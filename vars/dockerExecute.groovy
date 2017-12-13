@@ -7,8 +7,16 @@ def call(Map parameters = [:], body) {
         def dockerOptions = parameters.get('dockerOptions', '')
         Map dockerVolumeBind = parameters.get('dockerVolumeBind', [:])
 
+		if(!dockerImage?.isEmpty()) {
+
+			def returnCode = sh script: 'which docker' returnStatus: true
+			if(returnCode != 0) {
+				echo "[dockerExecute] No docker environment found."
+				dockerImage = null
+		}
+
         if(dockerImage?.isEmpty()){
-            echo '[dockerExecute] No Docker image provided - running on local environment.'
+            echo '[dockerExecute] Running on local environment.'
             body()
         }else{
             def image = docker.image(dockerImage)
