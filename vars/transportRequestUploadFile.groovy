@@ -53,12 +53,11 @@ def call(parameters = [:]) {
         Map configuration = configHelper.use()
 
         new Utils().pushToSWA([step: STEP_NAME], configuration)
-
-        def changeDocumentId = configuration.changeDocumentId
+        def changeDocumentId = configuration.changeDocumentId?.trim() ?: script.commonPipelineEnvironment.getChangeDocumentId()
 
         if(changeDocumentId?.trim()) {
 
-          echo "[INFO] ChangeDocumentId '${changeDocumentId}' retrieved from parameters."
+          echo "[INFO] ChangeDocumentId '${changeDocumentId}' retrieved from configuration or from common pipeline environment."
 
         } else {
 
@@ -114,6 +113,10 @@ def call(parameters = [:]) {
                            .withMandatoryProperty('transportRequestId',
                                "Transport request id not provided (parameter: \'transportRequestId\' or via commit history).")
                            .use()
+
+        if(! script.commonPipelineEnvironment.getChangeDocumentId()) {
+            script.commonPipelineEnvironment.setChangeDocumentId(configuration.changeDocumentId)
+        }
 
         echo "[INFO] Uploading file '${configuration.filePath}' to transport request '${configuration.transportRequestId}' of change document '${configuration.changeDocumentId}'."
 

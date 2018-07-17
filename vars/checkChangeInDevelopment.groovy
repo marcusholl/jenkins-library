@@ -50,12 +50,12 @@ def call(parameters = [:]) {
         Map configuration = configHelper.use()
 
         new Utils().pushToSWA([step: STEP_NAME], configuration)
+        def changeId = configuration.changeDocumentId?.trim() ?: script.commonPipelineEnvironment.getChangeDocumentId()
 
-        def changeId = configuration.changeDocumentId
 
         if(changeId?.trim()) {
 
-            echo "[INFO] ChangeDocumentId retrieved from parameters."
+          echo "[INFO] ChangeDocumentId retrieved from configuration or from common pipeline environment."
 
         } else {
 
@@ -83,6 +83,12 @@ def call(parameters = [:]) {
                                         "nor via label '${configuration.changeManagement.changeDocumentLabel}' in commit range " +
                                         "[from: ${configuration.changeManagement.git.from}, to: ${configuration.changeManagement.git.to}].")
                                     .use()
+
+        if(! script.commonPipelineEnvironment.getChangeDocumentId()) {
+            script.commonPipelineEnvironment.setChangeDocumentId(changeId)
+            echo "[INFO] Change document id '${script.commonPipelineEnvironment.getChangeDocumentId()}' set " +
+                 "on common pipeline environment."
+        }
 
         boolean isInDevelopment
 

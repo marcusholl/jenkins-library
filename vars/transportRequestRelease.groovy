@@ -74,7 +74,7 @@ def call(parameters = [:]) {
             }
         }
 
-        def changeDocumentId = configuration.changeDocumentId
+        def changeDocumentId = configuration.changeDocumentId?.trim() ?: script.commonPipelineEnvironment.getChangeDocumentId()
 
         if(changeDocumentId?.trim()) {
 
@@ -109,6 +109,9 @@ def call(parameters = [:]) {
                                 "Change document id not provided (parameter: \'changeDocumentId\' or via commit history).")
                             .use()
 
+        if(! script.commonPipelineEnvironment.getChangeDocumentId()) {
+            script.commonPipelineEnvironment.setChangeDocumentId(configuration.changeDocumentId)
+        }
         echo "[INFO] Closing transport request '${configuration.transportRequestId}' for change document '${configuration.changeDocumentId}'."
 
             try {

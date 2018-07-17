@@ -34,10 +34,9 @@ public class TransportRequestCreateTest extends BasePiperTest {
     @Before
     public void setup() {
 
-
+        nullScript.commonPipelineEnvironment.reset()
         nullScript.commonPipelineEnvironment.configuration = [general:
                                      [changeManagement:
-
                                          [
                                           credentialsId: 'CM',
                                           endpoint: 'https://example.org/cm',
@@ -49,6 +48,7 @@ public class TransportRequestCreateTest extends BasePiperTest {
                                          ]
                                      ]
                                  ]
+
     }
 
     @Test
@@ -106,6 +106,8 @@ public class TransportRequestCreateTest extends BasePiperTest {
 
         def result = [:]
 
+        nullScript.commonPipelineEnvironment.setChangeDocumentId('007')
+
         ChangeManagement cm = new ChangeManagement(nullScript) {
 
             String createTransportRequest(String changeId,
@@ -127,7 +129,7 @@ public class TransportRequestCreateTest extends BasePiperTest {
         def transportId = jsr.step.call(script: nullScript, changeDocumentId: '001', developmentSystemId: '001', cmUtils: cm)
 
         assert transportId == '001'
-        assert result == [changeId: '001',
+        assert result == [changeId: '001', // we expect the changeId from the parameters is used.
                          developmentSystemId: '001',
                          cmEndpoint: 'https://example.org/cm',
                          credentialId: 'CM',
@@ -136,5 +138,79 @@ public class TransportRequestCreateTest extends BasePiperTest {
 
         assert jlr.log.contains("[INFO] Creating transport request for change document '001' and development system '001'.")
         assert jlr.log.contains("[INFO] Transport Request '001' has been successfully created.")
+    }
+
+    @Test
+    public void changeDocumentIdTakenFromCommonPipelineEnvironmentTest() {
+
+        String changeDocumentIdReceivedByCreateTransportMethod = null
+
+        nullScript.commonPipelineEnvironment.setChangeDocumentId('007')
+
+        ChangeManagement cm = new ChangeManagement(nullScript) {
+
+            String getChangeDocumentId(
+                String gitFrom,
+                String gitTo,
+                String gitChangeDocumentLabel,
+                String gitFormat
+               ) {
+                   return '0815'
+            }
+
+            String createTransportRequest(String changeId,
+                                          String developmentSystemId,
+                                          String cmEndpoint,
+                                          String credentialsId,
+                                          String clientOpts) {
+
+                changeDocumentIdReceivedByCreateTransportMethod = changeId
+                return '001'
+            }
+        }
+
+        jsr.step.call(script: nullScript, developmentSystemId: '001', cmUtils: cm)
+
+        // side effect: the changeDocumentId is written into the common pipeline environment
+        assert nullScript.commonPipelineEnvironment.getChangeDocumentId() == '007'
+
+        assert changeDocumentIdReceivedByCreateTransportMethod == '007'
+    }
+
+    @Test
+    public void changeDocumentIdTakenFromCommitHistoryTest() {
+
+        String changeDocumentIdReceivedByCreateTransportMethod = null
+
+        assert nullScript.commonPipelineEnvironment.getChangeDocumentId() == null
+
+        ChangeManagement cm = new ChangeManagement(nullScript) {
+
+            String getChangeDocumentId(
+                String gitFrom,
+                String gitTo,
+                String gitChangeDocumentLabel,
+                String gitFormat
+               ) {
+                   return '0815'
+            }
+
+            String createTransportRequest(String changeId,
+                                          String developmentSystemId,
+                                          String cmEndpoint,
+                                          String credentialsId,
+                                          String clientOpts) {
+
+                changeDocumentIdReceivedByCreateTransportMethod = changeId
+                return '001'
+            }
+        }
+
+        jsr.step.call(script: nullScript, developmentSystemId: '001', cmUtils: cm)
+
+        // side effect: the changeDocumentId is written into the common pipeline environment
+        assert nullScript.commonPipelineEnvironment.getChangeDocumentId() == '0815'
+
+        assert changeDocumentIdReceivedByCreateTransportMethod == '0815'
     }
 }

@@ -1,3 +1,4 @@
+import org.junit.Before
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
@@ -29,8 +30,9 @@ class CheckChangeInDevelopmentTest extends BasePiperTest {
         .around(new JenkinsCredentialsRule(this)
         .withCredentials('CM', 'anonymous', '********'))
 
-    @After
-    public void tearDown() {
+    @Before
+    public void setup() {
+        nullScript.commonPipelineEnvironment.reset()
         cmUtilReceivedParams.clear()
     }
 
@@ -39,12 +41,18 @@ class CheckChangeInDevelopmentTest extends BasePiperTest {
     @Test
     public void changeIsInStatusDevelopmentTest() {
 
-        ChangeManagement cm = getChangeManagementUtils(true)
+        assert nullScript.commonPipelineEnvironment.getChangeDocumentId() == null
+
+        ChangeManagement cm = getChangeManagementUtils(true, '001')
         boolean inDevelopment = jsr.step.checkChangeInDevelopment(
                                     cmUtils: cm,
                                     changeManagement: [endpoint: 'https://example.org/cm'])
 
         assert inDevelopment
+
+        // side effect: changeDocumentId is stored in commonPipelineEnvironment
+        assert nullScript.commonPipelineEnvironment.getChangeDocumentId() == '001'
+
         assert cmUtilReceivedParams == [
             changeId: '001',
             endpoint: 'https://example.org/cm',
@@ -77,7 +85,10 @@ class CheckChangeInDevelopmentTest extends BasePiperTest {
     }
 
     @Test
-    public void ifChangeIdPresentAsParameterAndFromCommitsChangeIdFromParameterIsUsedTest() {
+    public void ifChangeIdPresentAsParameterChangeIdFromParameterIsUsedTest() {
+
+        nullScript.commonPipelineEnvironment.setChangeDocumentId('007')
+
         ChangeManagement cm = getChangeManagementUtils(true, '0815')
 
         jsr.step.checkChangeInDevelopment(
@@ -89,7 +100,10 @@ class CheckChangeInDevelopmentTest extends BasePiperTest {
     }
 
     @Test
-    public void ifChangeIdNotPresentAsParameterButFromCommitsChangeIdFromCommitsIsUsedTest() {
+    public void ifChangeIdNotPresentAsParameterAndFromCPEButFromCommitsChangeIdFromCommitsIsUsedTest() {
+
+        assert nullScript.commonPipelineEnvironment.getChangeDocumentId() == null
+
         ChangeManagement cm = getChangeManagementUtils(true, '0815')
 
         jsr.step.checkChangeInDevelopment(
@@ -97,6 +111,20 @@ class CheckChangeInDevelopmentTest extends BasePiperTest {
             changeManagement : [endpoint: 'https://example.org/cm'])
 
         assert cmUtilReceivedParams.changeId == '0815'
+    }
+
+    @Test
+    public void ifChangeIdNotPresentAsParameterButFromCPEChangeIdFromCommitsIsUsedTest() {
+
+        nullScript.commonPipelineEnvironment.setChangeDocumentId('007')
+
+        ChangeManagement cm = getChangeManagementUtils(true, '0815')
+
+        jsr.step.checkChangeInDevelopment(
+            cmUtils: cm,
+            changeManagement: [endpoint: 'https://example.org/cm'])
+
+        assert cmUtilReceivedParams.changeId == '007'
     }
 
     @Test
