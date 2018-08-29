@@ -94,7 +94,7 @@ def call(parameters = [:]) {
         def deployHost
         def deployAccount
         def credentialsId = configuration.get('neoCredentialsId')
-        def deployMode = configuration.deployMode
+        def deployMode = configuration?.deployMode?.toString()
         def warAction
         def propertiesFile
         def applicationName
@@ -102,13 +102,15 @@ def call(parameters = [:]) {
         def runtimeVersion
         def vmSize
 
+        echo "deployMode property is a ${configuration?.deployMode?.class}"
+
         def deployModes = ['mta', 'warParams', 'warPropertiesFile']
         if (! (deployMode in deployModes)) {
             throw new Exception("[neoDeploy] Invalid deployMode = '${deployMode}'. Valid 'deployMode' values are: ${deployModes}.")
         }
 
         if (deployMode in ['warPropertiesFile', 'warParams']) {
-            warAction = utils.getMandatoryParameter(configuration, 'warAction')
+            warAction = utils.getMandatoryParameter(configuration, 'warAction').toString()
             def warActions = ['deploy', 'rolling-update']
             if (! (warAction in warActions)) {
                 throw new Exception("[neoDeploy] Invalid warAction = '${warAction}'. Valid 'warAction' values are: ${warActions}.")
