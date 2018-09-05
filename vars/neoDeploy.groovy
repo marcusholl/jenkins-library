@@ -88,14 +88,14 @@ def call(parameters = [:]) {
             stepParam2: configuration.warAction == 'rolling-update'?'blue-green':'standard' // ['deploy', 'deploy-mta', 'rolling-update']
         ], configuration)
 
-        def archivePath = configuration.archivePath
-        if(archivePath?.trim()) {
-            if (!fileExists(archivePath)) {
-                error "Archive cannot be found with parameter archivePath: '${archivePath}'."
-            }
-        } else {
-            error "Archive path not configured (parameter \"archivePath\")."
-        }
+//        def archivePath = configuration.archivePath
+//        if(archivePath?.trim()) {
+//            if (!fileExists(archivePath)) {
+//                error "Archive cannot be found with parameter archivePath: '${archivePath}'."
+//            }
+//        } else {
+//            error "Archive path not configured (parameter \"archivePath\")."
+//        }
 
         def deployHost
         def deployAccount
