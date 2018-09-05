@@ -108,7 +108,7 @@ def call(parameters = [:]) {
         def runtimeVersion
         def vmSize
 
-        echo "[MARCUS] DeployMode is a ${deployMode.class}" 
+        echo "[MARCUS] DeployMode is a ${deployMode.class}. Value is '${deployMode}'" 
 
         def deployModes = ['mta', 'warParams', 'warPropertiesFile']
         if (! (deployMode in deployModes)) {
