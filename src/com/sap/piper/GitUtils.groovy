@@ -1,7 +1,27 @@
 package com.sap.piper
 
+import hudson.AbortException
+
 boolean insideWorkTree() {
-    return sh(returnStatus: true, script: 'git rev-parse --is-inside-work-tree 1>/dev/null 2>&1') == 0
+
+    boolean insideWorkTree = false
+    try {
+        // git command below returns:
+        // - 'true'  on stdout and exit code 0 in case we are in a work-tree
+        // - 'false' on stdout and exit code 0 in case we are in git-dir ('.git')
+        // - nothing written to stdout and exit code != 0 in case we are not at all in a worktree.
+        insideWorkTree = Boolean.valueOf(
+                             sh(returnStdout: true, script: 'git rev-parse --is-inside-work-tree 2>/dev/null')
+                                 .trim())
+    } catch(AbortException e) {
+      // script returned with exit code != 0, this is the normal
+      // behavior when located outside a work-tree.
+      //
+      // <paranoia>Of course there are also other possible reasons for ending up here, e.g.
+      // git is not in path. Anyway: when the command returns with != 0 we are on the save side
+      // with returning 'false'.</paranoia>
+    }
+    return insideWorkTree
 }
 
 String getGitCommitIdOrNull() {

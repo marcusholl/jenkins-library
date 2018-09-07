@@ -1,10 +1,13 @@
 package com.sap.piper
 
+import hudson.AbortException
+
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.junit.rules.RuleChain
+
 import util.BasePiperTest
 import util.JenkinsShellCallRule
 import util.Rules
@@ -33,27 +36,33 @@ class GitUtilsTest extends BasePiperTest {
     }
 
     @Test
-    void TestIsInsideWorkTree() {
-        jscr.setReturnValue('git rev-parse --is-inside-work-tree 1>/dev/null 2>&1', 0)
+    void testIsInsideWorkTree() {
+        jscr.setReturnValue('git rev-parse --is-inside-work-tree 2>/dev/null', 'true\n')
         assertTrue(gitUtils.insideWorkTree())
     }
 
     @Test
-    void TestIsNotInsideWorkTree() {
-        jscr.setReturnValue('git rev-parse --is-inside-work-tree 1>/dev/null 2>&1', 1)
+    void testNotInsideWorkTree() {
+        jscr.setReturnValue('git rev-parse --is-inside-work-tree 2>/dev/null',
+            {throw new AbortException('script returned exit code 128')})
         assertFalse(gitUtils.insideWorkTree())
     }
 
+    @Test
+    void testInsideGitTree() {
+        jscr.setReturnValue('git rev-parse --is-inside-work-tree 2>/dev/null', 'false')
+        assertFalse(gitUtils.insideWorkTree())
+    }
 
     @Test
     void testGetGitCommitId() {
-        jscr.setReturnValue('git rev-parse --is-inside-work-tree 1>/dev/null 2>&1', 0)
+        jscr.setReturnValue('git rev-parse --is-inside-work-tree 2>/dev/null', 'true\n')
         assertEquals('testCommitId', gitUtils.getGitCommitIdOrNull())
     }
 
     @Test
     void testGetGitCommitIdNotAGitRepo() {
-        jscr.setReturnValue('git rev-parse --is-inside-work-tree 1>/dev/null 2>&1', 128)
+        jscr.setReturnValue('git rev-parse --is-inside-work-tree 2>/dev/null', 'false\n')
         assertNull(gitUtils.getGitCommitIdOrNull())
     }
 
