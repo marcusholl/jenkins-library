@@ -124,9 +124,10 @@ public class TransportRequestCreateTest extends BasePiperTest {
             }
         }
 
-        def transportId = jsr.step.call(script: nullScript, changeDocumentId: '001', developmentSystemId: '001', cmUtils: cm)
+        def transportIdViaReturnValue = jsr.step.call(script: nullScript, changeDocumentId: '001', developmentSystemId: '001', cmUtils: cm)
 
-        assert transportId == '001'
+        assert nullScript.commonPipelineEnvironment.getTransportRequestId() == '001'
+        assert transportIdViaReturnValue == '001'
         assert result == [changeId: '001',
                          developmentSystemId: '001',
                          cmEndpoint: 'https://example.org/cm',
@@ -136,5 +137,21 @@ public class TransportRequestCreateTest extends BasePiperTest {
 
         assert jlr.log.contains("[INFO] Creating transport request for change document '001' and development system '001'.")
         assert jlr.log.contains("[INFO] Transport Request '001' has been successfully created.")
+    }
+
+    @Test
+    public void transportRequestAlreadyContainedInCPE() {
+
+        thrown.expect(AbortException)
+        thrown.expectMessage("There is already a tranport request id contained in the common pipeline environment (001)." +
+                             " Maybe that transport request should be used. No transport request will be created.")
+
+        ChangeManagement cm = new ChangeManagement(nullScript)
+
+        nullScript.commonPipelineEnvironment.setTransportRequestId('001')
+        jsr.step.call(script: nullScript,
+                      changeDocumentId: '001',
+                      developmentSystemId: '001',
+                      cmUtils: cm)
     }
 }

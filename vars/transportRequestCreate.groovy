@@ -48,6 +48,7 @@ def call(parameters = [:]) {
         new Utils().pushToSWA([step: STEP_NAME], configuration)
 
         def changeDocumentId = configuration.changeDocumentId
+        def transportRequestId = script.commonPipelineEnvironment.getTransportRequestId()
 
         if(changeDocumentId?.trim()) {
 
@@ -78,7 +79,10 @@ def call(parameters = [:]) {
                                         "Change document id not provided (parameter: \'changeDocumentId\' or via commit history).")
                                     .use()
 
-        def transportRequestId
+        if(transportRequestId) {
+            error "There is already a tranport request id contained in the common pipeline environment (${transportRequestId}). " +
+                  "Maybe that transport request should be used. No transport request will be created."
+        }
 
         echo "[INFO] Creating transport request for change document '${configuration.changeDocumentId}' and development system '${configuration.developmentSystemId}'."
 
@@ -94,6 +98,9 @@ def call(parameters = [:]) {
 
 
         echo "[INFO] Transport Request '$transportRequestId' has been successfully created."
+
+        script.commonPipelineEnvironment.setTransportRequestId(transportRequestId)
+
         return transportRequestId
     }
 }
