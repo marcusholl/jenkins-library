@@ -135,7 +135,7 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
     }
 
     @Test
-    public void uploadFileToTransportRequestSuccessTest() {
+    public void uploadFileToTransportRequestSuccessTransportRequestIdViaParametersTest() {
 
         jlr.expect("[INFO] Uploading file '/path' to transport request '002' of change document '001'.")
         jlr.expect("[INFO] File '/path' has been successfully uploaded to transport request '002' of change document '001'.")
@@ -176,6 +176,77 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
                 credentialsId: 'CM',
                 cmclientOpts: ''
             ]
+    }
+
+    public void uploadFileToTransportRequestSuccessTransportRequestIdViaCPETest() {
+
+        jlr.expect("[INFO] Uploading file '/path' to transport request '002' of change document '001'.")
+        jlr.expect("[INFO] File '/path' has been successfully uploaded to transport request '002' of change document '001'.")
+
+        ChangeManagement cm = new ChangeManagement(nullScript) {
+            void uploadFileToTransportRequest(String changeId,
+                                              String transportRequestId,
+                                              String applicationId,
+                                              String filePath,
+                                              String endpoint,
+                                              String credentialsId,
+                                              String cmclientOpts) {
+
+                cmUtilReceivedParams.changeId = changeId
+                cmUtilReceivedParams.transportRequestId = transportRequestId
+                cmUtilReceivedParams.applicationId = applicationId
+                cmUtilReceivedParams.filePath = filePath
+                cmUtilReceivedParams.endpoint = endpoint
+                cmUtilReceivedParams.credentialsId = credentialsId
+                cmUtilReceivedParams.cmclientOpts = cmclientOpts
+            }
+        }
+
+        nullScript.setTransportRequestId('005')
+
+        jsr.step.call(script: nullScript,
+                      changeDocumentId: '001',
+                      applicationId: 'app',
+                      filePath: '/path',
+                      cmUtils: cm)
+
+        assert cmUtilReceivedParams.transportRequestId == '005'
+    }
+
+    public void transportRequestIdViaParmetersHasHigherPrecedenceThanViaCpeTest() {
+
+        jlr.expect("[INFO] Uploading file '/path' to transport request '006' of change document '001'.")
+        jlr.expect("[INFO] File '/path' has been successfully uploaded to transport request '006' of change document '001'.")
+
+        ChangeManagement cm = new ChangeManagement(nullScript) {
+            void uploadFileToTransportRequest(String changeId,
+                                              String transportRequestId,
+                                              String applicationId,
+                                              String filePath,
+                                              String endpoint,
+                                              String credentialsId,
+                                              String cmclientOpts) {
+
+                cmUtilReceivedParams.changeId = changeId
+                cmUtilReceivedParams.transportRequestId = transportRequestId
+                cmUtilReceivedParams.applicationId = applicationId
+                cmUtilReceivedParams.filePath = filePath
+                cmUtilReceivedParams.endpoint = endpoint
+                cmUtilReceivedParams.credentialsId = credentialsId
+                cmUtilReceivedParams.cmclientOpts = cmclientOpts
+            }
+        }
+
+        nullScript.setTransportRequestId('005')
+
+        jsr.step.call(script: nullScript,
+                      changeDocumentId: '001',
+                      transportRequestId: '006',
+                      applicationId: 'app',
+                      filePath: '/path',
+                      cmUtils: cm)
+
+        assert cmUtilReceivedParams.transportRequestId == '005'
     }
 
     @Test
