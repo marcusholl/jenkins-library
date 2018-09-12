@@ -80,11 +80,11 @@ def call(parameters = [:]) {
             }
         }
 
-        def transportRequestId = configuration.transportRequestId
+        def transportRequestId = configuration.transportRequestId ?: script.commonPipelineEnvironment.getTransportRequestId()
 
         if(transportRequestId?.trim()) {
 
-          echo "[INFO] Transport request id '${transportRequestId}' retrieved from parameters."
+          echo "[INFO] Transport request id '${transportRequestId}' retrieved from parameters or from common pipeline environment."
 
         } else {
 
