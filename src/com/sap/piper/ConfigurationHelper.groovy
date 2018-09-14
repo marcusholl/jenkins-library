@@ -118,8 +118,7 @@ class ConfigurationHelper implements Serializable {
 
         def separator = '/'
 
-        // reason for cast to CharSequence: String#tokenize(./.) causes a deprecation warning.
-        List parts = (key in String) ? (key as CharSequence).tokenize(separator) : ([key] as List)
+        List parts = (key in CharSequence) ? (key as CharSequence).tokenize(separator) : ([key] as List)
 
         if(config[parts.head()] != null) {
 
@@ -127,8 +126,8 @@ class ConfigurationHelper implements Serializable {
                 return getConfigPropertyNested(config[parts.head()], (parts.tail() as Iterable).join(separator))
             }
 
-            if (config[parts.head()].class == String) {
-                return (config[parts.head()] as String).trim()
+            if (config[parts.head()].class in CharSequence) {
+                return config[parts.head()].toString().trim()
             }
         }
 
@@ -143,8 +142,8 @@ class ConfigurationHelper implements Serializable {
             return false
         }
 
-        if(value.class == String){
-            return value?.isEmpty() == false
+        if(value in CharSequence){
+            return value?.toString().isEmpty() == false
         }
 
         if(value){
