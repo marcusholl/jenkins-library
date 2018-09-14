@@ -51,26 +51,6 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
     }
 
     @Test
-    public void changeDocumentIdNotProvidedTest() {
-
-        thrown.expect(IllegalArgumentException)
-        thrown.expectMessage("Change document id not provided (parameter: 'changeDocumentId' or via commit history).")
-
-        ChangeManagement cm = new ChangeManagement(nullScript) {
-            String getChangeDocumentId(
-                                       String from,
-                                       String to,
-                                       String pattern,
-                                       String format
-                                    ) {
-                                        throw new ChangeManagementException('Cannot retrieve changeId from git commits.')
-                                      }
-        }
-
-        jsr.step.call(script: nullScript, transportRequestId: '001', applicationId: 'app', filePath: '/path', cmUtils: cm)
-    }
-
-    @Test
     public void transportRequestIdNotProvidedTest() {
 
         ChangeManagement cm = new ChangeManagement(nullScript) {
@@ -135,12 +115,82 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
     }
 
     @Test
-    public void uploadFileToTransportRequestSuccessTest() {
+    public void changeDocumentIdViaParametersTest() {
 
-        jlr.expect("[INFO] Uploading file '/path' to transport request '002' of change document '001'.")
-        jlr.expect("[INFO] File '/path' has been successfully uploaded to transport request '002' of change document '001'.")
+        uploadFileToTransportRequestChangeDocumentId(
+            '001', // expected
+            '001', // via params
+            '002', // via cpe
+            '003'  // via commit history
+            )
+
+            //
+            // Not updated in CPE when provided via parameters
+            // Reason: maybe the file is uploaded into several ChangeDocuments.
+            // In this case it does not make sense to keep the latest one.
+            assert nullScript.commonPipelineEnvironment.getChangeDocumentId() == '002'
+    }
+
+    @Test
+    public void changeDocumentIdViaCpeTest() {
+
+        uploadFileToTransportRequestChangeDocumentId(
+            '002', //expected
+            null,  // via params
+            '002', // via cpe
+            '003'  // via commit history
+            )
+    }
+
+    @Test
+    public void changeDocumentIdViaCommitHistoryTest() {
+
+        uploadFileToTransportRequestChangeDocumentId(
+            '003', // expected
+            null, // via params
+            null, // via cpe
+            '003' // via commit history
+            )
+
+        // when the value has been retrieved from commit history we store it in order
+        // to avoid another traversal of the commit history in subsequenct cm releated steps.
+        assert nullScript.commonPipelineEnvironment.getChangeDocumentId() == '003'
+    }
+
+    @Test
+    public void changeDocumentIdNotProvidedTest() {
+
+        thrown.expect(IllegalArgumentException)
+        thrown.expectMessage("Change document id not provided (parameter: 'changeDocumentId' or via commit history).")
+
+        uploadFileToTransportRequestChangeDocumentId(
+            null,
+            null,
+            null,
+        { throw new ChangeManagementException('Cannot retrieve changeId from git commits.') } )
+    }
+
+
+    // [Q] Why not via @RunWith(Parameterized.class) ?
+    // [A] That annotation is already used by the base class for injecting. We cannot have that annotation twice.
+    private void uploadFileToTransportRequestChangeDocumentId(expected, viaParam, viaCPE, viaGitCommits) {
+
+        if(expected) {
+            jlr.expect("[INFO] Uploading file '/path' to transport request '002' of change document '${expected}'.")
+            jlr.expect("[INFO] File '/path' has been successfully uploaded to transport request '002' of change document '${expected}'.")
+        }
 
         ChangeManagement cm = new ChangeManagement(nullScript) {
+
+            String getChangeDocumentId(
+                String from,
+                String to,
+                String label,
+                String format
+              ) {
+                  return viaGitCommits in Closure ? viaGitCommits() : viaGitCommits
+              }
+
             void uploadFileToTransportRequest(String changeId,
                                               String transportRequestId,
                                               String applicationId,
@@ -159,16 +209,21 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
             }
         }
 
-        jsr.step.call(script: nullScript,
-                      changeDocumentId: '001',
+        if(viaCPE) nullScript.commonPipelineEnvironment.setChangeDocumentId(viaCPE)
+
+        def params = [script: nullScript,
                       transportRequestId: '002',
                       applicationId: 'app',
                       filePath: '/path',
-                      cmUtils: cm)
+                      cmUtils: cm]
+
+        if(viaParam) params << [changeDocumentId: viaParam]
+
+        jsr.step.transportRequestUploadFile(params)
 
         assert cmUtilReceivedParams ==
             [
-                changeId: '001',
+                changeId: expected,
                 transportRequestId: '002',
                 applicationId: 'app',
                 filePath: '/path',
