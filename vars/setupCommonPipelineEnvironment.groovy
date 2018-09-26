@@ -10,16 +10,16 @@ def call(Map parameters = [:]) {
     handlePipelineStepErrors (stepName: STEP_NAME, stepParameters: parameters) {
 
         def script = parameters.script
-
+        def cpe = script.commonPipelineEnvironment
         prepareDefaultValues script: script, customDefaults: parameters.customDefaults
 
         String configFile = parameters.get('configFile')
 
-        loadConfigurationFromFile(script, configFile)
+        loadConfigurationFromFile(cpe, configFile)
 
         Map config = ConfigurationHelper
             .loadStepDefaults(this)
-            .mixinGeneralConfig(script.commonPipelineEnvironment, GENERAL_CONFIG_KEYS)
+            .mixinGeneralConfig(cpe, GENERAL_CONFIG_KEYS)
             .use()
 
         new Utils().pushToSWA([step: STEP_NAME, stepParam4: parameters.customDefaults?'true':'false'], config)
@@ -34,22 +34,22 @@ private boolean isProperties(String fileName) {
     return fileName.endsWith(".properties")
 }
 
-private loadConfigurationFromFile(script, String configFile) {
+private loadConfigurationFromFile(cpe, String configFile) {
 
     String defaultPropertiesConfigFile = '.pipeline/config.properties'
     String defaultYmlConfigFile = '.pipeline/config.yml'
 
     if (configFile?.trim()?.length() > 0 && isProperties(configFile)) {
         Map configMap = readProperties(file: configFile)
-        script.commonPipelineEnvironment.setConfigProperties(configMap)
+        cpe.setConfigProperties(configMap)
     } else if (fileExists(defaultPropertiesConfigFile)) {
         Map configMap = readProperties(file: defaultPropertiesConfigFile)
-        script.commonPipelineEnvironment.setConfigProperties(configMap)
+        cpe.setConfigProperties(configMap)
     }
 
     if (configFile?.trim()?.length() > 0 && isYaml(configFile)) {
-        script.commonPipelineEnvironment.configuration = readYaml(file: configFile)
+        cpe.configuration = readYaml(file: configFile)
     } else if (fileExists(defaultYmlConfigFile)) {
-        script.commonPipelineEnvironment.configuration = readYaml(file: defaultYmlConfigFile)
+        cpe.configuration = readYaml(file: defaultYmlConfigFile)
     }
 }

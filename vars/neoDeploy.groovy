@@ -33,6 +33,7 @@ def call(parameters = [:]) {
     handlePipelineStepErrors (stepName: STEP_NAME, stepParameters: parameters) {
 
         def script = parameters?.script ?: [commonPipelineEnvironment: commonPipelineEnvironment]
+        def cpe = script.commonPipelineEnvironment
         def utils = new Utils()
 
         prepareDefaultValues script: script
@@ -42,13 +43,13 @@ def call(parameters = [:]) {
         // Backward compatibility: ensure old configuration is taken into account
         // The old configuration in not stage / step specific
 
-        def defaultDeployHost = script.commonPipelineEnvironment.getConfigProperty('DEPLOY_HOST')
+        def defaultDeployHost = cpe.getConfigProperty('DEPLOY_HOST')
         if(defaultDeployHost) {
             echo "[WARNING][${STEP_NAME}] A deprecated configuration framework is used for configuring parameter 'DEPLOY_HOST'. This configuration framework will be removed in future versions."
             stepCompatibilityConfiguration.put('host', defaultDeployHost)
         }
 
-        def defaultDeployAccount = script.commonPipelineEnvironment.getConfigProperty('CI_DEPLOY_ACCOUNT')
+        def defaultDeployAccount = cpe.getConfigProperty('CI_DEPLOY_ACCOUNT')
         if(defaultDeployAccount) {
             echo "[WARNING][${STEP_NAME}] A deprecated configuration framework is used for configuring parameter 'DEPLOY_ACCOUNT'. This configuration framekwork will be removed in future versions."
             stepCompatibilityConfiguration.put('account', defaultDeployAccount)
@@ -64,7 +65,7 @@ def call(parameters = [:]) {
             parameters.put('account', parameters.deployAccount)
         }
 
-        def credId = script.commonPipelineEnvironment.getConfigProperty('neoCredentialsId')
+        def credId = cpe.getConfigProperty('neoCredentialsId')
         if(credId && !parameters.neoCredentialsId) {
             echo "[WARNING][${STEP_NAME}] Deprecated parameter 'neoCredentialsId' from old configuration framework is used. This will not work anymore in future versions."
             parameters.put('neoCredentialsId', credId)
@@ -74,11 +75,11 @@ def call(parameters = [:]) {
         // load default & individual configuration
         Map configuration = ConfigurationHelper
             .loadStepDefaults(this)
-            .mixinGeneralConfig(script.commonPipelineEnvironment, GENERAL_CONFIG_KEYS)
+            .mixinGeneralConfig(cpe, GENERAL_CONFIG_KEYS)
             .mixin(stepCompatibilityConfiguration)
-            .mixinStepConfig(script.commonPipelineEnvironment, STEP_CONFIG_KEYS)
-            .mixinStageConfig(script.commonPipelineEnvironment, parameters.stageName?:env.STAGE_NAME, STEP_CONFIG_KEYS)
-            .addIfEmpty('archivePath', script.commonPipelineEnvironment.getMtarFilePath())
+            .mixinStepConfig(cpe, STEP_CONFIG_KEYS)
+            .mixinStageConfig(cpe, parameters.stageName?:env.STAGE_NAME, STEP_CONFIG_KEYS)
+            .addIfEmpty('archivePath', cpe.getMtarFilePath())
             .mixin(parameters, PARAMETER_KEYS)
             .use()
         

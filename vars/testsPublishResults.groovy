@@ -25,14 +25,15 @@ def call(Map parameters = [:]) {
         def script = parameters.script
         if (script == null)
             script = [commonPipelineEnvironment: commonPipelineEnvironment]
+        def cpe = script.commonPipelineEnvironment
         prepare(parameters)
 
         // load default & individual configuration
         Map configuration = ConfigurationHelper
             .loadStepDefaults(this)
-            .mixinGeneralConfig(script.commonPipelineEnvironment, STEP_CONFIG_KEYS)
-            .mixinStepConfig(script.commonPipelineEnvironment, STEP_CONFIG_KEYS)
-            .mixinStageConfig(script.commonPipelineEnvironment, parameters.stageName ?: env.STAGE_NAME, STEP_CONFIG_KEYS)
+            .mixinGeneralConfig(cpe, STEP_CONFIG_KEYS)
+            .mixinStepConfig(cpe, STEP_CONFIG_KEYS)
+            .mixinStageConfig(cpe, parameters.stageName ?: env.STAGE_NAME, STEP_CONFIG_KEYS)
             .mixin(parameters, PARAMETER_KEYS)
             .use()
 

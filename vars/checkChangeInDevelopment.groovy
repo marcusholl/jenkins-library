@@ -24,6 +24,7 @@ def call(parameters = [:]) {
     handlePipelineStepErrors (stepName: STEP_NAME, stepParameters: parameters) {
 
         def script = parameters.script ?: [commonPipelineEnvironment: commonPipelineEnvironment]
+        def cpe = script.commonPipelineEnvironment
 
         GitUtils gitUtils = parameters?.gitUtils ?: new GitUtils()
 
@@ -31,9 +32,9 @@ def call(parameters = [:]) {
 
         ConfigurationHelper configHelper = ConfigurationHelper
             .loadStepDefaults(this)
-            .mixinGeneralConfig(script.commonPipelineEnvironment, generalConfigurationKeys)
-            .mixinStepConfig(script.commonPipelineEnvironment, stepConfigurationKeys)
-            .mixinStageConfig(script.commonPipelineEnvironment, parameters.stageName?:env.STAGE_NAME, stepConfigurationKeys)
+            .mixinGeneralConfig(cpe, generalConfigurationKeys)
+            .mixinStepConfig(cpe, stepConfigurationKeys)
+            .mixinStageConfig(cpe, parameters.stageName?:env.STAGE_NAME, stepConfigurationKeys)
             .mixin(parameters, parameterKeys)
             // for the following parameters we expect defaults
             .withMandatoryProperty('changeManagement/changeDocumentLabel')

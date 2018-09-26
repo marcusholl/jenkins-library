@@ -25,19 +25,20 @@ def call(Map parameters = [:]) {
 
         def utils = parameters.juStabUtils ?: new Utils()
         def script = parameters.script ?: [commonPipelineEnvironment: commonPipelineEnvironment]
+        def cpe = script.commonPipelineEnvironment
 
         Map config = ConfigurationHelper
             .loadStepDefaults(this)
-            .mixinGeneralConfig(script.commonPipelineEnvironment, STEP_CONFIG_KEYS)
-            .mixinStepConfig(script.commonPipelineEnvironment, STEP_CONFIG_KEYS)
-            .mixinStageConfig(script.commonPipelineEnvironment, parameters.stageName?:env.STAGE_NAME, STEP_CONFIG_KEYS)
+            .mixinGeneralConfig(cpe, STEP_CONFIG_KEYS)
+            .mixinStepConfig(cpe, STEP_CONFIG_KEYS)
+            .mixinStageConfig(cpe, parameters.stageName?:env.STAGE_NAME, STEP_CONFIG_KEYS)
             .mixin(parameters, PARAMETER_KEYS)
             .use()
 
         // report to SWA
         utils.pushToSWA([step: STEP_NAME], config)
 
-        script.commonPipelineEnvironment.setInfluxStepData('bats', false)
+        cpe.setInfluxStepData('bats', false)
 
 
         if (config.testRepository) {
@@ -54,7 +55,7 @@ def call(Map parameters = [:]) {
         //resolve commonPipelineEnvironment references in envVars
         config.envVarList = []
         config.envVars.each {e ->
-            def envValue = SimpleTemplateEngine.newInstance().createTemplate(e.getValue()).make(commonPipelineEnvironment: script.commonPipelineEnvironment).toString()
+            def envValue = SimpleTemplateEngine.newInstance().createTemplate(e.getValue()).make(commonPipelineEnvironment: cpe).toString()
             config.envVarList.add("${e.getKey()}=${envValue}")
         }
 
@@ -62,7 +63,7 @@ def call(Map parameters = [:]) {
             sh "git clone ${config.repository}"
             try {
                 sh "bats-core/bin/bats --recursive --tap ${config.testPath} > 'TEST-${config.testPackage}.tap'"
-                script.commonPipelineEnvironment.setInfluxStepData('bats', true)
+                cpe.setInfluxStepData('bats', true)
             } catch (err) {
                 echo "[${STEP_NAME}] One or more tests failed"
                 if (config.failOnError) throw err

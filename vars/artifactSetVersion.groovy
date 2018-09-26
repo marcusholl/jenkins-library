@@ -40,12 +40,14 @@ def call(Map parameters = [:], Closure body = null) {
         if (script == null)
             script = this
 
+        def cpe = script.commonPipelineEnvironment
+
         // load default & individual configuration
         ConfigurationHelper configHelper = ConfigurationHelper
             .loadStepDefaults(this)
-            .mixinGeneralConfig(script.commonPipelineEnvironment, STEP_CONFIG_KEYS, this, CONFIG_KEY_COMPATIBILITY)
-            .mixinStepConfig(script.commonPipelineEnvironment, STEP_CONFIG_KEYS, this, CONFIG_KEY_COMPATIBILITY)
-            .mixinStageConfig(script.commonPipelineEnvironment, parameters.stageName?:env.STAGE_NAME, STEP_CONFIG_KEYS, this, CONFIG_KEY_COMPATIBILITY)
+            .mixinGeneralConfig(cpe, STEP_CONFIG_KEYS, this, CONFIG_KEY_COMPATIBILITY)
+            .mixinStepConfig(cpe, STEP_CONFIG_KEYS, this, CONFIG_KEY_COMPATIBILITY)
+            .mixinStageConfig(cpe, parameters.stageName?:env.STAGE_NAME, STEP_CONFIG_KEYS, this, CONFIG_KEY_COMPATIBILITY)
             .mixin(gitCommitId: gitUtils.getGitCommitIdOrNull())
             .mixin(parameters, PARAMETER_KEYS, this, CONFIG_KEY_COMPATIBILITY)
             .withMandatoryProperty('buildTool')
@@ -79,8 +81,8 @@ def call(Map parameters = [:], Closure body = null) {
         if (config.commitVersion) {
             config = new ConfigurationHelper(config)
                 .addIfEmpty('gitSshUrl', isAppContainer(config)
-                            ?script.commonPipelineEnvironment.getAppContainerProperty('gitSshUrl')
-                            :script.commonPipelineEnvironment.getGitSshUrl())
+                            ?cpe.getAppContainerProperty('gitSshUrl')
+                            :cpe.getGitSshUrl())
                 .withMandatoryProperty('gitSshUrl')
                 .use()
             
@@ -107,12 +109,12 @@ def call(Map parameters = [:], Closure body = null) {
         }
 
         if (isAppContainer(config)) {
-            script.commonPipelineEnvironment.setAppContainerProperty('artifactVersion', newVersion)
-            script.commonPipelineEnvironment.setAppContainerProperty('gitCommitId', config.gitCommitId)
+            cpe.setAppContainerProperty('artifactVersion', newVersion)
+            cpe.setAppContainerProperty('gitCommitId', config.gitCommitId)
         } else {
             //standard case
-            script.commonPipelineEnvironment.setArtifactVersion(newVersion)
-            script.commonPipelineEnvironment.setGitCommitId(config.gitCommitId)
+            cpe.setArtifactVersion(newVersion)
+            cpe.setGitCommitId(config.gitCommitId)
         }
 
         echo "[${STEP_NAME}]New version: ${newVersion}"

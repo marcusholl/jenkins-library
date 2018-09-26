@@ -21,12 +21,12 @@ void call(Map parameters = [:], body) {
         final script = parameters.script
         if (script == null)
             script = [commonPipelineEnvironment: commonPipelineEnvironment]
-
+        def cpe = script.commonPipelineEnvironment
         ConfigurationHelper configHelper = ConfigurationHelper
             .loadStepDefaults(this)
-            .mixinGeneralConfig(script.commonPipelineEnvironment, GENERAL_CONFIG_KEYS)
-            .mixinStepConfig(script.commonPipelineEnvironment, STEP_CONFIG_KEYS)
-            .mixinStageConfig(script.commonPipelineEnvironment, parameters.stageName ?: env.STAGE_NAME, STEP_CONFIG_KEYS)
+            .mixinGeneralConfig(cpe, GENERAL_CONFIG_KEYS)
+            .mixinStepConfig(cpe, STEP_CONFIG_KEYS)
+            .mixinStageConfig(cpe, parameters.stageName ?: env.STAGE_NAME, STEP_CONFIG_KEYS)
             .mixin(parameters, PARAMETER_KEYS)
             .addIfEmpty('uniqueId', UUID.randomUUID().toString())
         Map config = [:]

@@ -33,11 +33,13 @@ def call(Map parameters = [:]) {
         if (script == null)
             script = [commonPipelineEnvironment: commonPipelineEnvironment]
 
+        def cpe = script.commonPipelineEnvironment
+
         Map config = ConfigurationHelper
             .loadStepDefaults(this)
-            .mixinGeneralConfig(script.commonPipelineEnvironment, STEP_CONFIG_KEYS, this, CONFIG_KEY_COMPATIBILITY)
-            .mixinStepConfig(script.commonPipelineEnvironment, STEP_CONFIG_KEYS, this, CONFIG_KEY_COMPATIBILITY)
-            .mixinStageConfig(script.commonPipelineEnvironment, parameters.stageName?:env.STAGE_NAME, STEP_CONFIG_KEYS, this, CONFIG_KEY_COMPATIBILITY)
+            .mixinGeneralConfig(cpe, STEP_CONFIG_KEYS, this, CONFIG_KEY_COMPATIBILITY)
+            .mixinStepConfig(cpe, STEP_CONFIG_KEYS, this, CONFIG_KEY_COMPATIBILITY)
+            .mixinStageConfig(cpe, parameters.stageName?:env.STAGE_NAME, STEP_CONFIG_KEYS, this, CONFIG_KEY_COMPATIBILITY)
             .mixin(parameters, PARAMETER_KEYS, this, CONFIG_KEY_COMPATIBILITY)
             .dependingOn('deployTool').mixin('dockerImage')
             .dependingOn('deployTool').mixin('dockerWorkspace')

@@ -1,6 +1,7 @@
 def call(Map parameters = [:], body) {
 
     def script = parameters.script
+    def cpe = script.commonPipelineEnvironment
     def measurementName = parameters.get('measurementName', 'test_duration')
 
     //start measurement
@@ -12,7 +13,7 @@ def call(Map parameters = [:], body) {
     def duration = System.currentTimeMillis() - start
 
     if (script != null)
-        script.commonPipelineEnvironment.setPipelineMeasurement(measurementName, duration)
+        cpe.setPipelineMeasurement(measurementName, duration)
 
     return duration
 }

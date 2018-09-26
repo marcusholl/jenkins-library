@@ -22,13 +22,13 @@ def call(Map parameters = [:]) {
         def script = parameters.script
         if (script == null)
              script = [commonPipelineEnvironment: commonPipelineEnvironment]
-
+        def cpe = script.commonPipelineEnvironment
         // load default & individual configuration
         Map configuration = ConfigurationHelper
             .loadStepDefaults(this)
-            .mixinGeneralConfig(script.commonPipelineEnvironment, GENERAL_CONFIG_KEYS)
-            .mixinStepConfig(script.commonPipelineEnvironment, STEP_CONFIG_KEYS)
-            .mixinStageConfig(script.commonPipelineEnvironment, parameters.stageName?:env.STAGE_NAME, STEP_CONFIG_KEYS)
+            .mixinGeneralConfig(cpe, GENERAL_CONFIG_KEYS)
+            .mixinStepConfig(cpe, STEP_CONFIG_KEYS)
+            .mixinStageConfig(cpe, parameters.stageName?:env.STAGE_NAME, STEP_CONFIG_KEYS)
             .mixin([
                 artifactVersion: commonPipelineEnvironment.getArtifactVersion()
             ])
@@ -47,17 +47,17 @@ def call(Map parameters = [:]) {
 Artifact version: ${configuration.artifactVersion}
 Influx server: ${configuration.influxServer}
 Influx prefix: ${configuration.influxPrefix}
-InfluxDB data: ${script.commonPipelineEnvironment.getInfluxCustomData()}
-InfluxDB data map: ${script.commonPipelineEnvironment.getInfluxCustomDataMap()}
+InfluxDB data: ${cpe.getInfluxCustomData()}
+InfluxDB data map: ${cpe.getInfluxCustomDataMap()}
 [${STEP_NAME}]----------------------------------------------------------"""
 
         if (configuration.influxServer)
-            step([$class: 'InfluxDbPublisher', selectedTarget: configuration.influxServer, customPrefix: configuration.influxPrefix, customData: script.commonPipelineEnvironment.getInfluxCustomData(), customDataMap: script.commonPipelineEnvironment.getInfluxCustomDataMap()])
+            step([$class: 'InfluxDbPublisher', selectedTarget: configuration.influxServer, customPrefix: configuration.influxPrefix, customData: cpe.getInfluxCustomData(), customDataMap: cpe.getInfluxCustomDataMap()])
 
         //write results into json file for archiving - also benefitial when no InfluxDB is available yet
         def jsonUtils = new JsonUtils()
-        writeFile file: 'jenkins_data.json', text: jsonUtils.getPrettyJsonString(script.commonPipelineEnvironment.getInfluxCustomData())
-        writeFile file: 'pipeline_data.json', text: jsonUtils.getPrettyJsonString(script.commonPipelineEnvironment.getInfluxCustomDataMap())
+        writeFile file: 'jenkins_data.json', text: jsonUtils.getPrettyJsonString(cpe.getInfluxCustomData())
+        writeFile file: 'pipeline_data.json', text: jsonUtils.getPrettyJsonString(cpe.getInfluxCustomDataMap())
         archiveArtifacts artifacts: '*data.json', allowEmptyArchive: true
     }
 }
