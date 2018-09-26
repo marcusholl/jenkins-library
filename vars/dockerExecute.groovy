@@ -18,10 +18,7 @@ import groovy.transform.Field
 
 void call(Map parameters = [:], body) {
     handlePipelineStepErrors(stepName: STEP_NAME, stepParameters: parameters) {
-        final script = parameters.script
-        if (script == null)
-            script = [commonPipelineEnvironment: commonPipelineEnvironment]
-        def cpe = parameters.cpe ?: script.commonPipelineEnvironment
+        def cpe = parameters.cpe
         Map config = ConfigurationHelper
             .loadStepDefaults(this)
             .mixinGeneralConfig(cpe, GENERAL_CONFIG_KEYS)
@@ -38,7 +35,7 @@ void call(Map parameters = [:], body) {
                 }
             } else {
                 dockerExecuteOnKubernetes(
-                    script: script,
+                    script: this,
                     dockerImage: config.dockerImage,
                     dockerEnvVars: config.dockerEnvVars,
                     dockerWorkspace: config.dockerWorkspace

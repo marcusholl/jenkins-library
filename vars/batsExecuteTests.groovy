@@ -24,8 +24,7 @@ def call(Map parameters = [:]) {
     handlePipelineStepErrors (stepName: STEP_NAME, stepParameters: parameters) {
 
         def utils = parameters.juStabUtils ?: new Utils()
-        def script = parameters.script ?: [commonPipelineEnvironment: commonPipelineEnvironment]
-        def cpe = parameters.cpe ?: script.commonPipelineEnvironment
+        def cpe = parameters.cpe
 
         Map config = ConfigurationHelper
             .loadStepDefaults(this)

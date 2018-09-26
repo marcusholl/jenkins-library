@@ -32,11 +32,10 @@ import groovy.transform.Field
 def call(parameters = [:]) {
     handlePipelineStepErrors (stepName: STEP_NAME, stepParameters: parameters) {
 
-        def script = parameters?.script ?: [commonPipelineEnvironment: commonPipelineEnvironment]
-        def cpe = parameters.cpe ?: script.commonPipelineEnvironment
+        def cpe = parameters.cpe
         def utils = new Utils()
 
-        prepareDefaultValues script: script
+        prepareDefaultValues script: this
 
         final Map stepCompatibilityConfiguration = [:]
 

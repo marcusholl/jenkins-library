@@ -22,8 +22,7 @@ import groovy.transform.Field
 
 def call(Map parameters = [:]) {
     handlePipelineStepErrors(stepName: STEP_NAME, stepParameters: parameters) {
-        final script = parameters?.script ?: [commonPipelineEnvironment: commonPipelineEnvironment]
-        def cpe = parameters.cpe ?: script.commonPipelineEnvironment
+        def cpe = parameters.cpe
         // load default & individual configuration
         Map configuration = ConfigurationHelper
             .loadStepDefaults(this)
@@ -35,7 +34,7 @@ def call(Map parameters = [:]) {
 
         new Utils().pushToSWA([step: STEP_NAME], configuration)
 
-        dockerExecute(script: script, dockerImage: configuration.dockerImage, dockerOptions: configuration.dockerOptions) {
+        dockerExecute(script: this, dockerImage: configuration.dockerImage, dockerOptions: configuration.dockerOptions) {
             def java = new ToolDescriptor('Java', 'JAVA_HOME', '', '/bin/', 'java', '1.8.0', '-version 2>&1')
             java.verify(this, configuration)
 
@@ -79,7 +78,7 @@ def call(Map parameters = [:]) {
             """
 
             def mtarFilePath = "${mtarFileName}"
-            script?.commonPipelineEnvironment?.setMtarFilePath(mtarFilePath)
+            cpe?.setMtarFilePath(mtarFilePath)
         }
     }
 }

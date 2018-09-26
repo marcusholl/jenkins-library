@@ -9,9 +9,8 @@ def call(Map parameters = [:]) {
 
     handlePipelineStepErrors (stepName: STEP_NAME, stepParameters: parameters) {
 
-        def script = parameters.script
-        def cpe = parameters.cpe ?: script.commonPipelineEnvironment
-        prepareDefaultValues script: script, customDefaults: parameters.customDefaults
+        def cpe = parameters.cpe
+        prepareDefaultValues script: this, customDefaults: parameters.customDefaults
 
         String configFile = parameters.get('configFile')
 

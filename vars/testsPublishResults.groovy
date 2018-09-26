@@ -17,15 +17,11 @@ import groovy.transform.Field
 /**
  * testResultsPublish
  *
- * @param script global script environment of the Jenkinsfile run
  * @param others document all parameters
  */
 def call(Map parameters = [:]) {
     handlePipelineStepErrors (stepName: STEP_NAME, stepParameters: parameters) {
-        def script = parameters.script
-        if (script == null)
-            script = [commonPipelineEnvironment: commonPipelineEnvironment]
-        def cpe = parameters.cpe ?: script.commonPipelineEnvironment
+        def cpe = parameters.cpe
         prepare(parameters)
 
         // load default & individual configuration

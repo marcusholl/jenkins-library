@@ -59,7 +59,9 @@ class PipelineStashFilesAfterBuildTest extends BasePiperTest {
             searchTerm ->
                 return true
         })
+        nullScript.commonPipelineEnvironment.configuration = [steps: [executeCheckmarxScan: [checkmarxProject: 'TestProject']]]
         jsr.step.call(
+            cpe: nullScript.commonPipelineEnvironment,
             script: [commonPipelineEnvironment: [configuration: [steps: [executeCheckmarxScan: [checkmarxProject: 'TestProject']]]]],
             juStabUtils: utils,
         )

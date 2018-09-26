@@ -23,8 +23,7 @@ import groovy.transform.Field
 
 def call(Map parameters = [:]) {
     handlePipelineStepErrors(stepName: STEP_NAME, stepParameters: parameters) {
-        final script = parameters.script
-        def cpe = parameters.cpe ?: script.commonPipelineEnvironment
+        def cpe = parameters.cpe
         // load default & individual configuration
         Map configuration = ConfigurationHelper
             .loadStepDefaults(this)
@@ -92,7 +91,7 @@ def call(Map parameters = [:]) {
         if (defines?.trim()){
             command += " ${defines}"
         }
-        dockerExecute(script: script, dockerImage: configuration.dockerImage, dockerOptions: configuration.dockerOptions) {
+        dockerExecute(script: this, dockerImage: configuration.dockerImage, dockerOptions: configuration.dockerOptions) {
             sh command
         }
     }

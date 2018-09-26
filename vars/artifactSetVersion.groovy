@@ -36,11 +36,7 @@ def call(Map parameters = [:], Closure body = null) {
                 error "[${STEP_NAME}] Files in the workspace have been changed previously - aborting ${STEP_NAME}"
         }
 
-        def script = parameters.script
-        if (script == null)
-            script = this
-
-        def cpe = parameters.cpe ?: script.commonPipelineEnvironment
+        def cpe = parameters.cpe
 
         // load default & individual configuration
         ConfigurationHelper configHelper = ConfigurationHelper
@@ -61,7 +57,7 @@ def call(Map parameters = [:], Closure body = null) {
 
         new Utils().pushToSWA([step: STEP_NAME, stepParam1: config.buildTool, stepParam2: config.artifactType], config)
 
-        def artifactVersioning = ArtifactVersioning.getArtifactVersioning(config.buildTool, script, config)
+        def artifactVersioning = ArtifactVersioning.getArtifactVersioning(config.buildTool, this, config)
         def currentVersion = artifactVersioning.getVersion()
 
         def newVersion
