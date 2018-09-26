@@ -22,7 +22,7 @@ def call(Map parameters = [:]) {
         def script = parameters.script
         if (script == null)
              script = [commonPipelineEnvironment: commonPipelineEnvironment]
-        def cpe = script.commonPipelineEnvironment
+        def cpe = parameters.cpe ?: script.commonPipelineEnvironment
         // load default & individual configuration
         Map configuration = ConfigurationHelper
             .loadStepDefaults(this)

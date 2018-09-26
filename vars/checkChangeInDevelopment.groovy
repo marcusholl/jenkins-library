@@ -24,7 +24,7 @@ def call(parameters = [:]) {
     handlePipelineStepErrors (stepName: STEP_NAME, stepParameters: parameters) {
 
         def script = parameters.script ?: [commonPipelineEnvironment: commonPipelineEnvironment]
-        def cpe = script.commonPipelineEnvironment
+        def cpe = parameters.cpe ?: script.commonPipelineEnvironment
 
         GitUtils gitUtils = parameters?.gitUtils ?: new GitUtils()
 

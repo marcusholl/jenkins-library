@@ -40,7 +40,7 @@ def call(Map parameters = [:], Closure body = null) {
         if (script == null)
             script = this
 
-        def cpe = script.commonPipelineEnvironment
+        def cpe = parameters.cpe ?: script.commonPipelineEnvironment
 
         // load default & individual configuration
         ConfigurationHelper configHelper = ConfigurationHelper

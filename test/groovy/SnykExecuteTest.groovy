@@ -75,7 +75,7 @@ class SnykExecuteTest extends BasePiperTest {
         thrown.expectMessage('[ERROR][snykExecute] ScanType \'seagul\' not supported!')
 
         jsr.step.snykExecute(
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             scanType: 'seagul'
         )
@@ -84,7 +84,7 @@ class SnykExecuteTest extends BasePiperTest {
     @Test
     void testDefaultsSettings() throws Exception {
         jsr.step.snykExecute(
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils
         )
 
@@ -97,7 +97,7 @@ class SnykExecuteTest extends BasePiperTest {
     @Test
     void testScanTypeNpm() throws Exception {
         jsr.step.snykExecute(
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils
         )
         // asserts
@@ -109,7 +109,7 @@ class SnykExecuteTest extends BasePiperTest {
     @Test
     void testScanTypeNpmWithOrgAndJsonReport() throws Exception {
         jsr.step.snykExecute(
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             snykOrg: 'myOrg',
             toJson: true
@@ -122,7 +122,7 @@ class SnykExecuteTest extends BasePiperTest {
     @Test
     void testScanTypeMta() throws Exception {
         jsr.step.snykExecute(
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             scanType: 'mta'
         )

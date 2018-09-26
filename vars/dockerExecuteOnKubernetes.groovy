@@ -21,7 +21,7 @@ void call(Map parameters = [:], body) {
         final script = parameters.script
         if (script == null)
             script = [commonPipelineEnvironment: commonPipelineEnvironment]
-        def cpe = script.commonPipelineEnvironment
+        def cpe = parameters.cpe ?: script.commonPipelineEnvironment
         ConfigurationHelper configHelper = ConfigurationHelper
             .loadStepDefaults(this)
             .mixinGeneralConfig(cpe, GENERAL_CONFIG_KEYS)

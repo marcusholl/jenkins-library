@@ -42,7 +42,7 @@ class SetupCommonPipelineEnvironmentTest extends BasePiperTest {
 
     @Test
     void testIsConfigurationAvailable() throws Exception {
-        jsr.step.call(script: nullScript)
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment)
 
         assertEquals('.pipeline/config.yml', usedConfigFile)
         assertNotNull(nullScript.commonPipelineEnvironment.configuration)

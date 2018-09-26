@@ -24,7 +24,7 @@ class PipelineStashFilesBeforeBuildTest extends BasePiperTest {
     @Test
     void testStashBeforeBuildNoOpa() {
 
-        jsr.step.call(script: nullScript, juStabUtils: utils)
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment, juStabUtils: utils)
 
         // asserts
         assertEquals('mkdir -p gitmetadata', jscr.shell[0])
@@ -44,7 +44,7 @@ class PipelineStashFilesBeforeBuildTest extends BasePiperTest {
     @Test
     void testStashBeforeBuildOpa() {
 
-        jsr.step.call(script: nullScript, juStabUtils: utils, runOpaTests: true)
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment, juStabUtils: utils, runOpaTests: true)
 
         // asserts
         assertThat(jlr.log, containsString('Stash content: buildDescriptor'))

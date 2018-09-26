@@ -27,7 +27,7 @@ class PipelineStashFilesAfterBuildTest extends BasePiperTest {
                 return false
         })
         jsr.step.call(
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils
         )
         // asserts
@@ -43,7 +43,7 @@ class PipelineStashFilesAfterBuildTest extends BasePiperTest {
                 return true
         })
         jsr.step.call(
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             runCheckmarx: true
         )

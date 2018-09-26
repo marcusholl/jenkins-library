@@ -25,7 +25,7 @@ def call(Map parameters = [:]) {
 
         def utils = parameters.juStabUtils ?: new Utils()
         def script = parameters.script ?: [commonPipelineEnvironment: commonPipelineEnvironment]
-        def cpe = script.commonPipelineEnvironment
+        def cpe = parameters.cpe ?: script.commonPipelineEnvironment
 
         Map config = ConfigurationHelper
             .loadStepDefaults(this)

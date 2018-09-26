@@ -149,7 +149,7 @@ class ArtifactSetVersionTest extends BasePiperTest {
     @Test
     void testCredentialCompatibility() {
         jsr.step.artifactSetVersion (
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             buildTool: 'maven',
             gitCredentialsId: 'testCredentials',
             juStabGitUtils: gitUtils

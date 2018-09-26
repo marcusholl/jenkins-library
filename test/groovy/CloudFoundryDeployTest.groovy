@@ -66,7 +66,7 @@ class CloudFoundryDeployTest extends BasePiperTest {
         ]
 
         jsr.step.cloudFoundryDeploy([
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             deployTool: '',
             stageName: 'acceptance',
@@ -94,7 +94,7 @@ class CloudFoundryDeployTest extends BasePiperTest {
         ]
 
         jsr.step.cloudFoundryDeploy([
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             deployTool: 'notAvailable',
             stageName: 'acceptance'
@@ -106,7 +106,7 @@ class CloudFoundryDeployTest extends BasePiperTest {
     @Test
     void testCfNativeWithAppName() {
         jsr.step.cloudFoundryDeploy([
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             deployTool: 'cf_native',
             cfOrg: 'testOrg',
@@ -126,7 +126,7 @@ class CloudFoundryDeployTest extends BasePiperTest {
     @Test
     void testCfNativeWithAppNameCustomApi() {
         jsr.step.cloudFoundryDeploy([
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             deployTool: 'cf_native',
             cfApiEndpoint: 'https://customApi',
@@ -143,7 +143,7 @@ class CloudFoundryDeployTest extends BasePiperTest {
     @Test
     void testCfNativeWithAppNameCompatible() {
         jsr.step.cloudFoundryDeploy([
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             deployTool: 'cf_native',
             cloudFoundry: [
@@ -168,7 +168,7 @@ class CloudFoundryDeployTest extends BasePiperTest {
         jryr.registerYaml('test.yml', "[applications: [[name: 'manifestAppName']]]")
 
         jsr.step.cloudFoundryDeploy([
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             deployTool: 'cf_native',
             cfOrg: 'testOrg',
@@ -189,7 +189,7 @@ class CloudFoundryDeployTest extends BasePiperTest {
         thrown.expectMessage('[cloudFoundryDeploy] ERROR: No appName available in manifest test.yml.')
 
         jsr.step.cloudFoundryDeploy([
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             deployTool: 'cf_native',
             cfOrg: 'testOrg',
@@ -202,7 +202,7 @@ class CloudFoundryDeployTest extends BasePiperTest {
     @Test
     void testMta() {
         jsr.step.cloudFoundryDeploy([
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             cfOrg: 'testOrg',
             cfSpace: 'testSpace',

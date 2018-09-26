@@ -43,7 +43,7 @@ class BatsExecuteTestsTest extends BasePiperTest {
     void testDefault() {
         nullScript.commonPipelineEnvironment.configuration = [general: [container: 'test-container']]
         jsr.step.batsExecuteTests(
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             dockerContainerName: 'test-container',
             dockerImageNameAndTag: 'test/image',
@@ -72,7 +72,7 @@ class BatsExecuteTestsTest extends BasePiperTest {
     @Test
     void testTap() {
         jsr.step.batsExecuteTests(
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             outputFormat: 'tap'
         )
@@ -90,7 +90,7 @@ class BatsExecuteTestsTest extends BasePiperTest {
         })
         thrown.expectMessage('Shell call failed')
         jsr.step.batsExecuteTests(
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             failOnError: true,
         )
@@ -108,7 +108,7 @@ class BatsExecuteTestsTest extends BasePiperTest {
         })
 
         jsr.step.batsExecuteTests(
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             testRepository: 'testRepo',
         )
@@ -129,7 +129,7 @@ class BatsExecuteTestsTest extends BasePiperTest {
         })
 
         jsr.step.batsExecuteTests(
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             gitBranch: 'test',
             gitSshKeyCredentialsId: 'testCredentials',

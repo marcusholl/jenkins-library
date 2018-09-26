@@ -77,7 +77,7 @@ class DockerExecuteOnKubernetesTest extends BasePiperTest {
 
     @Test
     void testRunOnPodNoContainerMapOnlyDockerImage() throws Exception {
-        jsr.step.call(script: nullScript,
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             dockerImage: 'maven:3.5-jdk-8-alpine',
             dockerOptions: '-it',
             dockerVolumeBind: ['my_vol': '/my_vol'],
@@ -95,7 +95,7 @@ class DockerExecuteOnKubernetesTest extends BasePiperTest {
 
     @Test
     void testDockerExecuteOnKubernetesWithCustomContainerMap() throws Exception {
-        jsr.step.call(script: nullScript,
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             containerMap: ['maven:3.5-jdk-8-alpine': 'mavenexecute']) {
             container(name: 'mavenexecute') {
                 bodyExecuted = true
@@ -110,7 +110,7 @@ class DockerExecuteOnKubernetesTest extends BasePiperTest {
     @Test
     void testDockerExecuteOnKubernetesWithCustomJnlpWithContainerMap() throws Exception {
         nullScript.commonPipelineEnvironment.configuration = ['general': ['jenkinsKubernetes': ['jnlpAgent': 'myJnalpAgent']]]
-        jsr.step.call(script: nullScript,
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             containerMap: ['maven:3.5-jdk-8-alpine': 'mavenexecute']) {
             container(name: 'mavenexecute') {
                 bodyExecuted = true
@@ -127,7 +127,7 @@ class DockerExecuteOnKubernetesTest extends BasePiperTest {
     @Test
     void testDockerExecuteOnKubernetesWithCustomJnlpWithDockerImage() throws Exception {
         nullScript.commonPipelineEnvironment.configuration = ['general': ['jenkinsKubernetes': ['jnlpAgent': 'myJnalpAgent']]]
-        jsr.step.call(script: nullScript,
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             dockerImage: 'maven:3.5-jdk-8-alpine') {
             bodyExecuted = true
         }
@@ -141,7 +141,7 @@ class DockerExecuteOnKubernetesTest extends BasePiperTest {
 
     @Test
     void testDockerExecuteOnKubernetesWithCustomWorkspace() throws Exception {
-        jsr.step.call(script: nullScript,
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             containerMap: ['maven:3.5-jdk-8-alpine': 'mavenexecute'],
             dockerWorkspace: '/home/piper') {
             container(name: 'mavenexecute') {
@@ -154,7 +154,7 @@ class DockerExecuteOnKubernetesTest extends BasePiperTest {
 
     @Test
     void testDockerExecuteOnKubernetesWithCustomEnv() throws Exception {
-        jsr.step.call(script: nullScript,
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             containerMap: ['maven:3.5-jdk-8-alpine': 'mavenexecute'],
             dockerEnvVars: ['customEnvKey': 'customEnvValue']) {
             container(name: 'mavenexecute') {
@@ -167,7 +167,7 @@ class DockerExecuteOnKubernetesTest extends BasePiperTest {
 
     @Test
     void testDockerExecuteOnKubernetesUpperCaseContainerName() throws Exception {
-        jsr.step.call(script: nullScript,
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             containerMap: ['maven:3.5-jdk-8-alpine': 'MAVENEXECUTE'],
             dockerEnvVars: ['customEnvKey': 'customEnvValue']) {
             container(name: 'mavenexecute') {
@@ -183,7 +183,7 @@ class DockerExecuteOnKubernetesTest extends BasePiperTest {
     @Test
     void testDockerExecuteOnKubernetesEmptyContainerMapNoDockerImage() throws Exception {
         exception.expect(IllegalArgumentException.class);
-            jsr.step.call(script: nullScript,
+            jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment,
                 containerMap: [:],
                 dockerEnvVars: ['customEnvKey': 'customEnvValue']) {
                 container(name: 'jnlp') {

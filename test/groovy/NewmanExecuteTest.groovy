@@ -61,7 +61,7 @@ class NewmanExecuteTest extends BasePiperTest {
     @Test
     void testExecuteNewmanDefault() throws Exception {
         jsr.step.newmanExecute(
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             newmanCollection: 'testCollection',
             newmanEnvironment: 'testEnvironment',
@@ -79,7 +79,7 @@ class NewmanExecuteTest extends BasePiperTest {
         thrown.expectMessage('[newmanExecute] No collection found with pattern \'notFound.json\'')
 
         jsr.step.newmanExecute(
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             newmanCollection: 'notFound.json'
         )
@@ -90,7 +90,7 @@ class NewmanExecuteTest extends BasePiperTest {
     @Test
     void testExecuteNewmanFailOnError() throws Exception {
         jsr.step.newmanExecute(
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             newmanCollection: 'testCollection',
             newmanEnvironment: 'testEnvironment',
@@ -109,7 +109,7 @@ class NewmanExecuteTest extends BasePiperTest {
     @Test
     void testExecuteNewmanWithFolder() throws Exception {
         jsr.step.newmanExecute(
-            script: nullScript,
+            script: nullScript, cpe: nullScript.commonPipelineEnvironment,
             juStabUtils: utils,
             newmanRunCommand: 'run ${config.newmanCollection} --iteration-data testDataFile --reporters junit,html --reporter-junit-export target/newman/TEST-${config.newmanCollection.toString().replace(File.separatorChar,(char)\'_\').tokenize(\'.\').first()}.xml --reporter-html-export target/newman/TEST-${config.newmanCollection.toString().replace(File.separatorChar,(char)\'_\').tokenize(\'.\').first()}.html'
         )

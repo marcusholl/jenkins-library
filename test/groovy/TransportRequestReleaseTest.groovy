@@ -60,7 +60,7 @@ public class TransportRequestReleaseTest extends BasePiperTest {
         thrown.expect(IllegalArgumentException)
         thrown.expectMessage("Change document id not provided (parameter: 'changeDocumentId' or via commit history).")
 
-        jsr.step.call(script: nullScript, transportRequestId: '001', cmUtils: cm)
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment, transportRequestId: '001', cmUtils: cm)
     }
 
     @Test
@@ -78,7 +78,7 @@ public class TransportRequestReleaseTest extends BasePiperTest {
         thrown.expect(IllegalArgumentException)
         thrown.expectMessage("Transport request id not provided (parameter: 'transportRequestId' or via commit history).")
 
-        jsr.step.call(script: nullScript, changeDocumentId: '001', cmUtils: cm)
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment, changeDocumentId: '001', cmUtils: cm)
     }
 
     @Test
@@ -99,7 +99,7 @@ public class TransportRequestReleaseTest extends BasePiperTest {
             }
         }
 
-        jsr.step.call(script: nullScript, changeDocumentId: '001', transportRequestId: '001', cmUtils: cm)
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment, changeDocumentId: '001', transportRequestId: '001', cmUtils: cm)
     }
 
     @Test
@@ -125,7 +125,7 @@ public class TransportRequestReleaseTest extends BasePiperTest {
             }
         }
 
-        jsr.step.call(script: nullScript, changeDocumentId: '001', transportRequestId: '002', cmUtils: cm)
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment, changeDocumentId: '001', transportRequestId: '002', cmUtils: cm)
 
         assert receivedParams == [changeId: '001',
                                   transportRequestId: '002',

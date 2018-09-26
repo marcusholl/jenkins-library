@@ -68,7 +68,7 @@ public class MtaBuildTest extends BasePiperTest {
     @Test
     void mtarFilePathFromCommonPipelineEnviromentTest() {
 
-        jsr.step.call(script: nullScript,
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment,
                       buildTarget: 'NEO')
 
         def mtarFilePath = nullScript.commonPipelineEnvironment.getMtarFilePath()
@@ -140,7 +140,7 @@ public class MtaBuildTest extends BasePiperTest {
 
         nullScript.commonPipelineEnvironment.configuration = [steps:[mtaBuild:[mtaJarLocation: '/config/mta/mta.jar']]]
 
-        jsr.step.call(script: nullScript,
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment,
                       buildTarget: 'NEO')
 
         assert jscr.shell.find(){ c -> c.contains("-jar /config/mta/mta.jar --mtar")}
@@ -152,7 +152,7 @@ public class MtaBuildTest extends BasePiperTest {
     @Test
     void mtaJarLocationFromDefaultStepConfigurationTest() {
 
-        jsr.step.call(script: nullScript,
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment,
                       buildTarget: 'NEO')
 
         assert jscr.shell.find(){ c -> c.contains("-jar mta.jar --mtar")}
@@ -175,7 +175,7 @@ public class MtaBuildTest extends BasePiperTest {
 
         nullScript.commonPipelineEnvironment.configuration = [steps:[mtaBuild:[buildTarget: 'NEO']]]
 
-        jsr.step.call(script: nullScript)
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment)
 
         assert jscr.shell.find(){ c -> c.contains('java -jar mta.jar --mtar com.mycompany.northwind.mtar --build-target=NEO build')}
     }
@@ -183,7 +183,7 @@ public class MtaBuildTest extends BasePiperTest {
     @Test
     void canConfigureDockerImage() {
 
-        jsr.step.call(script: nullScript, dockerImage: 'mta-docker-image:latest')
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment, dockerImage: 'mta-docker-image:latest')
 
         assert 'mta-docker-image:latest' == jder.dockerParams.dockerImage
     }
@@ -191,7 +191,7 @@ public class MtaBuildTest extends BasePiperTest {
     @Test
     void canConfigureDockerOptions() {
 
-        jsr.step.call(script: nullScript, dockerOptions: 'something')
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment, dockerOptions: 'something')
 
         assert 'something' == jder.dockerParams.dockerOptions
     }
@@ -201,7 +201,7 @@ public class MtaBuildTest extends BasePiperTest {
 
         nullScript.commonPipelineEnvironment.defaultConfiguration = [steps:[mtaBuild:[buildTarget: 'NEO']]]
 
-        jsr.step.call(script: nullScript)
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment)
 
         assert jscr.shell.find { c -> c.contains('java -jar mta.jar --mtar com.mycompany.northwind.mtar --build-target=NEO build')}
     }
@@ -221,7 +221,7 @@ public class MtaBuildTest extends BasePiperTest {
 
         nullScript.commonPipelineEnvironment.configuration = [steps:[mtaBuild:[buildTarget: 'NEO', extension: 'config_extension']]]
 
-        jsr.step.call(script: nullScript)
+        jsr.step.call(script: nullScript, cpe: nullScript.commonPipelineEnvironment)
 
         assert jscr.shell.find(){ c -> c.contains('java -jar mta.jar --mtar com.mycompany.northwind.mtar --build-target=NEO --extension=config_extension build')}
     }
