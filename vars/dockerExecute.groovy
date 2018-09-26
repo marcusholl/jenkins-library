@@ -18,7 +18,7 @@ import groovy.transform.Field
 
 void call(Map parameters = [:], body) {
     handlePipelineStepErrors(stepName: STEP_NAME, stepParameters: parameters) {
-        def cpe = parameters.cpe
+        def cpe =  parameters.cpe ?: parameters.script?.commonPipelineEnvironment
         Map config = ConfigurationHelper
             .loadStepDefaults(this)
             .mixinGeneralConfig(cpe, GENERAL_CONFIG_KEYS)

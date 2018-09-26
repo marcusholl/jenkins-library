@@ -32,7 +32,7 @@ import groovy.transform.Field
 def call(parameters = [:]) {
     handlePipelineStepErrors (stepName: STEP_NAME, stepParameters: parameters) {
 
-        def cpe = parameters.cpe
+        def cpe =  parameters.cpe ?: parameters.script?.commonPipelineEnvironment
         def utils = new Utils()
 
         prepareDefaultValues script: this

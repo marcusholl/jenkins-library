@@ -15,7 +15,7 @@ def call(Map parameters = [:]) {
             utils = new Utils()
         }
 
-        def cpe = parameters.cpe
+        def cpe =  parameters.cpe ?: parameters.script?.commonPipelineEnvironment
         //additional includes via passing e.g. stashIncludes: [opa5: '**/*.include']
         //additional excludes via passing e.g. stashExcludes: [opa5: '**/*.exclude']
 

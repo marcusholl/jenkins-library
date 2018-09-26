@@ -36,7 +36,7 @@ def call(Map parameters = [:], Closure body = null) {
                 error "[${STEP_NAME}] Files in the workspace have been changed previously - aborting ${STEP_NAME}"
         }
 
-        def cpe = parameters.cpe
+        def cpe =  parameters.cpe ?: parameters.script?.commonPipelineEnvironment
 
         // load default & individual configuration
         ConfigurationHelper configHelper = ConfigurationHelper

@@ -29,7 +29,7 @@ def call(Map parameters = [:]) {
             utils = new Utils()
         }
 
-        def cpe = parameters.cpe
+        def cpe =  parameters.cpe ?: parameters.script?.commonPipelineEnvironment
 
         Map config = ConfigurationHelper
             .loadStepDefaults(this)

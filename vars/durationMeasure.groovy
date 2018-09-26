@@ -1,6 +1,6 @@
 def call(Map parameters = [:], body) {
 
-    def cpe = parameters.cpe
+    def cpe =  parameters.cpe ?: parameters.script?.commonPipelineEnvironment
     def measurementName = parameters.get('measurementName', 'test_duration')
 
     //start measurement

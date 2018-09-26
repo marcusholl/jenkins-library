@@ -21,7 +21,7 @@ import groovy.text.SimpleTemplateEngine
 
 def call(Map parameters = [:]) {
     handlePipelineStepErrors(stepName: STEP_NAME, stepParameters: parameters) {
-        def cpe = parameters.cpe
+        def cpe =  parameters.cpe ?: parameters.script?.commonPipelineEnvironment
         def utils = parameters?.juStabUtils ?: new Utils()
 
         // load default & individual configuration

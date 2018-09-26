@@ -18,7 +18,7 @@ void call(Map parameters = [:], body) {
         if (!JenkinsUtils.isPluginActive(PLUGIN_ID_KUBERNETES)) {
             error("[ERROR][${STEP_NAME}] not supported. Plugin '${PLUGIN_ID_KUBERNETES}' is not installed or not active.")
         }
-        def cpe = parameters.cpe
+        def cpe =  parameters.cpe ?: parameters.script?.commonPipelineEnvironment
         ConfigurationHelper configHelper = ConfigurationHelper
             .loadStepDefaults(this)
             .mixinGeneralConfig(cpe, GENERAL_CONFIG_KEYS)
