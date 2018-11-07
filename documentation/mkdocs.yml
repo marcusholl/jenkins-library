@@ -50,8 +50,6 @@ extra:
       code: 'Ubuntu Mono'
 markdown_extensions:
     - admonition
-    - codehilite(guess_lang=false)
-    - toc(permalink=true)
     - footnotes
     - pymdownx.superfences
 extra_css:
