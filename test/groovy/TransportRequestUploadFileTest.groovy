@@ -362,7 +362,7 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
     @Test
     public void invalidBackendTypeTest() {
         thrown.expect(AbortException)
-        thrown.expectMessage('Invalid backend type: \'DUMMY\'. Valid values: [SOLMAN, CTS, NONE]. ' +
+        thrown.expectMessage('Invalid backend type: \'DUMMY\'. Valid values: [SOLMAN, CTS, RFC, NONE]. ' +
                              'Configuration: \'changeManagement/type\'.')
 
         jsr.step.transportRequestUploadFile(script: nullScript,
