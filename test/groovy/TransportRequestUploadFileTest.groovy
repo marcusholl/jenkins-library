@@ -192,6 +192,18 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
     }
 
     @Test
+    public void uploadFileToTransportRequestRFCSuccessTest() {
+
+        helper.registerAllowedMethod('dockerExecute', [], {System.err<<"INSIDE DOCKER_EXECUTE\n"})
+
+        jsr.step.transportRequestUploadFile(script: nullScript,
+                 filePath: 'xyz.jar',
+                 transportRequestId: '123456',
+                 changeManagement: [type: 'RFC'])
+    }
+
+
+    @Test
     public void uploadFileToTransportRequestSOLMANSuccessTest() {
 
         // Here we test only the case where the transportRequestId is

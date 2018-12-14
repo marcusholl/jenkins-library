@@ -111,6 +111,9 @@ public class ChangeManagement implements Serializable {
         } else if (type == BackendType.CTS) {
             args = ['-tID', transportRequestId,
                     "\"$filePath\""]
+        } else if(type == BackendType.RFC) {
+
+            args = []
         } else {
             throw new IllegalArgumentException("Invalid backend type: ${type}")
         }
@@ -136,7 +139,15 @@ public class ChangeManagement implements Serializable {
             credentialsId: credentialsId,
             passwordVariable: 'password',
             usernameVariable: 'username')]) {
-            def cmScript = getCMCommandLine(type, endpoint, script.username, script.password,
+            def cmScript
+            if(type == BackendType.RFC) {
+
+                script.dockerExecute(script: script) {
+                    sh "cts"
+                }
+
+            } else {
+                cmScript = getCMCommandLine(type, endpoint, script.username, script.password,
                     command, args,
                     clientOpts)
 
@@ -151,6 +162,7 @@ public class ChangeManagement implements Serializable {
             // user and password are masked by withCredentials
             script.echo """[INFO] Executing command line: "${cmScript}"."""
             return script.sh(shArgs)
+        }
         }
     }
 
