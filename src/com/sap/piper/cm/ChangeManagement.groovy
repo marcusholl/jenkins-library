@@ -143,7 +143,7 @@ public class ChangeManagement implements Serializable {
             if(type == BackendType.RFC) {
 
                 script.dockerExecute(script: script) {
-                    sh "cts"
+                    return script.sh("cts")
                 }
 
             } else {
