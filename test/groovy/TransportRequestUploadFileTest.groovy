@@ -6,6 +6,7 @@ import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.junit.rules.RuleChain
 
+import com.sap.piper.JenkinsUtils
 import com.sap.piper.cm.BackendType
 import com.sap.piper.cm.ChangeManagement
 import com.sap.piper.cm.ChangeManagementException
@@ -195,6 +196,8 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
     public void uploadFileToTransportRequestRFCSuccessTest() {
 
         helper.registerAllowedMethod('dockerExecute', [], {System.err<<"INSIDE DOCKER_EXECUTE\n"})
+
+        JenkinsUtils.getMetaClass().static.isPluginActive = { true }
 
         jsr.step.transportRequestUploadFile(script: nullScript,
                  filePath: 'xyz.jar',
