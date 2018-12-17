@@ -195,9 +195,10 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
     @Test
     public void uploadFileToTransportRequestRFCSuccessTest() {
 
-        helper.registerAllowedMethod('dockerExecute', [], {System.err<<"INSIDE DOCKER_EXECUTE\n"})
-
         JenkinsUtils.getMetaClass().static.isPluginActive = { true }
+
+        helper.registerAllowedMethod('dockerExecute', [Map, Closure], { m, c -> c() } )
+        helper.registerAllowedMethod('sh', [String], {s -> return (s == 'cts' ? 0 : 1)})
 
         jsr.step.transportRequestUploadFile(script: nullScript,
                  filePath: 'xyz.jar',
