@@ -144,7 +144,7 @@ public class ChangeManagement implements Serializable {
 
                 script.dockerExecute(script: script,
                                      dockerImage: 'rfc',
-                                     dockerOptions: ['--env ABAP_DEVELOPMENT_USER=0DATA',
+                                     dockerOptions: ['--env ABAP_DEVELOPMENT_USER=ODATA',
                                                      '--env ABAP_DEVELOPMENT_PASSWORD=Admin123',
                                                      '--env ABAP_DEVELOPMENT_SERVER=wdflbmd16301.wdf.sap.corp',
                                                      '--env ABAP_DEVELOPMENT_INSTANCE=00',
