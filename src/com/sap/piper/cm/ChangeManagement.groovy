@@ -142,8 +142,20 @@ public class ChangeManagement implements Serializable {
             def cmScript
             if(type == BackendType.RFC) {
 
-                script.dockerExecute(script: script) {
-                    return script.sh("cts")
+                script.dockerExecute(script: script,
+                                     dockerImage: 'rfc',
+                                     dockerOptions: ['--env ABAP_DEVELOPMENT_USER=0DATA',
+                                                     '--env ABAP_DEVELOPMENT_PASSWORD=Admin123',
+                                                     '--env ABAP_DEVELOPMENT_SERVER=wdflbmd16301.wdf.sap.corp',
+                                                     '--env ABAP_DEVELOPMENT_INSTANCE=00',
+                                                     '--env ABAP_DEVELOPMENT_CLIENT=001',
+                                                     '--env ABAP_APPLICATION_NAME=RFC_TEST',
+                                                     '--env ABAP_APPLICATION_DESC=TestRFCMH',
+                                                     '--env ABAP_PACKAGE=Test',
+                                                     '--env JOB_URL=',
+                                                     '--env NEXUS_SNAPSHOT_REPO=',
+                                                     '--env GIT_COMMIT=de38ca7510]' ) {
+                    return script.sh("cts createTransportRequest")
                 }
 
             } else {
