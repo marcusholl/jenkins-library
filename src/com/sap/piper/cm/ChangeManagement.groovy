@@ -154,7 +154,7 @@ public class ChangeManagement implements Serializable {
                                                      '--env ABAP_PACKAGE=Test',
                                                      '--env JOB_URL=',
                                                      '--env NEXUS_SNAPSHOT_REPO=',
-                                                     '--env GIT_COMMIT=de38ca7510]' ) {
+                                                     '--env GIT_COMMIT=de38ca7510]'] ) {
                     return script.sh("cts createTransportRequest")
                 }
 
