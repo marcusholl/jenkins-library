@@ -149,14 +149,15 @@ public class ChangeManagement implements Serializable {
             usernameVariable: 'username')]) {
             if(type == BackendType.RFC) {
 
+                Map shArgs = [returnStatus: true,
+                              'script': 'env']
                 args = args.plus(["--env ABAP_DEVELOPMENT_USER=${script.username}",
                                   "--env ABAP_DEVELOPMENT_PASSWORD=${script.password}"])
                 script.dockerExecute(script: script,
                                      dockerImage: 'ubuntu',
                                      dockerOptions: args ) {
                     //script.sh('cts createTransportRequest')
-                    script.sh('env')
-                    return 0
+                    return script.sh(shArgs)
                 }
 
             } else {
