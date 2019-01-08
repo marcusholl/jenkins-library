@@ -156,7 +156,8 @@ public class ChangeManagement implements Serializable {
                                                      '--env NEXUS_SNAPSHOT_REPO=',
                                                      '--env GIT_COMMIT=de38ca7510]'] ) {
                     //script.sh('cts createTransportRequest')
-                    return script.sh('env')
+                    script.sh('env')
+                    return 0
                 }
 
             } else {
