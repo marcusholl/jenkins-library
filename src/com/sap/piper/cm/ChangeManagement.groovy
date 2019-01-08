@@ -149,8 +149,8 @@ public class ChangeManagement implements Serializable {
             usernameVariable: 'username')]) {
             if(type == BackendType.RFC) {
 
-                args = args.plus(["--env ABAP_DEVELOPMENT_USER=${username}",
-                                  "--env ABAP_DEVELOPMENT_PASSWORD=${password}"])
+                args = args.plus(["--env ABAP_DEVELOPMENT_USER=${script.username}",
+                                  "--env ABAP_DEVELOPMENT_PASSWORD=${script.password}"])
                 script.dockerExecute(script: script,
                                      dockerImage: 'ubuntu',
                                      dockerOptions: args ) {
