@@ -139,7 +139,6 @@ public class ChangeManagement implements Serializable {
             credentialsId: credentialsId,
             passwordVariable: 'password',
             usernameVariable: 'username')]) {
-            def cmScript
             if(type == BackendType.RFC) {
 
                 script.dockerExecute(script: script,
@@ -161,7 +160,7 @@ public class ChangeManagement implements Serializable {
                 }
 
             } else {
-                cmScript = getCMCommandLine(type, endpoint, script.username, script.password,
+            def cmScript = getCMCommandLine(type, endpoint, script.username, script.password,
                     command, args,
                     clientOpts)
 
