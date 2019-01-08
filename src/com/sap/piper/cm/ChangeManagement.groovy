@@ -143,7 +143,7 @@ public class ChangeManagement implements Serializable {
             if(type == BackendType.RFC) {
 
                 script.dockerExecute(script: script,
-                                     dockerImage: 'rfc',
+                                     dockerImage: 'ubuntu',
                                      dockerOptions: ['--env ABAP_DEVELOPMENT_USER=ODATA',
                                                      '--env ABAP_DEVELOPMENT_PASSWORD=Admin123',
                                                      '--env ABAP_DEVELOPMENT_SERVER=wdflbmd16301.wdf.sap.corp',
@@ -155,8 +155,8 @@ public class ChangeManagement implements Serializable {
                                                      '--env JOB_URL=',
                                                      '--env NEXUS_SNAPSHOT_REPO=',
                                                      '--env GIT_COMMIT=de38ca7510]'] ) {
-                    script.sh('cts createTransportRequest')
-                    //script.sh('env')
+                    //script.sh('cts createTransportRequest')
+                    script.sh('env')
                 }
 
             } else {
