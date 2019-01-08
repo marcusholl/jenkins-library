@@ -113,7 +113,15 @@ public class ChangeManagement implements Serializable {
                     "\"$filePath\""]
         } else if(type == BackendType.RFC) {
 
-            args = []
+            args = ["--env ABAP_DEVELOPMENT_SERVER=${endpoint}",
+                    "--env ABAP_DEVELOPMENT_INSTANCE=TODO_INSTANCE",
+                    "--env ABAP_DEVELOPMENT_CLIENT=TODO_CLIENT",
+                    "--env ABAP_APPLICATION_NAME=${applicationId}",
+                    "--env ABAP_APPLICATION_DESC=TODO_APPLICATION_DESCRIPTION",
+                    "--env ABAP_PACKAGE=TOOD_PACKAGE",
+                    "--env JOB_URL=TOOD_JOB_URL",
+                    "--env NEXUS_SNAPSHOT_REPO=TODO_SNAPSHOT_REPO",
+                    "--env GIT_COMMIT=TODO_GIT_COMMIT"]
         } else {
             throw new IllegalArgumentException("Invalid backend type: ${type}")
         }
@@ -141,19 +149,11 @@ public class ChangeManagement implements Serializable {
             usernameVariable: 'username')]) {
             if(type == BackendType.RFC) {
 
+                args = args.plus(["--env ABAP_DEVELOPMENT_USER=${username}",
+                                  "--env ABAP_DEVELOPMENT_PASSWORD=${password}"])
                 script.dockerExecute(script: script,
                                      dockerImage: 'ubuntu',
-                                     dockerOptions: ['--env ABAP_DEVELOPMENT_USER=ODATA',
-                                                     '--env ABAP_DEVELOPMENT_PASSWORD=Admin123',
-                                                     '--env ABAP_DEVELOPMENT_SERVER=wdflbmd16301.wdf.sap.corp',
-                                                     '--env ABAP_DEVELOPMENT_INSTANCE=00',
-                                                     '--env ABAP_DEVELOPMENT_CLIENT=001',
-                                                     '--env ABAP_APPLICATION_NAME=RFC_TEST',
-                                                     '--env ABAP_APPLICATION_DESC=TestRFCMH',
-                                                     '--env ABAP_PACKAGE=Test',
-                                                     '--env JOB_URL=',
-                                                     '--env NEXUS_SNAPSHOT_REPO=',
-                                                     '--env GIT_COMMIT=de38ca7510]'] ) {
+                                     dockerOptions: args ) {
                     //script.sh('cts createTransportRequest')
                     script.sh('env')
                     return 0
