@@ -87,6 +87,7 @@ void call(Map parameters = [:]) {
             sh """#!/bin/bash
             export PATH=./node_modules/.bin:${PATH}
             $mtaCall
+            cat /home/mta/.npm/_logs/*
             """
 
             script?.commonPipelineEnvironment?.setMtarFilePath(mtarFileName)
