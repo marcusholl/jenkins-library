@@ -100,7 +100,14 @@ public class ChangeManagement implements Serializable {
         }
     }
 
-    void uploadFileToTransportRequest(BackendType type, String changeId, String transportRequestId, String applicationId, String filePath, String endpoint, String credentialsId, String cmclientOpts = '') {
+    void uploadFileToTransportRequest(BackendType type,
+                                      String changeId,
+                                      String transportRequestId,
+                                      String applicationId,
+                                      String filePath,
+                                      String endpoint,
+                                      String credentialsId,
+                                      String cmclientOpts = '') {
 
         def args = null
 
@@ -112,15 +119,13 @@ public class ChangeManagement implements Serializable {
             args = ['-tID', transportRequestId,
                     "\"$filePath\""]
         } else if(type == BackendType.RFC) {
-
             args = ["--env ABAP_DEVELOPMENT_SERVER=${endpoint}",
                     "--env ABAP_DEVELOPMENT_INSTANCE=TODO_INSTANCE",
                     "--env ABAP_DEVELOPMENT_CLIENT=TODO_CLIENT",
                     "--env ABAP_APPLICATION_NAME=${applicationId}",
                     "--env ABAP_APPLICATION_DESC=TODO_APPLICATION_DESCRIPTION",
                     "--env ABAP_PACKAGE=TOOD_PACKAGE",
-                    "--env JOB_URL=TOOD_JOB_URL",
-                    "--env NEXUS_SNAPSHOT_REPO=TODO_SNAPSHOT_REPO",
+                    "--env ZIP_FILE_URL=${filePath}", // TODO: revisit: I'm not fully happy with re-useing the file path here.
                     "--env GIT_COMMIT=TODO_GIT_COMMIT"]
         } else {
             throw new IllegalArgumentException("Invalid backend type: ${type}")
