@@ -89,6 +89,8 @@ void call(Map parameters = [:]) {
             npm config set loglevel verbose
             $mtaCall
             cat /home/mta/.npm/_logs/*
+            pwd
+            ls -laR node_modules
             """
 
             script?.commonPipelineEnvironment?.setMtarFilePath(mtarFileName)
