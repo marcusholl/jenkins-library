@@ -97,15 +97,38 @@ void call(parameters = [:]) {
 
             try {
 
+                switch(backendType) {
 
-                cm.uploadFileToTransportRequest(backendType,
-                                                configuration.changeDocumentId,
-                                                configuration.transportRequestId,
-                                                configuration.applicationId,
-                                                configuration.filePath,
-                                                configuration.changeManagement.endpoint,
-                                                configuration.changeManagement.credentialsId,
-                                                configuration.changeManagement.clientOpts)
+                    case BackendType.SOLMAN:
+                        System.err << "SOLMAN HERE"
+                        cm.uploadFileToTransportRequestSOLMAN(
+                            configuration.changeDocumentId,
+                            configuration.transportRequestId,
+                            configuration.applicationId,
+                            configuration.filePath,
+                            configuration.changeManagement.endpoint,
+                            configuration.changeManagement.credentialsId,
+                            configuration.changeManagement.clientOpts)
+                        break
+                    case BackendType.CTS:
+                        cm.uploadFileToTransportRequestCTS(
+                            configuration.transportRequestId,
+                            configuration.applicationId,
+                            configuration.filePath,
+                            configuration.changeManagement.endpoint,
+                            configuration.changeManagement.credentialsId,
+                            configuration.changeManagement.clientOpts)
+                        break
+                    case BackendType.RFC:
+                        cm.uploadFileToTransportRequestRFC(
+                            configuration.transportRequestId,
+                            configuration.applicationId,
+                            configuration.filePath,
+                            configuration.changeManagement.endpoint,
+                            configuration.changeManagement.credentialsId)
+                        break
+                   
+                }
 
             } catch(ChangeManagementException ex) {
                 throw new AbortException(ex.getMessage())

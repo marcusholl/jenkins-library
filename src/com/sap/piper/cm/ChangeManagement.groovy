@@ -100,41 +100,94 @@ public class ChangeManagement implements Serializable {
         }
     }
 
-    void uploadFileToTransportRequest(BackendType type,
-                                      String changeId,
-                                      String transportRequestId,
-                                      String applicationId,
-                                      String filePath,
-                                      String endpoint,
-                                      String credentialsId,
-                                      String cmclientOpts = '') {
+    void uploadFileToTransportRequestSOLMAN(
+        String changeId,
+        String transportRequestId,
+        String applicationId,
+        String filePath,
+        String endpoint,
+        String credentialsId,
+        String cmclientOpts = '') {
 
-        def args = null
+        def args = [
+                '-cID', changeId,
+                '-tID', transportRequestId,
+                applicationId, "\"$filePath\""
+            ]
 
-        if(type == BackendType.SOLMAN) {
-            args = ['-cID', changeId,
-                    '-tID', transportRequestId,
-                    applicationId, "\"$filePath\""]
-        } else if (type == BackendType.CTS) {
-            args = ['-tID', transportRequestId,
-                    "\"$filePath\""]
-        } else if(type == BackendType.RFC) {
-            args = ["--env ABAP_DEVELOPMENT_SERVER=${endpoint}",
-                    "--env ABAP_DEVELOPMENT_INSTANCE=TODO_INSTANCE",
-                    "--env ABAP_DEVELOPMENT_CLIENT=TODO_CLIENT",
-                    "--env ABAP_APPLICATION_NAME=${applicationId}",
-                    "--env ABAP_APPLICATION_DESC=TODO_APPLICATION_DESCRIPTION",
-                    "--env ABAP_PACKAGE=TOOD_PACKAGE",
-                    "--env ZIP_FILE_URL=${filePath}", // TODO: revisit: I'm not fully happy with re-useing the file path here.
-                    "--env GIT_COMMIT=TODO_GIT_COMMIT"]
-        } else {
+        uploadFileToTransportRequest(
+            BackendType.SOLMAN,
+            endpoint,
+            credentialsId,
+            'upload-file-to-transport',
+            args,
+            cmclientOpts)
+    }
+
+    void uploadFileToTransportRequestCTS(
+        String transportRequestId,
+        String applicationId,
+        String filePath,
+        String endpoint,
+        String credentialsId,
+        String cmclientOpts = '') {
+
+        def args = [
+                '-tID', transportRequestId,
+                "\"$filePath\""
+            ]
+
+        uploadFileToTransportRequest(
+            BackendType.CTS,
+            endpoint,
+            credentialsId,
+            'upload-file-to-transport',
+            args,
+            cmclientOpts)
+    }
+
+    void uploadFileToTransportRequestRFC(
+        String transportRequestId,
+        String applicationId,
+        String filePath,
+        String endpoint,
+        String credentialsId) {
+
+        def args = [
+                "--env ABAP_DEVELOPMENT_INSTANCE=TODO_INSTANCE",
+                "--env ABAP_DEVELOPMENT_CLIENT=TODO_CLIENT",
+                "--env ABAP_APPLICATION_NAME=${applicationId}",
+                "--env ABAP_APPLICATION_DESC=TODO_APPLICATION_DESCRIPTION",
+                "--env ABAP_PACKAGE=TOOD_PACKAGE",
+                "--env ZIP_FILE_URL=${filePath}",
+                "--env GIT_COMMIT=TODO_GIT_COMMIT"
+            ]
+
+            uploadFileToTransportRequest(
+                BackendType.RFC,
+                endpoint,
+                credentialsId,
+                'cts',
+                args,
+                null)
+    }
+
+    private void uploadFileToTransportRequest(
+        BackendType type,
+        def endpoint,
+        def credentialsId,
+        def command,
+        def args,
+        def cmclientOpts) {
+
+        if(! type in [BackendType.SOLMAN, BackendType.CTS, BackendType.RFC]) {
             throw new IllegalArgumentException("Invalid backend type: ${type}")
         }
 
         int rc = executeWithCredentials(type,
                                         endpoint,
                                         credentialsId,
-                                        'upload-file-to-transport',
+                                        command,
                                         args,
                                         false,
                                         cmclientOpts) as int
@@ -142,7 +195,7 @@ public class ChangeManagement implements Serializable {
         if(rc == 0) {
             return
         } else {
-            throw new ChangeManagementException("Cannot upload file '$filePath' for change document '$changeId' with transport request '$transportRequestId'. Return code from cmclient: $rc.")
+            throw new ChangeManagementException("Cannot upload file into transport request. Return code from cmclient: $rc.")
         }
 
     }
@@ -152,36 +205,40 @@ public class ChangeManagement implements Serializable {
             credentialsId: credentialsId,
             passwordVariable: 'password',
             usernameVariable: 'username')]) {
+
             if(type == BackendType.RFC) {
 
                 Map shArgs = [returnStatus: true,
                               'script': 'env']
-                args = args.plus(["--env ABAP_DEVELOPMENT_USER=${script.username}",
-                                  "--env ABAP_DEVELOPMENT_PASSWORD=${script.password}"])
+                args = args.plus([
+                    "--env ABAP_DEVELOPMENT_SERVER=${endpoint}",
+                    "--env ABAP_DEVELOPMENT_USER=${script.username}",
+                    "--env ABAP_DEVELOPMENT_PASSWORD=${script.password}"])
                 script.dockerExecute(script: script,
                                      dockerImage: 'ubuntu',
                                      dockerOptions: args ) {
-                    //script.sh('cts createTransportRequest')
+                    script.sh(command)
                     return script.sh(shArgs)
                 }
 
             } else {
-            def cmScript = getCMCommandLine(type, endpoint, script.username, script.password,
+
+                def cmScript = getCMCommandLine(type, endpoint, script.username, script.password,
                     command, args,
                     clientOpts)
 
-            Map shArgs = [:]
-            if(returnStdout)
-                shArgs.put('returnStdout', true)
-            else
-                shArgs.put('returnStatus', true)
+                Map shArgs = [:]
+                if(returnStdout)
+                    shArgs.put('returnStdout', true)
+                else
+                    shArgs.put('returnStatus', true)
 
-            shArgs.put('script', cmScript)
+                shArgs.put('script', cmScript)
 
-            // user and password are masked by withCredentials
-            script.echo """[INFO] Executing command line: "${cmScript}"."""
-            return script.sh(shArgs)
-        }
+                // user and password are masked by withCredentials
+                script.echo """[INFO] Executing command line: "${cmScript}"."""
+                return script.sh(shArgs)
+            }
         }
     }
 
