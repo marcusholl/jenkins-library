@@ -2,6 +2,7 @@ package com.sap.piper.cm
 
 import com.sap.piper.GitUtils
 
+import groovy.ui.SystemOutputInterceptor
 import hudson.AbortException
 
 
@@ -11,6 +12,7 @@ public class ChangeManagement implements Serializable {
     private GitUtils gitUtils
 
     public ChangeManagement(def script, GitUtils gitUtils = null) {
+        System.err<<"Inside cm constructor ${script}.\n"
         this.script = script
         this.gitUtils = gitUtils ?: new GitUtils()
     }
@@ -109,6 +111,8 @@ public class ChangeManagement implements Serializable {
         String credentialsId,
         String cmclientOpts = '') {
 
+        System.err << "Inside SOLMAN upload.\n"
+        
         def args = [
                 '-cID', changeId,
                 '-tID', transportRequestId,
@@ -180,6 +184,8 @@ public class ChangeManagement implements Serializable {
         def args,
         def cmclientOpts) {
 
+        System.err<<"Inside upload ${script}\n"
+
         if(! type in [BackendType.SOLMAN, BackendType.CTS, BackendType.RFC]) {
             throw new IllegalArgumentException("Invalid backend type: ${type}")
         }
@@ -191,6 +197,9 @@ public class ChangeManagement implements Serializable {
                                         args,
                                         false,
                                         cmclientOpts) as int
+                                    
+                                    System.err<< "Return code ${rc}\n"
+
 
         if(rc == 0) {
             return
@@ -201,11 +210,16 @@ public class ChangeManagement implements Serializable {
     }
 
     def executeWithCredentials(BackendType type, String endpoint, String credentialsId, String command, List<String> args, boolean returnStdout = false, String clientOpts = '') {
-        script.withCredentials([script.usernamePassword(
+
+      System.err<<"Inside execute WC\n"
+        
+       script.withCredentials([script.usernamePassword(
             credentialsId: credentialsId,
             passwordVariable: 'password',
             usernameVariable: 'username')]) {
 
+        System.err<<"Inside execute with credentials: ${script}\n"
+        
             if(type == BackendType.RFC) {
 
                 Map shArgs = [returnStatus: true,

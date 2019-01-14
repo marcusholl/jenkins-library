@@ -100,7 +100,7 @@ void call(parameters = [:]) {
                 switch(backendType) {
 
                     case BackendType.SOLMAN:
-                        System.err << "SOLMAN HERE"
+                        System.err << "SOLMAN HERE\n"
                         cm.uploadFileToTransportRequestSOLMAN(
                             configuration.changeDocumentId,
                             configuration.transportRequestId,
