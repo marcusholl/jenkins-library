@@ -151,16 +151,20 @@ public class ChangeManagement implements Serializable {
         String applicationId,
         String filePath,
         String endpoint,
-        String credentialsId) {
+        String credentialsId,
+        String developmentInstance,
+        String developmentClient,
+        String applicationDescription,
+        String abapPackage) {
 
         def args = [
-                "--env ABAP_DEVELOPMENT_INSTANCE=TODO_INSTANCE",
-                "--env ABAP_DEVELOPMENT_CLIENT=TODO_CLIENT",
+                "--env ABAP_DEVELOPMENT_INSTANCE=${developmentInstance}",
+                "--env ABAP_DEVELOPMENT_CLIENT=${developmentClient}",
                 "--env ABAP_APPLICATION_NAME=${applicationId}",
-                "--env ABAP_APPLICATION_DESC=TODO_APPLICATION_DESCRIPTION",
-                "--env ABAP_PACKAGE=TOOD_PACKAGE",
+                "--env ABAP_APPLICATION_DESC=${applicationDescription}",
+                "--env ABAP_PACKAGE=${abapPackage}",
                 "--env ZIP_FILE_URL=${filePath}",
-                "--env GIT_COMMIT=TODO_GIT_COMMIT"
+                "--env GIT_COMMIT=TODO_GIT_COMMIT" // under discussion, maybe better simply via description
             ]
 
             uploadFileToTransportRequest(

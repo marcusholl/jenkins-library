@@ -124,7 +124,11 @@ void call(parameters = [:]) {
                             configuration.applicationId,
                             configuration.filePath,
                             configuration.changeManagement.endpoint,
-                            configuration.changeManagement.credentialsId)
+                            configuration.changeManagement.credentialsId,
+                            'developmentInstance',
+                            'developmentClient',
+                            'applicationDescription',
+                            'abapPackage')
                         break
 
                 }
