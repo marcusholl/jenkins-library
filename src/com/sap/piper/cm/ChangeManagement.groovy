@@ -211,14 +211,14 @@ public class ChangeManagement implements Serializable {
 
     def executeWithCredentials(BackendType type, String endpoint, String credentialsId, String command, List<String> args, boolean returnStdout = false, String clientOpts = '') {
 
-      System.err<<"Inside execute WC\n"
-        
+      System.err<<"Inside execute WC ${script}\n"
+      def xscript = script
        script.withCredentials([script.usernamePassword(
             credentialsId: credentialsId,
             passwordVariable: 'password',
             usernameVariable: 'username')]) {
 
-        System.err<<"Inside execute with credentials: ${script}\n"
+        System.err<<"Inside execute with credentials: ${xscript}\n"
         
             if(type == BackendType.RFC) {
 
