@@ -2,7 +2,6 @@ package com.sap.piper.cm
 
 import com.sap.piper.GitUtils
 
-import groovy.ui.SystemOutputInterceptor
 import hudson.AbortException
 
 
