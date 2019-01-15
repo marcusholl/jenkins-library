@@ -201,7 +201,7 @@ public class ChangeManagement implements Serializable {
 
     def executeWithCredentials(BackendType type, String endpoint, String credentialsId, String command, List<String> args, boolean returnStdout = false, String clientOpts = '') {
 
-      def xscript = script
+       def script = this.script
        script.withCredentials([script.usernamePassword(
             credentialsId: credentialsId,
             passwordVariable: 'password',
@@ -215,16 +215,16 @@ public class ChangeManagement implements Serializable {
                     "--env ABAP_DEVELOPMENT_SERVER=${endpoint}",
                     "--env ABAP_DEVELOPMENT_USER=${script.username}",
                     "--env ABAP_DEVELOPMENT_PASSWORD=${script.password}"])
-                xscript.dockerExecute(script: script,
+                script.dockerExecute(script: script,
                                      dockerImage: 'ubuntu',
                                      dockerOptions: args ) {
-                    return xscript.sh(command)
+                    return script.sh(command)
 
                 }
 
             } else {
 
-                def cmScript = getCMCommandLine(type, endpoint, xscript.username, xscript.password,
+                def cmScript = getCMCommandLine(type, endpoint, script.username, script.password,
                     command, args,
                     clientOpts)
 
@@ -237,8 +237,8 @@ public class ChangeManagement implements Serializable {
                 shArgs.put('script', cmScript)
 
                 // user and password are masked by withCredentials
-                xscript.echo """[INFO] Executing command line: "${cmScript}"."""
-                return xscript.sh(shArgs)
+                script.echo """[INFO] Executing command line: "${cmScript}"."""
+                return script.sh(shArgs)
             }
         }
     }
