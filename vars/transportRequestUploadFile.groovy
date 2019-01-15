@@ -126,7 +126,7 @@ void call(parameters = [:]) {
                             configuration.changeManagement.endpoint,
                             configuration.changeManagement.credentialsId)
                         break
-                   
+
                 }
 
             } catch(ChangeManagementException ex) {
