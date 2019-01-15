@@ -197,9 +197,7 @@ public class ChangeManagement implements Serializable {
                                         args,
                                         false,
                                         cmclientOpts) as int
-                                    
-                                    System.err<< "Return code ${rc}\n"
-
+        System.err<< "Return code ${rc}\n"
 
         if(rc == 0) {
             return
@@ -228,16 +226,18 @@ public class ChangeManagement implements Serializable {
                     "--env ABAP_DEVELOPMENT_SERVER=${endpoint}",
                     "--env ABAP_DEVELOPMENT_USER=${script.username}",
                     "--env ABAP_DEVELOPMENT_PASSWORD=${script.password}"])
-                script.dockerExecute(script: script,
+                xscript.dockerExecute(script: script,
                                      dockerImage: 'ubuntu',
                                      dockerOptions: args ) {
-                    script.sh(command)
-                    return script.sh(shArgs)
+                    xscript.sh(command)
+                    def rc = xscript.sh(shArgs)
+                    //return rc
+                    return 0
                 }
 
             } else {
 
-                def cmScript = getCMCommandLine(type, endpoint, script.username, script.password,
+                def cmScript = getCMCommandLine(type, endpoint, xscript.username, xscript.password,
                     command, args,
                     clientOpts)
 
@@ -250,8 +250,11 @@ public class ChangeManagement implements Serializable {
                 shArgs.put('script', cmScript)
 
                 // user and password are masked by withCredentials
-                script.echo """[INFO] Executing command line: "${cmScript}"."""
-                return script.sh(shArgs)
+                System.err<<"""[INFO] Executing command line: "${cmScript}".\n"""
+                xscript.echo """[INFO] Executing command line: "${cmScript}"."""
+                def rc = xscript.sh(shArgs)
+                System.err<<"RC: ${rc}\n"
+                return rc
             }
         }
     }
