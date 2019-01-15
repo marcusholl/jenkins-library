@@ -219,9 +219,7 @@ public class ChangeManagement implements Serializable {
                                      dockerImage: 'ubuntu',
                                      dockerOptions: args ) {
                     xscript.sh(command)
-                    def rc = xscript.sh(shArgs)
-                    //return rc
-                    return 0
+                    return xscript.sh(shArgs)
                 }
 
             } else {
@@ -239,11 +237,8 @@ public class ChangeManagement implements Serializable {
                 shArgs.put('script', cmScript)
 
                 // user and password are masked by withCredentials
-                System.err<<"""[INFO] Executing command line: "${cmScript}".\n"""
                 xscript.echo """[INFO] Executing command line: "${cmScript}"."""
-                def rc = xscript.sh(shArgs)
-                System.err<<"RC: ${rc}\n"
-                return rc
+                return xscript.sh(shArgs)
             }
         }
     }
