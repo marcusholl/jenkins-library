@@ -192,6 +192,7 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
 
         JenkinsUtils.getMetaClass().static.isPluginActive = { true }
 
+        // TODO: split one test for the step and the other test for the cm toolset.
         helper.registerAllowedMethod('dockerExecute', [Map, Closure], { m, c -> c() } )
         helper.registerAllowedMethod('sh', [String], {s -> return (s == 'cts' ? 0 : 1)})
 

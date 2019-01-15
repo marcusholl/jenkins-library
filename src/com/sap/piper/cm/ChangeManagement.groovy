@@ -218,8 +218,8 @@ public class ChangeManagement implements Serializable {
                 xscript.dockerExecute(script: script,
                                      dockerImage: 'ubuntu',
                                      dockerOptions: args ) {
-                    xscript.sh(command)
-                    return xscript.sh(shArgs)
+                    return xscript.sh(command)
+
                 }
 
             } else {
