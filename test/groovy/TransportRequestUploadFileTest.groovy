@@ -199,7 +199,12 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
         jsr.step.transportRequestUploadFile(script: nullScript,
                  filePath: 'xyz.jar',
                  transportRequestId: '123456',
-                 changeManagement: [type: 'RFC'])
+                 changeManagement: [type: 'RFC'],
+                 developmentInstance:'001',
+                 developmentClient: '002',
+                 applicationId: '42',
+                 applicationDescription: 'Lorem ipsum',
+                 abapPackage: 'APCK',)
     }
 
 
