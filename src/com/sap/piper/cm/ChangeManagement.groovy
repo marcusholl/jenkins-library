@@ -220,7 +220,7 @@ public class ChangeManagement implements Serializable {
                     "--env ABAP_DEVELOPMENT_USER=${script.username}",
                     "--env ABAP_DEVELOPMENT_PASSWORD=${script.password}"])
                 script.dockerExecute(script: script,
-                                     dockerImage: 'ubuntu',
+                                     dockerImage: 'rfc',
                                      dockerOptions: args ) {
                     return script.sh(command)
 
