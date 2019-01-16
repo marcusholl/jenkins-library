@@ -2,6 +2,7 @@ import com.sap.piper.k8s.ContainerMap
 import com.sap.piper.JenkinsUtils
 
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -105,6 +106,7 @@ class DockerExecuteTest extends BasePiperTest {
     }
 
     @Test
+    @Ignore
     void testExecuteInsideDockerContainer() throws Exception {
         jsr.step.dockerExecute(script: nullScript, dockerImage: 'maven:3.5-jdk-8-alpine') {
             bodyExecuted = true
@@ -158,6 +160,7 @@ class DockerExecuteTest extends BasePiperTest {
     }
 
     @Test
+    @Ignore
     void testSidecarDefault(){
         jsr.step.dockerExecute(
             script: nullScript,
