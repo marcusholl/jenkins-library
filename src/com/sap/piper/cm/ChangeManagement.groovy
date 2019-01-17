@@ -164,7 +164,7 @@ public class ChangeManagement implements Serializable {
                 "--env ABAP_APPLICATION_DESC=${applicationDescription}",
                 "--env ABAP_PACKAGE=${abapPackage}",
                 "--env ZIP_FILE_URL=${filePath}",
-                "--env GIT_COMMIT=TODO_GIT_COMMIT" // under discussion, maybe better simply via description
+                "--env TRANSPORT_DESCRIPTION=TODO" // under discussion, maybe better simply via description
             ]
 
             uploadFileToTransportRequest(
