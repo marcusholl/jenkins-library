@@ -214,17 +214,23 @@ public class ChangeManagement implements Serializable {
             if(type == BackendType.RFC) {
 
                 Map shArgs = [returnStatus: true,
-                              'script': 'env']
+                              'script': command]
                 args = args.plus([
                     "--env ABAP_DEVELOPMENT_SERVER=${endpoint}",
                     "--env ABAP_DEVELOPMENT_USER=${script.username}",
                     "--env ABAP_DEVELOPMENT_PASSWORD=${script.password}"])
+
+                def rc = 1
+
                 script.dockerExecute(script: script,
                                      dockerImage: 'rfc',
                                      dockerOptions: args ) {
-                    return script.sh(command)
+
+                    rc = script.sh(shArgs)
 
                 }
+
+                return rc
 
             } else {
 
