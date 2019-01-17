@@ -169,6 +169,8 @@ public class ChangeManagement implements Serializable {
 
             uploadFileToTransportRequest(
                 BackendType.RFC,
+                'rfc',
+                [],
                 endpoint,
                 credentialsId,
                 "cts uploadToABAP:${transportRequestId}",
@@ -178,10 +180,12 @@ public class ChangeManagement implements Serializable {
 
     private void uploadFileToTransportRequest(
         BackendType type,
+        def dockerImage,
+        List dockerOptions,
         def endpoint,
         def credentialsId,
         def command,
-        def args,
+        List args,
         def cmclientOpts) {
 
         if(! type in [BackendType.SOLMAN, BackendType.CTS, BackendType.RFC]) {
@@ -189,6 +193,8 @@ public class ChangeManagement implements Serializable {
         }
 
         int rc = executeWithCredentials(type,
+                                        dockerImage,
+                                        dockerOptions,
                                         endpoint,
                                         credentialsId,
                                         command,
@@ -203,7 +209,15 @@ public class ChangeManagement implements Serializable {
 
     }
 
-    def executeWithCredentials(BackendType type, String endpoint, String credentialsId, String command, List<String> args, boolean returnStdout = false, String clientOpts = '') {
+    def executeWithCredentials(BackendType type,
+                               String dockerImage,
+                               List dockerOptions,
+                               String endpoint,
+                               String credentialsId,
+                               String command,
+                               List args,
+                               boolean returnStdout = false,
+                               String clientOpts = '') {
 
        def script = this.script
        script.withCredentials([script.usernamePassword(
@@ -220,11 +234,12 @@ public class ChangeManagement implements Serializable {
                     "--env ABAP_DEVELOPMENT_USER=${script.username}",
                     "--env ABAP_DEVELOPMENT_PASSWORD=${script.password}"])
 
+                dockerOptions = dockerOptions.plus(args)
                 def rc = 1
 
                 script.dockerExecute(script: script,
-                                     dockerImage: 'rfc',
-                                     dockerOptions: args ) {
+                                     dockerImage: dockerImage,
+                                     dockerOptions: dockerOptions ) {
 
                     rc = script.sh(shArgs)
 
