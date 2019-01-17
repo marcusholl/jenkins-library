@@ -147,6 +147,8 @@ public class ChangeManagement implements Serializable {
     }
 
     void uploadFileToTransportRequestRFC(
+        String dockerImage,
+        List dockerOptions,
         String transportRequestId,
         String applicationId,
         String filePath,
@@ -169,8 +171,8 @@ public class ChangeManagement implements Serializable {
 
             uploadFileToTransportRequest(
                 BackendType.RFC,
-                'rfc',
-                [],
+                dockerImage,
+                dockerOptions,
                 endpoint,
                 credentialsId,
                 "cts uploadToABAP:${transportRequestId}",

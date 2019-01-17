@@ -129,6 +129,8 @@ void call(parameters = [:]) {
                         break
                     case BackendType.RFC:
                         cm.uploadFileToTransportRequestRFC(
+                            'rfc',
+                            [],
                             configuration.transportRequestId,
                             configuration.applicationId,
                             configuration.filePath,
