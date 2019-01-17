@@ -171,7 +171,7 @@ public class ChangeManagement implements Serializable {
                 BackendType.RFC,
                 endpoint,
                 credentialsId,
-                'cts',
+                'cts createTransportRequest',
                 args,
                 null)
     }
