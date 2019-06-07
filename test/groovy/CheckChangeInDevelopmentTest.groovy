@@ -1,4 +1,5 @@
 import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
@@ -34,6 +35,11 @@ class CheckChangeInDevelopmentTest extends BasePiperTest {
         .around(loggingRule)
         .around(new JenkinsCredentialsRule(this)
         .withCredentials('CM', 'anonymous', '********'))
+
+    @Before
+    void init() {
+        DefaultValueCache.createInstance(loadDefaultPipelineEnvironment(), [:])
+    }
 
     @After
     public void tearDown() {
