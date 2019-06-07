@@ -4,6 +4,7 @@ import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.junit.rules.RuleChain
 
+import com.sap.piper.DefaultValueCache
 import com.sap.piper.cm.BackendType
 import com.sap.piper.cm.ChangeManagement
 import com.sap.piper.cm.ChangeManagementException
@@ -166,7 +167,7 @@ class CheckChangeInDevelopmentTest extends BasePiperTest {
     @Test
     public void stageConfigIsNotConsideredWithParamKeysTest() {
 
-        nullScript.commonPipelineEnvironment.configuration = [stages:[foo:[changeDocumentId:'12345']]]
+        DefaultValueCache.createInstance(loadDefaultPipelineEnvironment(), [stages:[foo:[changeDocumentId:'12345']]])
         ChangeManagement cm = getChangeManagementUtils(true, '')
 
         thrown.expect(IllegalArgumentException)
