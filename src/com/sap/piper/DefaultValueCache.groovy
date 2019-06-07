@@ -19,7 +19,9 @@ class DefaultValueCache implements Serializable {
     }
 
     @NonCPS
-    static getInstance(){
+    static synchronized getInstance(){
+        if(instance == null)
+            instance = createInstance([:], [:])
         return instance
     }
 
