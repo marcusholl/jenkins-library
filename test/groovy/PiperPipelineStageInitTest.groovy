@@ -5,6 +5,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.junit.rules.RuleChain
+
+import com.sap.piper.DefaultValueCache
+
 import util.BasePiperTest
 import util.JenkinsFileExistsRule
 import util.JenkinsLoggingRule
@@ -33,6 +36,9 @@ class PiperPipelineStageInitTest extends BasePiperTest {
 
     @Before
     void init()  {
+
+        DefaultValueCache.createInstance(loadDefaultPipelineEnvironment(), [:])
+
         binding.variables.env.STAGE_NAME = 'Init'
         binding.setVariable('scm', {})
 
@@ -107,7 +113,7 @@ class PiperPipelineStageInitTest extends BasePiperTest {
 
     @Test
     void testInitWithSlackNotification() {
-        nullScript.commonPipelineEnvironment.configuration = [runStep: [Init: [slackSendNotification: true]]]
+        DefaultValueCache.getInstance().getProjectConfig().runStep = [Init: [slackSendNotification: true]]
 
         jsr.step.piperPipelineStageInit(script: nullScript, juStabUtils: utils, buildTool: 'maven')
 

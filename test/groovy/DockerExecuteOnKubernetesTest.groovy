@@ -1,3 +1,4 @@
+import com.sap.piper.DefaultValueCache
 import com.sap.piper.JenkinsUtils
 
 import org.junit.Before
@@ -134,7 +135,9 @@ class DockerExecuteOnKubernetesTest extends BasePiperTest {
 
     @Test
     void testDockerExecuteOnKubernetesWithCustomJnlpWithContainerMap() throws Exception {
-        nullScript.commonPipelineEnvironment.configuration = ['general': ['jenkinsKubernetes': ['jnlpAgent': 'myJnalpAgent']]]
+
+        DefaultValueCache.createInstance(loadDefaultPipelineEnvironment(),
+            ['general': ['jenkinsKubernetes': ['jnlpAgent': 'myJnalpAgent']]])
         stepRule.step.dockerExecuteOnKubernetes(script: nullScript,
             containerMap: ['maven:3.5-jdk-8-alpine': 'mavenexecute']) {
             container(name: 'mavenexecute') {
@@ -151,7 +154,8 @@ class DockerExecuteOnKubernetesTest extends BasePiperTest {
 
     @Test
     void testDockerExecuteOnKubernetesWithCustomJnlpWithDockerImage() throws Exception {
-        nullScript.commonPipelineEnvironment.configuration = ['general': ['jenkinsKubernetes': ['jnlpAgent': 'myJnalpAgent']]]
+        DefaultValueCache.createInstance(loadDefaultPipelineEnvironment(),
+            ['general': ['jenkinsKubernetes': ['jnlpAgent': 'myJnalpAgent']]])
         stepRule.step.dockerExecuteOnKubernetes(
             script: nullScript,
             juStabUtils: utils,
@@ -344,7 +348,8 @@ class DockerExecuteOnKubernetesTest extends BasePiperTest {
     @Test
     void testDockerExecuteOnKubernetesWithCustomNamespace() {
         def expectedNamespace = "sandbox"
-        nullScript.commonPipelineEnvironment.configuration = [general: [jenkinsKubernetes: [namespace: expectedNamespace]]]
+        DefaultValueCache.createInstance(loadDefaultPipelineEnvironment(),
+            [general: [jenkinsKubernetes: [namespace: expectedNamespace]]])
 
         stepRule.step.dockerExecuteOnKubernetes(
                 script: nullScript,
@@ -358,8 +363,9 @@ class DockerExecuteOnKubernetesTest extends BasePiperTest {
     @Test
     void testDockerExecuteOnKubernetesWithSecurityContext() {
         def expectedSecurityContext = [ runAsUser: 1000, fsGroup: 1000 ]
-        nullScript.commonPipelineEnvironment.configuration = [general: [jenkinsKubernetes: [
-                    securityContext: expectedSecurityContext]]]
+        DefaultValueCache.createInstance(loadDefaultPipelineEnvironment(),
+            [general: [jenkinsKubernetes: [
+                    securityContext: expectedSecurityContext]]])
 
         stepRule.step.dockerExecuteOnKubernetes(
                 script: nullScript,
