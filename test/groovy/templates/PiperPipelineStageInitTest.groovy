@@ -5,6 +5,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.junit.rules.RuleChain
+
+import com.sap.piper.DefaultValueCache
+
 import util.*
 
 import static org.hamcrest.Matchers.hasItems
@@ -34,7 +37,7 @@ class PiperPipelineStageInitTest extends BasePiperTest {
 
         binding.variables.env.STAGE_NAME = 'Init'
 
-        nullScript.commonPipelineEnvironment.configuration = [:]
+        DefaultValueCache.createInstance(loadDefaultPipelineEnvironment(), [:])
 
         helper.registerAllowedMethod("findFiles", [Map.class], { map ->
             switch (map.glob) {
