@@ -20,13 +20,12 @@ class DefaultValueCache implements Serializable {
 
     @NonCPS
     static synchronized getInstance(){
-        if(instance == null)
-            instance = createInstance([:], [:])
         return instance
     }
 
     static createInstance(Map defaultValues, Map projectConfig){
         instance = new DefaultValueCache(defaultValues, projectConfig)
+        return instance
     }
 
     @NonCPS
@@ -44,7 +43,9 @@ class DefaultValueCache implements Serializable {
     }
 
     static void prepare(Script steps, Map parameters = [:]) {
+
         if(parameters == null) parameters = [:]
+
         if(!DefaultValueCache.getInstance() || parameters.customDefaults) {
 
             def defaultValues = [:]
