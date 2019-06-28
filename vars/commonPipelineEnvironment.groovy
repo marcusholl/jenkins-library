@@ -38,7 +38,7 @@ class commonPipelineEnvironment implements Serializable {
     }
 
     def getConfiguration() {
-        DefaultValueCache.getProjectConfig()
+        DefaultValueCache.getInstance().getProjectConfig()
     }
 
     void setValue(String property, value) {
