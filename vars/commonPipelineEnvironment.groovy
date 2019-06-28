@@ -34,7 +34,7 @@ class commonPipelineEnvironment implements Serializable {
      * Should only be used by tests
      */
     void setConfiguration(Map configuration) {
-        DefaultValueCache.createInstance(DefaultValueCache.getInstance().getDefaultValues(), configuration)
+        DefaultValueCache.createInstance(DefaultValueCache.getInstance()?.getDefaultValues() ?: [:], configuration)
     }
 
     def getConfiguration() {
