@@ -289,6 +289,10 @@ def executeXSCommand(Map dockerOptions, String command, boolean returnStdout = f
 
         // in case there are credentials contained in the commands we assume
         // the call is properly wrapped by withCredentials(./.)
+
+
+        sh 'la -la'
+
         echo "Executing: '${command}'."
 
         String script = '#!/bin/bash' + '\n' + command
