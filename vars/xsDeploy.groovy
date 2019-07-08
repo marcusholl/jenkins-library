@@ -195,7 +195,7 @@ void login(Script script, Map config) {
     )]) {
 
         def returnCode = executeXSCommand([script: script].plus(config.docker),
-            XS_COMMAND + " login --context-file='${config.xsSessionFile}'  -a ${config.apiUrl} -u ${username} -p ${BashUtils.quoteAndEscape(password)} -o ${config.org} -s ${config.space} ${config.loginOpts}")
+            XS_COMMAND + " login --context-file=${config.xsSessionFile}  -a ${config.apiUrl} -u ${username} -p ${BashUtils.quoteAndEscape(password)} -o ${config.org} -s ${config.space} ${config.loginOpts}")
 
         if(returnCode != 0)
             error "xs login failed."
@@ -213,7 +213,7 @@ void deploy(Script script, DeployMode mode, Map config, def failures) {
     try {
         lock(getLockIdentifier(config)) {
             deploymentLog = executeXSCommand([script: script].plus(config.docker),
-                XS_COMMAND + " ${mode.toString()} '${config.mtaPath}' --context-file='${config.xsSessionFile}' -f ${config.deployOpts}", true)
+                XS_COMMAND + " ${mode.toString()} '${config.mtaPath}' --context-file=${config.xsSessionFile} -f ${config.deployOpts}", true)
         }
 
         echo "Deploy log: ${deploymentLog}"
@@ -255,7 +255,7 @@ void complete(Script script, DeployMode mode, Action action, Map config, def fai
 
     lock(getLockIdentifier(config)) {
         returnCode = executeXSCommand([script: script].plus(config.docker),
-            XS_COMMAND + " ${mode.toString()} --context-file='${config.xsSessionFile}' -i ${config.deploymentId} -a ${action.toString()}")
+            XS_COMMAND + " ${mode.toString()} --context-file=${config.xsSessionFile} -i ${config.deploymentId} -a ${action.toString()}")
     }
 
     if(returnCode != 0) {
@@ -267,7 +267,7 @@ void complete(Script script, DeployMode mode, Action action, Map config, def fai
 void logout(Script script, Map config, def failures) {
 
     def returnCode = executeXSCommand([script: script].plus(config.docker),
-        XS_COMMAND + " logout --context-file='${config.xsSessionFile}' ")
+        XS_COMMAND + " logout --context-file=${config.xsSessionFile} ")
 
     if(returnCode != 0) {
         failures << 'xs logout'
