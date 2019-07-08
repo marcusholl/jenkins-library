@@ -273,7 +273,7 @@ void logout(Script script, Map config, def failures) {
         failures << 'xs logout'
     }
 
-    sh "XSCONFIG=${config.xsSessionFile}; [ -f '\${XSCONFIG}' ] && rm '\${XSCONFIG}'"
+    //sh "XSCONFIG=${config.xsSessionFile}; [ -f '\${XSCONFIG}' ] && rm '\${XSCONFIG}'"
 
 }
 
