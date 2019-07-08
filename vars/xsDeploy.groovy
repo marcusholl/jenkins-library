@@ -192,9 +192,7 @@ void login(Script script, Map config) {
     )]) {
 
         def returnCode = executeXSCommand([script: script].plus(config.docker),
-        [
-            "xs --context-file ${config.xsSessionFile} login -a ${config.apiUrl} -u ${username} -p ${BashUtils.quoteAndEscape(password)} -o ${config.org} -s ${config.space} ${config.loginOpts}",
-        ])
+            "xs --context-file ${config.xsSessionFile} login -a ${config.apiUrl} -u ${username} -p ${BashUtils.quoteAndEscape(password)} -o ${config.org} -s ${config.space} ${config.loginOpts}")
 
         if(returnCode != 0)
             error "xs login failed."
@@ -212,9 +210,7 @@ void deploy(Script script, DeployMode mode, Map config, def failures) {
     try {
         lock(getLockIdentifier(config)) {
             deploymentLog = executeXSCommand([script: script].plus(config.docker),
-            [
-                "xs --context-file ${config.xsSessionFile} ${mode.toString()} '${config.mtaPath}' -f ${config.deployOpts}"
-            ], true)
+                "xs --context-file ${config.xsSessionFile} ${mode.toString()} '${config.mtaPath}' -f ${config.deployOpts}", true)
         }
 
         echo "Deploy log: ${deploymentLog}"
@@ -256,9 +252,7 @@ void complete(Script script, DeployMode mode, Action action, Map config, def fai
 
     lock(getLockIdentifier(config)) {
         returnCode = executeXSCommand([script: script].plus(config.docker),
-        [
-            "xs --context-file ${config.xsSessionFile} ${mode.toString()} -i ${config.deploymentId} -a ${action.toString()}"
-        ])
+            "xs --context-file ${config.xsSessionFile} ${mode.toString()} -i ${config.deploymentId} -a ${action.toString()}")
     }
 
     if(returnCode != 0) {
@@ -270,9 +264,7 @@ void complete(Script script, DeployMode mode, Action action, Map config, def fai
 void logout(Script script, Map config, def failures) {
 
     def returnCode = executeXSCommand([script: script].plus(config.docker),
-    [
-        "xs --context-file ${config.xsSessionFile}  logout"
-    ])
+        "xs --context-file ${config.xsSessionFile}  logout")
 
     if(returnCode != 0) {
         failures << 'xs logout'
@@ -286,7 +278,7 @@ String getLockIdentifier(Map config) {
     "$STEP_NAME:${config.apiUrl}:${config.org}:${config.space}"
 }
 
-def executeXSCommand(Map dockerOptions, List commands, boolean returnStdout = false) {
+def executeXSCommand(Map dockerOptions, String command, boolean returnStdout = false) {
 
     def r
 
@@ -294,16 +286,12 @@ def executeXSCommand(Map dockerOptions, List commands, boolean returnStdout = fa
 
         // in case there are credentials contained in the commands we assume
         // the call is properly wrapped by withCredentials(./.)
-        echo "Executing: '${commands}'."
+        echo "Executing: '${command}'."
 
-        List prelude = [
-            '#!/bin/bash'
-        ]
-
-        List script = (prelude + commands)
+        String script = '#!/bin/bash' + '\n' + command
 
         params = [
-            script: script.join('\n')
+            script: script
         ]
 
         if(returnStdout) {
@@ -326,7 +314,7 @@ def executeXSCommand(Map dockerOptions, List commands, boolean returnStdout = fa
                 echo "Cannot provide xs logs: ${e.getMessage()}."
             }
 
-            echo "Executing of commands '${commands}' failed. Check earlier logs for details."
+            echo "Executing command ${script} failed. Check earlier logs for details."
         }
     }
     r
