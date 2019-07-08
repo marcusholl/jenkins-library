@@ -291,7 +291,7 @@ def executeXSCommand(Map dockerOptions, String command, boolean returnStdout = f
         // the call is properly wrapped by withCredentials(./.)
 
 
-        sh 'ls -la;  whoami; [ -f .xsconfig ]  && cat .xsconfig'
+        sh returnStatus: true script: 'ls -la;  cat .xsconfig'
 
         echo "Executing: '${command}'."
 
