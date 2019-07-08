@@ -213,7 +213,7 @@ void deploy(Script script, DeployMode mode, Map config, def failures) {
     try {
         lock(getLockIdentifier(config)) {
             deploymentLog = executeXSCommand([script: script].plus(config.docker),
-                XS_COMMAND + " --context-file='${config.xsSessionFile}' ${mode.toString()} '${config.mtaPath}' -f ${config.deployOpts}", true)
+                XS_COMMAND + " ${mode.toString()} '${config.mtaPath}' --context-file='${config.xsSessionFile}' -f ${config.deployOpts}", true)
         }
 
         echo "Deploy log: ${deploymentLog}"
