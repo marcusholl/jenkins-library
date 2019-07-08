@@ -193,10 +193,7 @@ void login(Script script, Map config) {
 
         def returnCode = executeXSCommand([script: script].plus(config.docker),
         [
-            "xs login -a ${config.apiUrl} -u ${username} -p ${BashUtils.quoteAndEscape(password)} -o ${config.org} -s ${config.space} ${config.loginOpts}",
-            'RC=$?',
-            "[ \$RC == 0 ]  && cp \"\${HOME}/${config.xsSessionFile}\" .",
-            'exit $RC'
+            "xs --context-file ${config.xsSessionFile} login -a ${config.apiUrl} -u ${username} -p ${BashUtils.quoteAndEscape(password)} -o ${config.org} -s ${config.space} ${config.loginOpts}",
         ])
 
         if(returnCode != 0)
@@ -216,8 +213,7 @@ void deploy(Script script, DeployMode mode, Map config, def failures) {
         lock(getLockIdentifier(config)) {
             deploymentLog = executeXSCommand([script: script].plus(config.docker),
             [
-                "cp ${config.xsSessionFile} \${HOME}",
-                "xs ${mode.toString()} '${config.mtaPath}' -f ${config.deployOpts}"
+                "xs --context-file ${config.xsSessionFile} ${mode.toString()} '${config.mtaPath}' -f ${config.deployOpts}"
             ], true)
         }
 
@@ -261,8 +257,7 @@ void complete(Script script, DeployMode mode, Action action, Map config, def fai
     lock(getLockIdentifier(config)) {
         returnCode = executeXSCommand([script: script].plus(config.docker),
         [
-            "cp ${config.xsSessionFile} \${HOME}",
-            "xs ${mode.toString()} -i ${config.deploymentId} -a ${action.toString()}"
+            "xs --context-file ${config.xsSessionFile} ${mode.toString()} -i ${config.deploymentId} -a ${action.toString()}"
         ])
     }
 
@@ -276,8 +271,7 @@ void logout(Script script, Map config, def failures) {
 
     def returnCode = executeXSCommand([script: script].plus(config.docker),
     [
-        "cp ${config.xsSessionFile} \${HOME}",
-        'xs logout'
+        "xs --context-file ${config.xsSessionFile}  logout"
     ])
 
     if(returnCode != 0) {
@@ -285,6 +279,7 @@ void logout(Script script, Map config, def failures) {
     }
 
     sh "XSCONFIG=${config.xsSessionFile}; [ -f \${XSCONFIG} ] && rm \${XSCONFIG}"
+
 }
 
 String getLockIdentifier(Map config) {

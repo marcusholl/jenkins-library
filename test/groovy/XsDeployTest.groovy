@@ -77,7 +77,7 @@ class XsDeployTest extends BasePiperTest {
         thrown.expect(AbortException)
         thrown.expectMessage('xs login failed')
 
-        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, '#!/bin/bash xs login .*', 1)
+        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, '#!/bin/bash xs --context-file \\.xsconfig login .*', 1)
 
         try {
             stepRule.step.xsDeploy(
@@ -97,7 +97,7 @@ class XsDeployTest extends BasePiperTest {
                     hasSize(2),
                     new CommandLineMatcher()
                         .hasProlog("#!/bin/bash")
-                        .hasSnippet('xs login'),
+                        .hasSnippet('xs --context-file .xsconfig login'),
                     new CommandLineMatcher()
                         .hasProlog('LOG_FOLDER')
                         .hasSnippet('cat \\$\\{LOG_FOLDER\\}/\\*')
@@ -113,7 +113,7 @@ class XsDeployTest extends BasePiperTest {
         thrown.expect(AbortException)
         thrown.expectMessage('Failed command(s): [xs deploy]. Check earlier log for details.')
 
-        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, '#!/bin/bash.*xs deploy .*', {throw new AbortException()})
+        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, '#!/bin/bash.*xs --context-file \\.xsconfig deploy.*', {throw new AbortException()})
 
         try {
             stepRule.step.xsDeploy(
@@ -125,19 +125,18 @@ class XsDeployTest extends BasePiperTest {
                 mtaPath: 'myApp.mta'
             )
         } catch(AbortException e ) {
-
             assertThat(shellRule.shell,
                 allOf(
                     hasSize(4),
                     new CommandLineMatcher()
                         .hasProlog("#!/bin/bash")
-                        .hasSnippet('xs login'),
+                        .hasSnippet('xs --context-file .xsconfig login'),
                     new CommandLineMatcher()
                         .hasProlog("#!/bin/bash")
-                        .hasSnippet('xs deploy'),
+                        .hasSnippet('xs --context-file .xsconfig deploy'),
                     new CommandLineMatcher()
                         .hasProlog('#!/bin/bash')
-                        .hasSnippet('xs logout'), // logout must be present in case deployment failed.
+                        .hasSnippet('xs --context-file .xsconfig logout'), // logout must be present in case deployment failed.
                     new CommandLineMatcher()
                         .hasProlog('')
                         .hasSnippet('rm \\$\\{XSCONFIG\\}') // remove the session file after logout
@@ -201,21 +200,21 @@ class XsDeployTest extends BasePiperTest {
         assertThat(shellRule.shell,
             allOf(
                 new CommandLineMatcher()
-                    .hasProlog("#!/bin/bash xs login")
-                    .hasSnippet('xs login')
+                    .hasProlog("#!/bin/bash")
+                    .hasSnippet('xs --context-file .xsconfig login')
                     .hasOption('a', 'https://example.org/xs')
                     .hasOption('u', 'cred_xs')
                     .hasSingleQuotedOption('p', 'topSecret')
                     .hasOption('o', 'myOrg')
                     .hasOption('s', 'mySpace'),
-                new CommandLineMatcher()
+               new CommandLineMatcher()
                     .hasProlog("#!/bin/bash")
-                    .hasSnippet('xs deploy')
+                    .hasSnippet('xs --context-file .xsconfig deploy')
                     .hasOption('t', '60')
                     .hasArgument('\'myApp.mta\''),
                 new CommandLineMatcher()
                     .hasProlog("#!/bin/bash")
-                    .hasSnippet('xs logout')
+                    .hasSnippet('xs --context-file .xsconfig logout')
             )
         )
 
@@ -269,7 +268,7 @@ class XsDeployTest extends BasePiperTest {
 
         logRule.expect('Something went wrong')
 
-        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, '#!/bin/bash.*xs bg-deploy .*',
+        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, '#!/bin/bash.*xs --context-file \\.xsconfig bg-deploy .*',
             { throw new AbortException('Something went wrong.') })
 
         try {
@@ -288,7 +287,7 @@ class XsDeployTest extends BasePiperTest {
             assertThat(shellRule.shell,
                 new CommandLineMatcher()
                     .hasProlog('#!/bin/bash')
-                    .hasSnippet('xs logout')
+                    .hasSnippet('xs --context-file .xsconfig logout')
             )
 
             throw e
@@ -298,7 +297,7 @@ class XsDeployTest extends BasePiperTest {
     @Test
     public void testBlueGreenDeployStraighForward() {
 
-        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, '#!/bin/bash.*xs bg-deploy .*',
+        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, '#!/bin/bash.*xs --context-file \\.xsconfig bg-deploy .*',
             ((CharSequence)'''  |
                                 |
                                 |Uploading 1 files:
@@ -341,7 +340,7 @@ class XsDeployTest extends BasePiperTest {
         assertThat(shellRule.shell,
             allOf(
                 new CommandLineMatcher()
-                    .hasProlog("#!/bin/bash xs login")
+                    .hasProlog("#!/bin/bash xs --context-file .xsconfig login")
                     .hasOption('a', 'https://example.org/xs')
                     .hasOption('u', 'cred_xs')
                     .hasSingleQuotedOption('p', 'topSecret')
@@ -413,7 +412,7 @@ class XsDeployTest extends BasePiperTest {
         thrown.expect(AbortException)
         thrown.expectMessage('Failed command(s): [xs bg-deploy -a resume].')
 
-        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, 'xs bg-deploy -i .*', 1)
+        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, 'xs --context-file \\.xsconfig bg-deploy -i .*', 1)
 
         nullScript.commonPipelineEnvironment.xsDeploymentId = '1234'
 
@@ -428,12 +427,11 @@ class XsDeployTest extends BasePiperTest {
                 action: 'RESUME'
             )
         } catch(AbortException e) {
-
             // logout must happen also in case of a failed deployment
             assertThat(shellRule.shell,
                 new CommandLineMatcher()
                     .hasProlog('')
-                    .hasSnippet('xs logout'))
+                    .hasSnippet('xs --context-file .xsconfig logout'))
             throw e
         }
     }
@@ -441,7 +439,7 @@ class XsDeployTest extends BasePiperTest {
     @Test
     public void testBlueGreenDeployResume() {
 
-        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, 'xs bg-deploy -i .*', 0)
+        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, 'xs --context-file \\.xsconfig bg-deploy -i .*', 0)
 
         nullScript.commonPipelineEnvironment.xsDeploymentId = '1234'
 
@@ -461,12 +459,12 @@ class XsDeployTest extends BasePiperTest {
                 hasSize(3),
                 new CommandLineMatcher()
                     .hasProlog('#!/bin/bash')
-                    .hasSnippet('xs bg-deploy')
+                    .hasSnippet('xs --context-file .xsconfig bg-deploy')
                     .hasOption('i', '1234')
                     .hasOption('a', 'resume'),
                 new CommandLineMatcher()
                     .hasProlog("#!/bin/bash")
-                    .hasSnippet('xs logout'),
+                    .hasSnippet('xs --context-file .xsconfig logout'),
                 new CommandLineMatcher()
                     .hasProlog('')
                     .hasSnippet('rm \\$\\{XSCONFIG\\}') // delete the session file after logout
