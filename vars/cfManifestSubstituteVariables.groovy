@@ -120,7 +120,7 @@ void call(Map<String, String> arguments) {
     }
 }
 
-/**
+/*
  * Removes the given file, if it exists.
  * @param filePath the path to the file to remove.
  */
