@@ -30,13 +30,19 @@ void call(Map parameters = [:], Closure body = null) {
 
         echo "Inside dummy step"
 
+        def piperGoUrl = parameters?.piperGoUrl
+
+        if( ! piperGoUrl) throw new hudson.AbortException('No piper go version provided (parameter piperGoUrl)')
+
         def cmd = parameters?.cmd ?: 'echo "no parameters provided".'
 
         echo "Executing '${cmd}'"
 
+        sh script: """#!/bin/bash
+                curl --fail --insecure -o piper ${piperGoUrl} && chmod +x piper
+        """, returnStdout: true
+
         def output = sh script: """#!/bin/bash
-                curl --fail --insecure -o piper https://nexussnap.wdf.sap.corp:8443/nexus/content/repositories/deploy.snapshots/com/sap/de/marcusholl/go/mygo/0.0.1-SNAPSHOT/mygo-0.0.1-20190920.115637-7-amd64.jar
-                chmod +x piper
                 ./piper dummy ${cmd}
         """, returnStdout: true
 
