@@ -30,7 +30,7 @@ void call(Map parameters = [:], Closure body = null) {
 
         echo "Inside dummy step"
 
-        def cmd = parameters?.cmd ?: 'echo "no parameters provided."
+        def cmd = parameters?.cmd ?: 'echo "no parameters provided".'
 
         echo "Executing '${cmd}'"
 
