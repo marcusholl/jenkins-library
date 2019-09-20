@@ -30,11 +30,15 @@ void call(Map parameters = [:], Closure body = null) {
 
         echo "Inside dummy step"
 
-        def output = sh script: '''#!/bin/bash
+        def cmd = parameters?.cmd ?: 'echo "no parameters provided."
+
+        echo "Executing '${cmd}'"
+
+        def output = sh script: """#!/bin/bash
                 curl --fail --insecure -o piper https://nexussnap.wdf.sap.corp:8443/nexus/content/repositories/deploy.snapshots/com/sap/de/marcusholl/go/mygo/0.0.1-SNAPSHOT/mygo-0.0.1-20190920.115637-7-amd64.jar
                 chmod +x piper
-                ./piper dummy parameters?.cmd ?: 'echo "no parameters provided."'
-        ''', returnStdout: true
+                ./piper dummy ${cmd}
+        """, returnStdout: true
 
         echo "OUTPUT: ${output}"
 
