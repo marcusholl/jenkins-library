@@ -29,6 +29,9 @@ void call(Map parameters = [:]) {
         def script = checkScript(this, parameters)
 
         sh """#!/bin/bash
+              whoami
+              pwd
+              ls -la
               /opt/sap/piper/bin/piper mtaBuild
         """
 
