@@ -197,7 +197,7 @@ def getCulprits(config, branch, numberOfCommits) {
                 ignoreMissing: true
             ) {
                 def pullRequestID = branch.replaceAll('PR-', '')
-                def localBranchName = "pr" + pullRequestID;
+                def localBranchName = "pr" + pullRequestID
                 sh """git init
     git fetch ${config.gitUrl} pull/${pullRequestID}/head:${localBranchName} > /dev/null 2>&1
     git checkout -f ${localBranchName} > /dev/null 2>&1
@@ -223,7 +223,7 @@ def getCulprits(config, branch, numberOfCommits) {
             }
         }
 
-        def recipients = sh(returnStdout: true, script: "git log -${numberOfCommits} --pretty=format:'%ae %ce'")
+        def recipients = sh(returnStdout: true, script: "git log -${numberOfCommits} --first-parent --pretty=format:'%ae %ce'")
         return getDistinctRecipients(recipients)
     } catch(err) {
         echo "[${STEP_NAME}] Culprit retrieval from git failed with '${err.getMessage()}'. Please make sure to configure gitSshKeyCredentialsId. So far, only fixed list of recipients is used."

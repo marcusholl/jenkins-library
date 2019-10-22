@@ -4,11 +4,13 @@
 
 ## Prerequisites
 
-* **[Change Management Client 2.0.0 or compatible version](http://central.maven.org/maven2/com/sap/devops/cmclient/dist.cli/)** - available for download on Maven Central.
+* **[Change Management Client 2.0.0 or compatible version](http://central.maven.org/maven2/com/sap/devops/cmclient/dist.cli/)** - available for download on Maven Central. **Note:** This is only required if you don't use a Docker-based environment.
 
 ## ${docGenParameters}
 
 ## ${docGenConfiguration}
+
+## ${docJenkinsPluginDependencies}
 
 The step is configured using a customer configuration file provided as
 resource in an custom shared library.
@@ -74,21 +76,25 @@ The parameters can also be provided when the step is invoked. For examples see b
 
 ```groovy
 // SOLMAN
-transportRequestUploadFile script:this,
-                           changeDocumentId: '001',   // typically provided via git commit history
-                           transportRequestId: '001', // typically provided via git commit history
-                           applicationId: '001',
-                           filePath: '/path',
-                           changeManagement:[
-                             type: 'SOLMAN'
-                             endpoint: 'https://example.org/cm'
-                           ]
+transportRequestUploadFile(
+  script: this,
+  changeDocumentId: '001',   // typically provided via git commit history
+  transportRequestId: '001', // typically provided via git commit history
+  applicationId: '001',
+  filePath: '/path',
+  changeManagement: [
+    type: 'SOLMAN'
+    endpoint: 'https://example.org/cm'
+  ]
+)
 // CTS
-transportRequestUploadFile script:this,
-                           transportRequestId: '001', // typically provided via git commit history
-                           filePath: '/path',
-                           changeManagement:[
-                             type: 'CTS'
-                             endpoint: 'https://example.org/cm'
-                           ]
+transportRequestUploadFile(
+  script: this,
+  transportRequestId: '001', // typically provided via git commit history
+  filePath: '/path',
+  changeManagement: [
+    type: 'CTS'
+    endpoint: 'https://example.org/cm'
+  ]
+)
 ```

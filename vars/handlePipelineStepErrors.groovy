@@ -3,8 +3,7 @@ import com.cloudbees.groovy.cps.NonCPS
 import com.sap.piper.GenerateDocumentation
 import com.sap.piper.ConfigurationHelper
 import com.sap.piper.analytics.InfluxData
-
-import groovy.text.SimpleTemplateEngine
+import groovy.text.GStringTemplateEngine
 import groovy.transform.Field
 import hudson.AbortException
 
@@ -19,6 +18,10 @@ import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
      * @possibleValues `true`, `false`
      */
     'failOnError',
+    /** Defines the url of the library's documentation that will be used to generate the corresponding links to the step documentation.*/
+    'libraryDocumentationUrl',
+    /** Defines the url of the library's repository that will be used to generate the corresponding links to the step implementation.*/
+    'libraryRepositoryUrl',
     /** Defines a list of mandatory steps (step names) which have to be successful (=stop the pipeline), even if `failOnError: false` */
     'mandatorySteps',
     /**
@@ -33,10 +36,6 @@ import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
      * @possibleValues `true`, `false`
      */
     'echoDetails',
-    /** Defines the url of the library's documentation that will be used to generate the corresponding links to the step documentation.*/
-    'libraryDocumentationUrl',
-    /** Defines the url of the library's repository that will be used to generate the corresponding links to the step implementation.*/
-    'libraryRepositoryUrl',
     /** Defines the name of the step for which the error handling is active. It will be shown in the console log.*/
     'stepName',
     /** Defines the documented step, in case the documentation reference should point to a different step. */
@@ -82,13 +81,18 @@ void call(Map parameters = [:], body) {
             throw ex
         }
 
-        if (config.stepParameters?.script) {
-            config.stepParameters?.script.currentBuild.result = 'UNSTABLE'
-        } else {
-            currentBuild.result = 'UNSTABLE'
+        def failureMessage = "[${STEP_NAME}] Error in step ${config.stepName} - Build result set to 'UNSTABLE'"
+        try {
+            //use new unstable feature if available: see https://jenkins.io/blog/2019/07/05/jenkins-pipeline-stage-result-visualization-improvements/
+            unstable(failureMessage)
+        } catch (java.lang.NoSuchMethodError nmEx) {
+            if (config.stepParameters?.script) {
+                config.stepParameters?.script.currentBuild.result = 'UNSTABLE'
+            } else {
+                currentBuild.result = 'UNSTABLE'
+            }
+            echo failureMessage
         }
-
-        echo "[${STEP_NAME}] Error in step ${config.stepName} - Build result set to 'UNSTABLE'"
 
         List unstableSteps = cpe?.getValue('unstableSteps') ?: []
         if(!unstableSteps) {
@@ -119,9 +123,9 @@ private String formatErrorMessage(Map config, error){
         libraryDocumentationUrl: config.libraryDocumentationUrl,
         libraryRepositoryUrl: config.libraryRepositoryUrl,
         stepName: config.stepName,
-        stepParameters: config.stepParameters?.toString()
+        stepParameters: (config.stepParameters?.verbose == true) ? config.stepParameters?.toString() : '*** to show step parameters, set verbose:true in general pipeline configuration\n*** WARNING: this may reveal sensitive information. ***'
     ]
-    return SimpleTemplateEngine
+    return GStringTemplateEngine
         .newInstance()
         .createTemplate(libraryResource('com.sap.piper/templates/error.log'))
         .make(binding)

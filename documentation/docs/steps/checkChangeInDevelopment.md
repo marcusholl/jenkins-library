@@ -4,11 +4,13 @@
 
 ## Prerequisites
 
-* **[Change Management Client 2.0.0 or compatible version](http://central.maven.org/maven2/com/sap/devops/cmclient/dist.cli/)** - available for download on Maven Central.
+* **[Change Management Client 2.0.0 or compatible version](http://central.maven.org/maven2/com/sap/devops/cmclient/dist.cli/)** - available for download on Maven Central. **Note:** This is only required if you don't use a Docker-based environment.
 
 ## ${docGenParameters}
 
 ## ${docGenConfiguration}
+
+## ${docJenkinsPluginDependencies}
 
 ## Exceptions
 
@@ -32,8 +34,7 @@ resource in an custom shared library.
 
 // inside the shared lib denoted by 'foo' the additional configuration file
 // needs to be located under 'resources' ('resoures/myConfig.yml')
-prepareDefaultValues script: this,
-                             customDefaults: 'myConfig.yml'
+prepareDefaultValues script: this, customDefaults: 'myConfig.yml'
 ```
 
 Example content of `'resources/myConfig.yml'` in branch `'master'` of the repository denoted by
@@ -79,11 +80,13 @@ The parameters can also be provided when the step is invoked:
     // explict endpoint provided, we search for changeDocumentId
     // starting at the previous commit (HEAD~1) rather than on
     // 'origin/master' (the default).
-    checkChangeInDevelopment script:this
-                             changeManagement: [
-                               endpoint: 'https:example.org/cm'
-                               git: [
-                                 from: 'HEAD~1'
-                               ]
-                             ]
+    checkChangeInDevelopment(
+      script: this
+      changeManagement: [
+        endpoint: 'https:example.org/cm'
+        git: [
+          from: 'HEAD~1'
+        ]
+      ]
+    )
 ```

@@ -63,7 +63,7 @@ import static com.sap.piper.Prerequisites.checkScript
     'userTokenCredentialsId',
     /**
      * Type of development stack used to implement the solution.
-     * @possibleValues `golang`, `maven`, `mta`, `npm`, `pip`, `sbt`
+     * @possibleValues `golang`, `maven`, `mta`, `npm`, `pip`, `sbt`, `dub`
      */
     'scanType',
     /**
@@ -175,6 +175,7 @@ import static com.sap.piper.Prerequisites.checkScript
         productName                             : 'productName',
         productToken                            : 'productToken',
         projectNames                            : 'projectNames',
+        productVersion                          : 'productVersion',
         serviceUrl                              : 'serviceUrl',
         configFilePath                          : 'configFilePath',
         userTokenCredentialsId                  : 'userTokenCredentialsId',
@@ -226,6 +227,11 @@ void call(Map parameters = [:]) {
         def utils = parameters.juStabUtils ?: new Utils()
         def descriptorUtils = parameters.descriptorUtilsStub ?: new DescriptorUtils()
         def statusCode = 1
+
+        //initialize CPE for passing whiteSourceProjects
+        if(script.commonPipelineEnvironment.getValue('whitesourceProjectNames') == null) {
+            script.commonPipelineEnvironment.setValue('whitesourceProjectNames', [])
+        }
 
         // load default & individual configuration
         Map config = ConfigurationHelper.newInstance(this)
@@ -358,6 +364,10 @@ private def triggerWhitesourceScanWithUserKey(script, config, utils, descriptorU
                 if(!config.whitesource['projectNames'].contains(projectName))
                     config.whitesource['projectNames'].add(projectName)
 
+                //share projectNames with other steps
+                if(!script.commonPipelineEnvironment.getValue('whitesourceProjectNames').contains(projectName))
+                    script.commonPipelineEnvironment.getValue('whitesourceProjectNames').add(projectName)
+
                 WhitesourceConfigurationHelper.extendUAConfigurationFile(script, utils, config, path)
                 dockerExecute(script: script, dockerImage: config.dockerImage, dockerWorkspace: config.dockerWorkspace, stashContent: config.stashContent) {
                     if (config.whitesource.agentDownloadUrl) {
@@ -397,6 +407,14 @@ private def triggerWhitesourceScanWithUserKey(script, config, utils, descriptorU
 
                     // archive whitesource debug files, if available
                     archiveArtifacts artifacts: "**/ws-l*", allowEmptyArchive: true
+
+                    try {
+                        // archive UA log file
+                        sh "cp -Rf --parents /var/log/UA/* ."
+                        archiveArtifacts artifacts: "**/var/log/UA/**/*.log", allowEmptyArchive: true
+                    } catch (e) {
+                        echo "Failed archiving WhiteSource UA logs"
+                    }
                 }
                 break
         }
@@ -425,7 +443,8 @@ private resolveProjectIdentifiers(script, descriptorUtils, config) {
             case 'golang':
                 gav = descriptorUtils.getGoGAV(config.buildDescriptorFile, new URI(script.commonPipelineEnvironment.getGitHttpsUrl()))
                 break
-            case 'dlang':
+            case 'dub':
+                gav = descriptorUtils.getDubGAV(config.buildDescriptorFile)
                 break
             case 'maven':
                 gav = descriptorUtils.getMavenGAV(config.buildDescriptorFile)

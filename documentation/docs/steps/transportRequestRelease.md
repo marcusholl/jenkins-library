@@ -4,14 +4,13 @@
 
 ## Prerequisites
 
-* **[Change Management Client 2.0.0 or compatible version](http://central.maven.org/maven2/com/sap/devops/cmclient/dist.cli/)** - available for download on Maven Central.
+* **[Change Management Client 2.0.0 or compatible version](http://central.maven.org/maven2/com/sap/devops/cmclient/dist.cli/)** - available for download on Maven Central. **Note:** This is only required if you don't use a Docker-based environment.
 
 ## ${docGenParameters}
 
-
 ## ${docGenConfiguration}
 
-
+## ${docJenkinsPluginDependencies}
 
 The step is configured using a customer configuration file provided as
 resource in an custom shared library.

@@ -1,5 +1,4 @@
-#!groovy
-package stages
+package templates
 
 import org.junit.Before
 import org.junit.Rule
@@ -38,13 +37,14 @@ class PiperPipelineStagePostTest extends BasePiperTest {
         helper.registerAllowedMethod('influxWriteData', [Map.class], {m -> stepsCalled.add('influxWriteData')})
         helper.registerAllowedMethod('slackSendNotification', [Map.class], {m -> stepsCalled.add('slackSendNotification')})
         helper.registerAllowedMethod('mailSendNotification', [Map.class], {m -> stepsCalled.add('mailSendNotification')})
+        helper.registerAllowedMethod('piperPublishWarnings', [Map.class], {m -> stepsCalled.add('piperPublishWarnings')})
     }
 
     @Test
     void testPostDefault() {
         jsr.step.piperPipelineStagePost(script: nullScript, juStabUtils: utils)
 
-        assertThat(stepsCalled, hasItems('influxWriteData','mailSendNotification'))
+        assertThat(stepsCalled, hasItems('influxWriteData','mailSendNotification','piperPublishWarnings'))
         assertThat(stepsCalled, not(hasItems('slackSendNotification')))
     }
 
@@ -54,7 +54,7 @@ class PiperPipelineStagePostTest extends BasePiperTest {
 
         jsr.step.piperPipelineStagePost(script: nullScript, juStabUtils: utils)
 
-        assertThat(stepsCalled, hasItems('influxWriteData','mailSendNotification'))
+        assertThat(stepsCalled, hasItems('influxWriteData','mailSendNotification','piperPublishWarnings'))
         assertThat(stepsCalled, not(hasItems('slackSendNotification')))
     }
 
@@ -64,6 +64,6 @@ class PiperPipelineStagePostTest extends BasePiperTest {
 
         jsr.step.piperPipelineStagePost(script: nullScript, juStabUtils: utils)
 
-        assertThat(stepsCalled, hasItems('influxWriteData','mailSendNotification','slackSendNotification'))
+        assertThat(stepsCalled, hasItems('influxWriteData','mailSendNotification','slackSendNotification','piperPublishWarnings'))
     }
 }
