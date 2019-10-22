@@ -1,6 +1,6 @@
 branches:
   only:
-  - master
+  - /^pr\/.*$/
   - /^it\/.*$/
 language: groovy
 jdk:
