@@ -24,15 +24,11 @@ jobs:
     - stage: Tests
       name: Unit Tests
       before_script:
-        - curl -L --output cc-test-reporter https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
-        - chmod +x ./cc-test-reporter
-        - ./cc-test-reporter before-build
+        - echo hello1
       script:
-        - docker build -t piper:latest . 
-        - mvn package --batch-mode
+        - echo hello2
       after_script:
-        - JACOCO_SOURCE_PATH="src vars test" ./cc-test-reporter format-coverage target/site/jacoco/jacoco.xml --input-type jacoco
-        - ./cc-test-reporter upload-coverage
+        - echo hello3
     - name: Consumer Tests
       script: cd consumer-test && groovy consumerTestController.groovy
 
