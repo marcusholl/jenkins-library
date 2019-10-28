@@ -10,7 +10,7 @@ unclassified:
           scm:
             git:
               remote: "https://github.com/SAP/cloud-s4-sdk-pipeline-lib.git"
-    - defaultVersion: "master"
+    - defaultVersion: "__LIBRARY_VERSION__"
       name: "piper-library-os"
       retriever:
         modernSCM:

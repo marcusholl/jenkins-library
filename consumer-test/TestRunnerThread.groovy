@@ -73,8 +73,9 @@ class TestRunnerThread extends Thread {
     // Configure path to library-repository under test in Jenkins config
     private void addJenkinsYmlToWorkspace() {
         def sourceFile = 'jenkins.yml'
-        def sourceText = new File(sourceFile).text.replaceAll(
-            '__REPO_SLUG__', repositoryUnderTest)
+        def sourceText = new File(sourceFile).text
+            .replaceAll('__REPO_SLUG__', repositoryUnderTest)
+            .replaceAll('__LIBRARY_VERSION__', libraryVersionUnderTest)
         def target = new File("${testCaseWorkspace}/${sourceFile}")
         target.write(sourceText)
     }
@@ -84,7 +85,7 @@ class TestRunnerThread extends Thread {
     private void setLibraryVersionInJenkinsfile() {
         def jenkinsfile = new File("${testCaseWorkspace}/Jenkinsfile")
         def manipulatedText =
-            "@Library(\"piper-library-os@${libraryVersionUnderTest}\") _\n" +
+            "@Library(\"piper-library-os\") _\n" +
                 jenkinsfile.text
         jenkinsfile.write(manipulatedText)
     }
