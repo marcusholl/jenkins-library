@@ -55,9 +55,9 @@ class TestRunnerThread extends Thread {
         setLibraryVersionInJenkinsfile()
 
         //Commit the changed version because artifactSetVersion expects the git repo not to be dirty
-        executeShell(["git", "-C", "${testCaseWorkspace}", "commit", "--all",
-                        '--author="piper-testing-bot <piper-testing-bot@example.com>"',
-                        '--message="Set piper lib version for test"'])
+        //executeShell(["git", "-C", "${testCaseWorkspace}", "commit", "--all",
+        //                '--author="piper-testing-bot <piper-testing-bot@example.com>"',
+        //                '--message="Set piper lib version for test"'])
 
         executeShell("docker run --rm -v /var/run/docker.sock:/var/run/docker.sock " +
             "-v ${System.getenv('PWD')}/${testCaseWorkspace}:/workspace -v /tmp " +
