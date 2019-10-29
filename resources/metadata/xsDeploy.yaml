@@ -1,0 +1,26 @@
+metadata:
+  name: xsDeploy
+  description: Performs xs deployment
+  longDescription: |
+    Performs xs deployment
+
+spec:
+  inputs:
+    resources:
+    params:
+      - name: mode
+        type: string
+        description: The mode
+        default: xxx
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: true
+  containers:
+    - name: maven
+      image: maven:3.5-jdk-8
+      volumeMounts:
+      - mountPath: /dev/shm
+        name: dev-shm
