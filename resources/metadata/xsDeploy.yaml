@@ -18,6 +18,60 @@ spec:
         - STAGES
         - STEPS
         mandatory: true
+      - name: apiUrl
+        type: string
+        description: The api url (e.g. https://example.org:12345
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: true
+      - name: user
+        type: string
+        description: User
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: true
+      - name: password
+        type: string
+        description: Password
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: true
+      - name: org
+        type: string
+        description: The org
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: true
+      - name: space
+        type: string
+        description: The space
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: true
+      - name: loginOpts
+        type: string
+        description: Additional options for performing xs login. 
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: true
   containers:
     - name: maven
       image: maven:3.5-jdk-8
