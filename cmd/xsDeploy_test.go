@@ -2,20 +2,20 @@ package cmd
 
 import (
 	"errors"
+	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestXSLogin(t *testing.T) {
 
 	myXsDeployOptions := xsDeployOptions{
-		APIURL: "https://example.org:12345",
-		User: "me",
-		Password: "secret",
-		Org: "myOrg",
-		Space: "mySpace",
-		LoginOpts: "--skip-ssl-validation",
+		APIURL:        "https://example.org:12345",
+		User:          "me",
+		Password:      "secret",
+		Org:           "myOrg",
+		Space:         "mySpace",
+		LoginOpts:     "--skip-ssl-validation",
 		XsSessionFile: ".xs_session",
 	}
 
@@ -33,7 +33,6 @@ func TestXSLogin(t *testing.T) {
 			t.Errorf("Failed with unexpected error: '%v'", e)
 		}
 	})
-
 
 	t.Run("Login failure", func(t *testing.T) {
 

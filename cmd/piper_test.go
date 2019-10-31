@@ -24,8 +24,8 @@ type execCall struct {
 }
 
 type shellMockRunner struct {
-	dir   string
-	calls []string
+	dir            string
+	calls          []string
 	shouldFailWith error
 }
 
