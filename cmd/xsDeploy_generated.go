@@ -8,14 +8,14 @@ import (
 )
 
 type xsDeployOptions struct {
-	Mode          string `json:"mode,omitempty"`
-	ApiURL        string `json:"apiUrl,omitempty"`
-	User          string `json:"user,omitempty"`
-	Password      string `json:"password,omitempty"`
-	Org           string `json:"org,omitempty"`
-	Space         string `json:"space,omitempty"`
-	LoginOpts     string `json:"loginOpts,omitempty"`
-	XsSessionFile string `json:"xsSessionFile,omitempty"`
+	Mode          string `json:"Mode,omitempty"`
+	APIURL        string `json:"ApiUrl,omitempty"`
+	User          string `json:"User,omitempty"`
+	Password      string `json:"Password,omitempty"`
+	Org           string `json:"Org,omitempty"`
+	Space         string `json:"Space,omitempty"`
+	LoginOpts     string `json:"LoginOpts,omitempty"`
+	XsSessionFile string `json:"XsSessionFile,omitempty"`
 }
 
 var myXsDeployOptions xsDeployOptions
@@ -41,23 +41,23 @@ func XsDeployCommand() *cobra.Command {
 }
 
 func addXsDeployFlags(cmd *cobra.Command) {
-	cmd.Flags().StringVar(&myXsDeployOptions.Mode, "mode", "xxx", "The mode")
-	cmd.Flags().StringVar(&myXsDeployOptions.ApiURL, "apiUrl", os.Getenv("PIPER_apiUrl"), "The api url (e.g. https://example.org:12345")
-	cmd.Flags().StringVar(&myXsDeployOptions.User, "user", os.Getenv("PIPER_user"), "User")
-	cmd.Flags().StringVar(&myXsDeployOptions.Password, "password", os.Getenv("PIPER_password"), "Password")
-	cmd.Flags().StringVar(&myXsDeployOptions.Org, "org", os.Getenv("PIPER_org"), "The org")
-	cmd.Flags().StringVar(&myXsDeployOptions.Space, "space", os.Getenv("PIPER_space"), "The space")
-	cmd.Flags().StringVar(&myXsDeployOptions.LoginOpts, "loginOpts", os.Getenv("PIPER_loginOpts"), "Additional options for performing xs login.")
-	cmd.Flags().StringVar(&myXsDeployOptions.XsSessionFile, "xsSessionFile", os.Getenv("PIPER_xsSessionFile"), "The file keeping the xs session.")
+	cmd.Flags().StringVar(&myXsDeployOptions.Mode, "Mode", "xxx", "The mode")
+	cmd.Flags().StringVar(&myXsDeployOptions.APIURL, "ApiUrl", os.Getenv("PIPER_ApiUrl"), "The api url (e.g. https://example.org:12345")
+	cmd.Flags().StringVar(&myXsDeployOptions.User, "User", os.Getenv("PIPER_User"), "User")
+	cmd.Flags().StringVar(&myXsDeployOptions.Password, "Password", os.Getenv("PIPER_Password"), "Password")
+	cmd.Flags().StringVar(&myXsDeployOptions.Org, "Org", os.Getenv("PIPER_Org"), "The org")
+	cmd.Flags().StringVar(&myXsDeployOptions.Space, "Space", os.Getenv("PIPER_Space"), "The space")
+	cmd.Flags().StringVar(&myXsDeployOptions.LoginOpts, "LoginOpts", os.Getenv("PIPER_LoginOpts"), "Additional options for performing xs login.")
+	cmd.Flags().StringVar(&myXsDeployOptions.XsSessionFile, "XsSessionFile", os.Getenv("PIPER_XsSessionFile"), "The file keeping the xs session.")
 
-	cmd.MarkFlagRequired("mode")
-	cmd.MarkFlagRequired("apiUrl")
-	cmd.MarkFlagRequired("user")
-	cmd.MarkFlagRequired("password")
-	cmd.MarkFlagRequired("org")
-	cmd.MarkFlagRequired("space")
-	cmd.MarkFlagRequired("loginOpts")
-	cmd.MarkFlagRequired("xsSessionFile")
+	cmd.MarkFlagRequired("Mode")
+	cmd.MarkFlagRequired("ApiUrl")
+	cmd.MarkFlagRequired("User")
+	cmd.MarkFlagRequired("Password")
+	cmd.MarkFlagRequired("Org")
+	cmd.MarkFlagRequired("Space")
+	cmd.MarkFlagRequired("LoginOpts")
+	cmd.MarkFlagRequired("XsSessionFile")
 }
 
 // retrieve step metadata
@@ -67,49 +67,49 @@ func xsDeployMetadata() config.StepData {
 			Inputs: config.StepInputs{
 				Parameters: []config.StepParameters{
 					{
-						Name:      "mode",
+						Name:      "Mode",
 						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
 						Type:      "string",
 						Mandatory: true,
 					},
 					{
-						Name:      "apiUrl",
+						Name:      "ApiUrl",
 						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
 						Type:      "string",
 						Mandatory: true,
 					},
 					{
-						Name:      "user",
+						Name:      "User",
 						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
 						Type:      "string",
 						Mandatory: true,
 					},
 					{
-						Name:      "password",
+						Name:      "Password",
 						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
 						Type:      "string",
 						Mandatory: true,
 					},
 					{
-						Name:      "org",
+						Name:      "Org",
 						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
 						Type:      "string",
 						Mandatory: true,
 					},
 					{
-						Name:      "space",
+						Name:      "Space",
 						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
 						Type:      "string",
 						Mandatory: true,
 					},
 					{
-						Name:      "loginOpts",
+						Name:      "LoginOpts",
 						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
 						Type:      "string",
 						Mandatory: true,
 					},
 					{
-						Name:      "xsSessionFile",
+						Name:      "XsSessionFile",
 						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
 						Type:      "string",
 						Mandatory: true,
