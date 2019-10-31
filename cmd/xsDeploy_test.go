@@ -8,18 +8,17 @@ import (
 
 func TestXSLogin(t *testing.T) {
 
+	myXsDeployOptions := xsDeployOptions{
+		APIURL: "https://example.org:12345",
+		User: "me",
+		Password: "secret",
+		Org: "myOrg",
+		Space: "mySpace",
+		LoginOpts: "--skip-ssl-validation",
+		XsSessionFile: ".xs_session",
+	}
 	t.Run("No xs session file", func(t *testing.T) {
 		s := shellMockRunner{}
-
-		myXsDeployOptions := xsDeployOptions{
-			APIURL: "https://example.org:12345",
-			User: "me",
-			Password: "secret",
-			Org: "myOrg",
-			Space: "mySpace",
-			LoginOpts: "--skip-ssl-validation",
-			XsSessionFile: ".xs_session",
-		}
 
 		e := xsLogin(myXsDeployOptions, &s, func(f string) bool {
 			return false
@@ -34,16 +33,6 @@ func TestXSLogin(t *testing.T) {
 
 	t.Run("Success case", func(t *testing.T) {
 		s := shellMockRunner{}
-
-		myXsDeployOptions := xsDeployOptions{
-			APIURL: "https://example.org:12345",
-			User: "me",
-			Password: "secret",
-			Org: "myOrg",
-			Space: "mySpace",
-			LoginOpts: "--skip-ssl-validation",
-			XsSessionFile: ".xs_session",
-		}
 
 		e := xsLogin(myXsDeployOptions, &s, func(f string) bool {
 			return f == ".xs_session"
