@@ -8,7 +8,31 @@ import (
 
 func TestXSLogin(t *testing.T) {
 
-	t.Run("success case", func(t *testing.T) {
+	t.Run("No xs session file", func(t *testing.T) {
+		s := shellMockRunner{}
+
+		myXsDeployOptions := xsDeployOptions{
+			APIURL: "https://example.org:12345",
+			User: "me",
+			Password: "secret",
+			Org: "myOrg",
+			Space: "mySpace",
+			LoginOpts: "--skip-ssl-validation",
+			XsSessionFile: ".xs_session",
+		}
+
+		e := xsLogin(myXsDeployOptions, &s, func(f string) bool {
+			return false
+		})
+
+		if e == nil {
+			t.Error("Missing xs session file not detected")
+		} else if e.Error() != "file does not exist (.xs_session)" {
+			t.Errorf("Failed with unexpected error: '%v'", e)
+		}
+	})
+
+	t.Run("Success case", func(t *testing.T) {
 		s := shellMockRunner{}
 
 		myXsDeployOptions := xsDeployOptions{
@@ -34,4 +58,5 @@ func TestXSLogin(t *testing.T) {
 		assert.Contains(t, cmds[1], "xs login -a https://example.org:12345 -u me -p 'secret' -o myOrg -s mySpace --skip-ssl-validation")
 		assert.Contains(t, cmds[3], "cp \"${HOME}/.xs_session\" .")
 	})
+
 }
