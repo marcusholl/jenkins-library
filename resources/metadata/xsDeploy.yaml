@@ -8,7 +8,7 @@ spec:
   inputs:
     resources:
     params:
-      - name: mode
+      - name: Mode
         type: string
         description: The mode
         default: xxx
@@ -18,7 +18,7 @@ spec:
         - STAGES
         - STEPS
         mandatory: true
-      - name: apiUrl
+      - name: ApiUrl
         type: string
         description: The api url (e.g. https://example.org:12345
         scope:
@@ -27,7 +27,7 @@ spec:
         - STAGES
         - STEPS
         mandatory: true
-      - name: user
+      - name: User
         type: string
         description: User
         scope:
@@ -36,7 +36,7 @@ spec:
         - STAGES
         - STEPS
         mandatory: true
-      - name: password
+      - name: Password
         type: string
         description: Password
         scope:
@@ -45,7 +45,7 @@ spec:
         - STAGES
         - STEPS
         mandatory: true
-      - name: org
+      - name: Org
         type: string
         description: The org
         scope:
@@ -54,7 +54,7 @@ spec:
         - STAGES
         - STEPS
         mandatory: true
-      - name: space
+      - name: Space
         type: string
         description: The space
         scope:
@@ -63,7 +63,7 @@ spec:
         - STAGES
         - STEPS
         mandatory: true
-      - name: loginOpts
+      - name: LoginOpts
         type: string
         description: Additional options for performing xs login.
         scope:
@@ -72,7 +72,7 @@ spec:
         - STAGES
         - STEPS
         mandatory: true
-      - name: xsSessionFile
+      - name: XsSessionFile
         type: string
         description: The file keeping the xs session.
         scope:
