@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"github.com/SAP/jenkins-library/pkg/command"
 	"os"
@@ -34,20 +33,21 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner, fExists func(string
 		exit $RC
 	`
 
-	r := strings.NewReplacer("$API_URL", "https://example.org",
-		"$USERNAME", "me",
-		"$PASSWORD", "secret",
-		"$ORG", "myOrg",
-		"$SPACE", "mySpace",
-		"$LOGIN_OPTS", "--skip-ssl-validation",
-		"$XS_SESSION_FILE", ".xssession")
+	r := strings.NewReplacer(
+		"$API_URL", XsDeployOptions.APIURL,
+		"$USERNAME", XsDeployOptions.User,
+		"$PASSWORD", XsDeployOptions.Password,
+		"$ORG", XsDeployOptions.Org,
+		"$SPACE", XsDeployOptions.Space,
+		"$LOGIN_OPTS", XsDeployOptions.LoginOpts,
+		"$XS_SESSION_FILE", XsDeployOptions.XsSessionFile)
 
 	loginScript = r.Replace(loginScript)
 
 	s.RunShell("/bin/bash", loginScript)
 
-	if !fExists("xyz") {
-		return errors.New("File does not exist")
+	if !fExists(XsDeployOptions.XsSessionFile) {
+		return fmt.Errorf("file does not exist (%s)", XsDeployOptions.XsSessionFile)
 	}
 
 	return nil
