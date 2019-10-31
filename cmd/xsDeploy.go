@@ -44,7 +44,11 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner, fExists func(string
 
 	loginScript = r.Replace(loginScript)
 
-	s.RunShell("/bin/bash", loginScript)
+	e := s.RunShell("/bin/bash", loginScript)
+
+	if e != nil {
+		return e
+	}
 
 	if !fExists(XsDeployOptions.XsSessionFile) {
 		return fmt.Errorf("file does not exist (%s)", XsDeployOptions.XsSessionFile)

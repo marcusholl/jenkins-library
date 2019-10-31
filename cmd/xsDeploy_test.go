@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"strings"
 	"testing"
 	"github.com/stretchr/testify/assert"
@@ -17,7 +18,9 @@ func TestXSLogin(t *testing.T) {
 		LoginOpts: "--skip-ssl-validation",
 		XsSessionFile: ".xs_session",
 	}
+
 	t.Run("No xs session file", func(t *testing.T) {
+
 		s := shellMockRunner{}
 
 		e := xsLogin(myXsDeployOptions, &s, func(f string) bool {
@@ -31,7 +34,26 @@ func TestXSLogin(t *testing.T) {
 		}
 	})
 
+
+	t.Run("Login failure", func(t *testing.T) {
+
+		s := shellMockRunner{shouldFailWith: errors.New("xs login failed")}
+
+		e := xsLogin(myXsDeployOptions, &s, func(f string) bool {
+			return f == ".xs_session"
+		})
+
+		if e != nil && e.Error() != "xs login failed" {
+			t.Errorf("Exception exception not seen. Instead we got: '%s'", e.Error())
+		}
+
+		if e == nil {
+			t.Error("Login failure expected, but not seen." + e.Error())
+		}
+	})
+
 	t.Run("Success case", func(t *testing.T) {
+
 		s := shellMockRunner{}
 
 		e := xsLogin(myXsDeployOptions, &s, func(f string) bool {
@@ -47,5 +69,4 @@ func TestXSLogin(t *testing.T) {
 		assert.Contains(t, cmds[1], "xs login -a https://example.org:12345 -u me -p 'secret' -o myOrg -s mySpace --skip-ssl-validation")
 		assert.Contains(t, cmds[3], "cp \"${HOME}/.xs_session\" .")
 	})
-
 }
