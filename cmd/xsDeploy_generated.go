@@ -8,13 +8,14 @@ import (
 )
 
 type xsDeployOptions struct {
-	Mode      string `json:"mode,omitempty"`
-	ApiURL    string `json:"apiUrl,omitempty"`
-	User      string `json:"user,omitempty"`
-	Password  string `json:"password,omitempty"`
-	Org       string `json:"org,omitempty"`
-	Space     string `json:"space,omitempty"`
-	LoginOpts string `json:"loginOpts,omitempty"`
+	Mode          string `json:"mode,omitempty"`
+	ApiURL        string `json:"apiUrl,omitempty"`
+	User          string `json:"user,omitempty"`
+	Password      string `json:"password,omitempty"`
+	Org           string `json:"org,omitempty"`
+	Space         string `json:"space,omitempty"`
+	LoginOpts     string `json:"loginOpts,omitempty"`
+	XsSessionFile string `json:"xsSessionFile,omitempty"`
 }
 
 var myXsDeployOptions xsDeployOptions
@@ -47,6 +48,7 @@ func addXsDeployFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&myXsDeployOptions.Org, "org", os.Getenv("PIPER_org"), "The org")
 	cmd.Flags().StringVar(&myXsDeployOptions.Space, "space", os.Getenv("PIPER_space"), "The space")
 	cmd.Flags().StringVar(&myXsDeployOptions.LoginOpts, "loginOpts", os.Getenv("PIPER_loginOpts"), "Additional options for performing xs login.")
+	cmd.Flags().StringVar(&myXsDeployOptions.XsSessionFile, "xsSessionFile", os.Getenv("PIPER_xsSessionFile"), "The file keeping the xs session.")
 
 	cmd.MarkFlagRequired("mode")
 	cmd.MarkFlagRequired("apiUrl")
@@ -55,6 +57,7 @@ func addXsDeployFlags(cmd *cobra.Command) {
 	cmd.MarkFlagRequired("org")
 	cmd.MarkFlagRequired("space")
 	cmd.MarkFlagRequired("loginOpts")
+	cmd.MarkFlagRequired("xsSessionFile")
 }
 
 // retrieve step metadata
@@ -101,6 +104,12 @@ func xsDeployMetadata() config.StepData {
 					},
 					{
 						Name:      "loginOpts",
+						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
+						Type:      "string",
+						Mandatory: true,
+					},
+					{
+						Name:      "xsSessionFile",
 						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
 						Type:      "string",
 						Mandatory: true,

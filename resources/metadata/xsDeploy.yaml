@@ -65,7 +65,16 @@ spec:
         mandatory: true
       - name: loginOpts
         type: string
-        description: Additional options for performing xs login. 
+        description: Additional options for performing xs login.
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: true
+      - name: xsSessionFile
+        type: string
+        description: The file keeping the xs session.
         scope:
         - GENERAL
         - PARAMETERS
