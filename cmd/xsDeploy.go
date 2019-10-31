@@ -50,7 +50,7 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner, fExists func(string
 	}
 
 	if !fExists(XsDeployOptions.XsSessionFile) {
-		return fmt.Errorf("file does not exist (%s)", XsDeployOptions.XsSessionFile)
+		return fmt.Errorf("xs session file does not exist (%s)", XsDeployOptions.XsSessionFile)
 	}
 
 	return nil

@@ -29,7 +29,7 @@ func TestXSLogin(t *testing.T) {
 
 		if e == nil {
 			t.Error("Missing xs session file not detected")
-		} else if e.Error() != "file does not exist (.xs_session)" {
+		} else if e.Error() != "xs session file does not exist (.xs_session)" {
 			t.Errorf("Failed with unexpected error: '%v'", e)
 		}
 	})
