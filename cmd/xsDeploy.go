@@ -14,7 +14,6 @@ func xsDeploy(myXsDeployOptions xsDeployOptions) error {
 
 func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 
-	fmt.Println("[DEBUG] Inside xsDeploy")
 	err := xsLogin(XsDeployOptions, s, nil)
 
 	return err
