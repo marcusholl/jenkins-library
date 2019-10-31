@@ -8,7 +8,13 @@ import (
 )
 
 type xsDeployOptions struct {
-	Mode string `json:"mode,omitempty"`
+	Mode      string `json:"mode,omitempty"`
+	ApiURL    string `json:"apiUrl,omitempty"`
+	User      string `json:"user,omitempty"`
+	Password  string `json:"password,omitempty"`
+	Org       string `json:"org,omitempty"`
+	Space     string `json:"space,omitempty"`
+	LoginOpts string `json:"loginOpts,omitempty"`
 }
 
 var myXsDeployOptions xsDeployOptions
@@ -35,8 +41,20 @@ func XsDeployCommand() *cobra.Command {
 
 func addXsDeployFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&myXsDeployOptions.Mode, "mode", "xxx", "The mode")
+	cmd.Flags().StringVar(&myXsDeployOptions.ApiURL, "apiUrl", os.Getenv("PIPER_apiUrl"), "The api url (e.g. https://example.org:12345")
+	cmd.Flags().StringVar(&myXsDeployOptions.User, "user", os.Getenv("PIPER_user"), "User")
+	cmd.Flags().StringVar(&myXsDeployOptions.Password, "password", os.Getenv("PIPER_password"), "Password")
+	cmd.Flags().StringVar(&myXsDeployOptions.Org, "org", os.Getenv("PIPER_org"), "The org")
+	cmd.Flags().StringVar(&myXsDeployOptions.Space, "space", os.Getenv("PIPER_space"), "The space")
+	cmd.Flags().StringVar(&myXsDeployOptions.LoginOpts, "loginOpts", os.Getenv("PIPER_loginOpts"), "Additional options for performing xs login.")
 
 	cmd.MarkFlagRequired("mode")
+	cmd.MarkFlagRequired("apiUrl")
+	cmd.MarkFlagRequired("user")
+	cmd.MarkFlagRequired("password")
+	cmd.MarkFlagRequired("org")
+	cmd.MarkFlagRequired("space")
+	cmd.MarkFlagRequired("loginOpts")
 }
 
 // retrieve step metadata
@@ -47,6 +65,42 @@ func xsDeployMetadata() config.StepData {
 				Parameters: []config.StepParameters{
 					{
 						Name:      "mode",
+						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
+						Type:      "string",
+						Mandatory: true,
+					},
+					{
+						Name:      "apiUrl",
+						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
+						Type:      "string",
+						Mandatory: true,
+					},
+					{
+						Name:      "user",
+						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
+						Type:      "string",
+						Mandatory: true,
+					},
+					{
+						Name:      "password",
+						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
+						Type:      "string",
+						Mandatory: true,
+					},
+					{
+						Name:      "org",
+						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
+						Type:      "string",
+						Mandatory: true,
+					},
+					{
+						Name:      "space",
+						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
+						Type:      "string",
+						Mandatory: true,
+					},
+					{
+						Name:      "loginOpts",
 						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
 						Type:      "string",
 						Mandatory: true,
