@@ -1,0 +1,89 @@
+metadata:
+  name: xsDeploy
+  description: Performs xs deployment
+  longDescription: |
+    Performs xs deployment
+
+spec:
+  inputs:
+    resources:
+    params:
+      - name: Mode
+        type: string
+        description: The mode
+        default: xxx
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: true
+      - name: ApiUrl
+        type: string
+        description: The api url (e.g. https://example.org:12345
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: true
+      - name: User
+        type: string
+        description: User
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: true
+      - name: Password
+        type: string
+        description: Password
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: true
+      - name: Org
+        type: string
+        description: The org
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: true
+      - name: Space
+        type: string
+        description: The space
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: true
+      - name: LoginOpts
+        type: string
+        description: Additional options for performing xs login.
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: true
+      - name: XsSessionFile
+        type: string
+        description: The file keeping the xs session.
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: true
+  containers:
+    - name: maven
+      image: maven:3.5-jdk-8
+      volumeMounts:
+      - mountPath: /dev/shm
+        name: dev-shm
