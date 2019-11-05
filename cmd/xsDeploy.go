@@ -19,22 +19,26 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 	prOut, pwOut := io.Pipe()
 	prErr, pwErr := io.Pipe()
 
-	_ = prOut
-	_ = pwOut
-	_ = prErr
-
-	s.Stdout(os.Stdout)
+	s.Stdout(pwOut)
 	s.Stderr(pwErr)
 
-	buf := new(bytes.Buffer)
 	go func() {
-		io.Copy(buf, prErr)
-		sss := buf.String()
-		fmt.Printf("STDERR: %v\n", sss)
+		buf := new(bytes.Buffer)
+		io.Copy(buf, prOut)
+		o := buf.String()
+		fmt.Printf("STDOUT: %v\n", o)
 	}()
 
+	go func() {
+		buf := new(bytes.Buffer)
+		io.Copy(buf, prErr)
+		e := buf.String()
+		fmt.Printf("STDERR: %v\n", e)
+	}()
+
+
 	err := xsLogin(XsDeployOptions, s, nil)
-	pwErr.Close()
+	pwOut.Close()
 	pwErr.Close()
 
 	return err
