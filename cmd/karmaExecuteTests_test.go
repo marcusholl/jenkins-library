@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/SAP/jenkins-library/pkg/log"
@@ -26,9 +27,9 @@ func TestRunKarma(t *testing.T) {
 		var hasFailed bool
 		log.Entry().Logger.ExitFunc = func(int) { hasFailed = true }
 
-		opts := karmaExecuteTestsOptions{ModulePath: "./test", InstallCommand: "fail install test", RunCommand: "npm run test"}
+		opts := karmaExecuteTestsOptions{ModulePath: "./test", InstallCommand: "install test", RunCommand: "npm run test"}
 
-		e := execMockRunner{}
+		e := execMockRunner{shouldFailWith: errors.New("error case")}
 		runKarma(opts, &e)
 		assert.True(t, hasFailed, "expected command to exit with fatal")
 	})
@@ -37,9 +38,9 @@ func TestRunKarma(t *testing.T) {
 		var hasFailed bool
 		log.Entry().Logger.ExitFunc = func(int) { hasFailed = true }
 
-		opts := karmaExecuteTestsOptions{ModulePath: "./test", InstallCommand: "npm install test", RunCommand: "fail run test"}
+		opts := karmaExecuteTestsOptions{ModulePath: "./test", InstallCommand: "npm install test", RunCommand: "npm run test"}
 
-		e := execMockRunner{}
+		e := execMockRunner{shouldFailWith: errors.New("error case")}
 		runKarma(opts, &e)
 		assert.True(t, hasFailed, "expected command to exit with fatal")
 	})
