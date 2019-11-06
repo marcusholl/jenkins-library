@@ -88,9 +88,7 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner, fExists func(string
 
 	loginScript = r.Replace(loginScript)
 
-	e := s.RunShell("/bin/bash", loginScript)
-
-	if e != nil {
+	if e := s.RunShell("/bin/bash", loginScript); e != nil {
 		return e
 	}
 
