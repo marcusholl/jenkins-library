@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"sync"
 )
 
 func xsDeploy(myXsDeployOptions xsDeployOptions) error {
@@ -22,23 +23,33 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 	s.Stdout(pwOut)
 	s.Stderr(pwErr)
 
+	var e, o string
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
 	go func() {
 		buf := new(bytes.Buffer)
 		io.Copy(buf, prOut)
-		o := buf.String()
-		fmt.Printf("STDOUT: %v\n", o)
+		o = buf.String()
+		wg.Done()
 	}()
 
 	go func() {
 		buf := new(bytes.Buffer)
 		io.Copy(buf, prErr)
-		e := buf.String()
-		fmt.Printf("STDERR: %v\n", e)
+		e = buf.String()
+		wg.Done()
 	}()
 
 	err := xsLogin(XsDeployOptions, s, nil)
 	pwOut.Close()
 	pwErr.Close()
+
+	wg.Wait()
+
+	fmt.Printf("STDOUT: %v\n", o)
+	fmt.Printf("STDERR: %v\n", e)
 
 	return err
 }
