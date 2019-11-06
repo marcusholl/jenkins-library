@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/SAP/jenkins-library/pkg/command"
+	"github.com/SAP/jenkins-library/pkg/log"
 	"io"
 	"os"
 	"strings"
@@ -56,6 +57,10 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 
 func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner, fExists func(string) bool) error {
 
+	log.Entry().Debugf("Performing xs login. api-url: '%s', org: '%s', space: '%s'",
+		XsDeployOptions.APIURL, XsDeployOptions.Org, XsDeployOptions.Space)
+
+
 	if fExists == nil {
 		fExists = fileExists
 	}
@@ -92,6 +97,9 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner, fExists func(string
 	if !fExists(xsSessionFile) {
 		return fmt.Errorf("xs session file does not exist (%s)", xsSessionFile)
 	}
+
+	log.Entry().Infof("xs login has been performed. api-url: '%s', org: '%s', space: '%s'",
+		XsDeployOptions.APIURL, XsDeployOptions.Org, XsDeployOptions.Space)
 
 	return nil
 }
