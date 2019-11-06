@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/SAP/jenkins-library/pkg/config"
+	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/spf13/cobra"
 )
 
@@ -29,6 +30,8 @@ func XsDeployCommand() *cobra.Command {
 		Short: "Performs xs deployment",
 		Long:  `Performs xs deployment`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
+			log.SetStepName("xsDeploy")
+			log.SetVerbose(generalConfig.verbose)
 			return PrepareConfig(cmd, &metadata, "xsDeploy", &myXsDeployOptions, openPiperFile)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -57,7 +60,6 @@ func addXsDeployFlags(cmd *cobra.Command) {
 	cmd.MarkFlagRequired("Org")
 	cmd.MarkFlagRequired("Space")
 	cmd.MarkFlagRequired("LoginOpts")
-	cmd.MarkFlagRequired("XsSessionFile")
 }
 
 // retrieve step metadata
@@ -112,7 +114,7 @@ func xsDeployMetadata() config.StepData {
 						Name:      "XsSessionFile",
 						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
 						Type:      "string",
-						Mandatory: true,
+						Mandatory: false,
 					},
 				},
 			},

@@ -49,6 +49,11 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner, fExists func(string
 		fExists = fileExists
 	}
 
+	xsSessionFile := ".xsconfig"
+	if len(XsDeployOptions.XsSessionFile) > 0 {
+		xsSessionFile = XsDeployOptions.XsSessionFile
+	}
+
 	loginScript := `#!/bin/bash
 		xs login -a $API_URL -u $USERNAME -p '$PASSWORD' -o $ORG -s $SPACE $LOGIN_OPTS
 		RC=$?
@@ -63,7 +68,7 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner, fExists func(string
 		"$ORG", XsDeployOptions.Org,
 		"$SPACE", XsDeployOptions.Space,
 		"$LOGIN_OPTS", XsDeployOptions.LoginOpts,
-		"$XS_SESSION_FILE", XsDeployOptions.XsSessionFile)
+		"$XS_SESSION_FILE", xsSessionFile)
 
 	loginScript = r.Replace(loginScript)
 
@@ -73,8 +78,8 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner, fExists func(string
 		return e
 	}
 
-	if !fExists(XsDeployOptions.XsSessionFile) {
-		return fmt.Errorf("xs session file does not exist (%s)", XsDeployOptions.XsSessionFile)
+	if !fExists(xsSessionFile) {
+		return fmt.Errorf("xs session file does not exist (%s)", xsSessionFile)
 	}
 
 	return nil

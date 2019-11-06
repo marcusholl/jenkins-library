@@ -80,7 +80,7 @@ spec:
         - PARAMETERS
         - STAGES
         - STEPS
-        mandatory: true
+        mandatory: false
   containers:
     - name: maven
       image: maven:3.5-jdk-8
