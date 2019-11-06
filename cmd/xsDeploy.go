@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"io"
 	"bytes"
 	"fmt"
 	"github.com/SAP/jenkins-library/pkg/command"
+	"io"
 	"os"
 	"strings"
 )
@@ -35,7 +35,6 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 		e := buf.String()
 		fmt.Printf("STDERR: %v\n", e)
 	}()
-
 
 	err := xsLogin(XsDeployOptions, s, nil)
 	pwOut.Close()
