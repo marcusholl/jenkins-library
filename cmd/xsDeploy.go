@@ -44,6 +44,11 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 	}()
 
 	err := xsLogin(XsDeployOptions, s, nil)
+
+	if err == nil {
+		err = xsLogout(XsDeployOptions, s, nil, nil)
+	}
+
 	pwOut.Close()
 	pwErr.Close()
 
@@ -59,7 +64,6 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner, fExists func(string
 
 	log.Entry().Debugf("Performing xs login. api-url: '%s', org: '%s', space: '%s'",
 		XsDeployOptions.APIURL, XsDeployOptions.Org, XsDeployOptions.Space)
-
 
 	if fExists == nil {
 		fExists = fileExists
@@ -98,6 +102,49 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner, fExists func(string
 
 	log.Entry().Infof("xs login has been performed. api-url: '%s', org: '%s', space: '%s'",
 		XsDeployOptions.APIURL, XsDeployOptions.Org, XsDeployOptions.Space)
+
+	return nil
+}
+
+func xsLogout(XsDeployOptions xsDeployOptions, s shellRunner, fExists func(string) bool, fRemove func(string) error) error {
+
+	log.Entry().Debug("Performing xs logout.")
+
+	xsSessionFile := ".xsconfig"
+	if len(XsDeployOptions.XsSessionFile) > 0 {
+		xsSessionFile = XsDeployOptions.XsSessionFile
+	}
+
+	if fRemove == nil {
+		fRemove = os.Remove
+	}
+
+	if fExists == nil {
+		fExists = fileExists
+	}
+
+	if !fExists(xsSessionFile) {
+		return fmt.Errorf("xs session file does not exist (%s)", xsSessionFile)
+	}
+
+	logoutScript := `#!/bin/bash
+	cp $XS_SESSION_FILE ${HOME}
+	xs logout`
+
+	r := strings.NewReplacer(
+		"$XS_SESSION_FILE", xsSessionFile)
+
+	logoutScript = r.Replace(logoutScript)
+
+	if e := s.RunShell("/bin/bash", logoutScript); e != nil {
+		return e
+	}
+
+	if e := fRemove(xsSessionFile); e != nil {
+		return e
+	}
+
+	log.Entry().Info("xs logput has been performed")
 
 	return nil
 }
