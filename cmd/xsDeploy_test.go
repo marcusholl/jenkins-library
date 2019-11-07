@@ -25,6 +25,8 @@ func TestXSLogin(t *testing.T) {
 
 		e := xsLogin(myXsDeployOptions, &s, func(f string) bool {
 			return false
+		}, func(src, dest string) (int64, error) {
+			return 0, nil
 		})
 
 		if e == nil {
@@ -40,6 +42,8 @@ func TestXSLogin(t *testing.T) {
 
 		e := xsLogin(myXsDeployOptions, &s, func(f string) bool {
 			return f == ".xs_session"
+		}, func(src, dest string) (int64, error) {
+			return 0, nil
 		})
 
 		if e != nil && e.Error() != "xs login failed" {
@@ -57,6 +61,8 @@ func TestXSLogin(t *testing.T) {
 
 		e := xsLogin(myXsDeployOptions, &s, func(f string) bool {
 			return f == ".xs_session"
+		}, func(src, dest string) (int64, error) {
+			return 0, nil
 		})
 
 		if e != nil {
@@ -92,6 +98,10 @@ func TestXSLogout(t *testing.T) {
 				return f == ".xs_session"
 			},
 
+			func(src, dest string) (int64, error) {
+				return 0, nil
+			},
+
 			func(f string) error {
 				return nil
 			},
@@ -116,6 +126,10 @@ func TestXSLogout(t *testing.T) {
 				return f == ".xs_session"
 			},
 
+			func(src, dest string) (int64, error) {
+				return 0, nil
+			},
+
 			func(f string) error {
 				return nil
 			},
@@ -134,6 +148,10 @@ func TestXSLogout(t *testing.T) {
 
 			func(f string) bool {
 				return f == ".xs_session"
+			},
+
+			func(src, dest string) (int64, error) {
+				return 0, nil
 			},
 
 			func(f string) error {
@@ -156,6 +174,10 @@ func TestXSLogout(t *testing.T) {
 
 			func(f string) bool {
 				return false
+			},
+
+			func(src, dest string) (int64, error) {
+				return 0, nil
 			},
 
 			func(f string) error {
