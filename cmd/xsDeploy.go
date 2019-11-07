@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/SAP/jenkins-library/pkg/command"
 	"github.com/SAP/jenkins-library/pkg/log"
+	"github.com/SAP/jenkins-library/pkg/piperutils"
 	"io"
 	"os"
 	"strings"
@@ -133,7 +134,7 @@ func xsLogout(XsDeployOptions xsDeployOptions, s shellRunner,
 	}
 
 	if fCopy == nil {
-		fCopy = nil // TODO provide helper for copying
+		fCopy =  piperutils.Copy
 	}
 
 	if fExists == nil {
