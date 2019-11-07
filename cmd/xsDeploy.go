@@ -74,7 +74,8 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 	}
 
 	if(fCopy == nil) {
-		fCopy = piperUtils.copyFile
+		fCopy = piperutils.Copy
+	}
 
 	xsSessionFile := ".xsconfig"
 	if len(XsDeployOptions.XsSessionFile) > 0 {
@@ -165,6 +166,8 @@ func xsLogout(XsDeployOptions xsDeployOptions, s shellRunner,
 	if e := fRemove(xsSessionFile); e != nil {
 		return e
 	}
+
+	log.Entry().Debugf("xs session file '%s' has been deleted", xsSessionFile)
 
 	log.Entry().Info("xs logout has been performed")
 
