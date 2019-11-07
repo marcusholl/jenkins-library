@@ -70,7 +70,7 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 		XsDeployOptions.APIURL, XsDeployOptions.Org, XsDeployOptions.Space)
 
 	if fExists == nil {
-		fExists = fileExists
+		fExists = piperutils.FileExists
 	}
 
 	xsSessionFile := ".xsconfig"
@@ -138,7 +138,7 @@ func xsLogout(XsDeployOptions xsDeployOptions, s shellRunner,
 	}
 
 	if fExists == nil {
-		fExists = fileExists
+		fExists = piperutils.FileExists
 	}
 
 	if !fExists(xsSessionFile) {
@@ -167,10 +167,3 @@ func xsLogout(XsDeployOptions xsDeployOptions, s shellRunner,
 	return nil
 }
 
-func fileExists(filename string) bool {
-	f, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !f.IsDir()
-}
