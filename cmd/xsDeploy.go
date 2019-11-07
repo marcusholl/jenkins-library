@@ -73,6 +73,9 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 		fExists = piperutils.FileExists
 	}
 
+	if(fCopy == nil) {
+		fCopy = piperUtils.copyFile
+
 	xsSessionFile := ".xsconfig"
 	if len(XsDeployOptions.XsSessionFile) > 0 {
 		xsSessionFile = XsDeployOptions.XsSessionFile
@@ -105,6 +108,7 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 	}
 
 	src, dest := fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile), fmt.Sprintf("./%s", xsSessionFile)
+	log.Entry().Debugf("Copying xs session file from '%s' to '%s' (%v)", src, dest, fCopy)
 	if _, err := fCopy(src, dest); err != nil {
 		return  errors.Wrapf(err, "Cannot copy xssession file from '%s' to '%s'", src, dest)
 	}

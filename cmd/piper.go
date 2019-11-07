@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"reflect"
 	"github.com/SAP/jenkins-library/pkg/config"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -81,7 +82,16 @@ func PrepareConfig(cmd *cobra.Command, metadata *config.StepData, stepName strin
 		// use config & defaults
 
 		//accept that config file and defaults cannot be loaded since both are not mandatory here
-		customConfig, _ := openFile(GeneralConfig.CustomConfig)
+		customConfig, errFOpen := openFile(GeneralConfig.CustomConfig)
+
+		if(errFOpen != nil) {
+			isNiill := &customConfig == nil
+                        fmt.Printf("CUST CONFIG: %v, isNil: %v, type: %v\n", customConfig, isNiill, reflect.TypeOf(customConfig))
+                        customConfig = nil
+		}
+
+		fmt.Printf("CUST CONFIG: '%v'\n", customConfig)
+
 		var defaultConfig []io.ReadCloser
 		for _, f := range GeneralConfig.DefaultConfig {
 			//ToDo: support also https as source

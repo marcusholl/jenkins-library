@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
-
+	"reflect"
 	"github.com/ghodss/yaml"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
@@ -82,7 +82,10 @@ func (c *Config) GetStepConfig(flagValues map[string]interface{}, paramJSON stri
 	var stepConfig StepConfig
 	var d PipelineDefaults
 
+	fmt.Printf("THE CONFIG: '%v'\n", configuration)
+
 	if configuration != nil {
+		fmt.Printf("THE CONFIG2: '%v', %v\n", configuration, reflect.TypeOf(configuration))
 		if err := c.ReadConfig(configuration); err != nil {
 			return StepConfig{}, errors.Wrap(err, "failed to parse custom pipeline configuration")
 		}
