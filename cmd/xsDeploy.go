@@ -144,7 +144,7 @@ func xsLogout(XsDeployOptions xsDeployOptions, s shellRunner, fExists func(strin
 		return e
 	}
 
-	log.Entry().Info("xs logput has been performed")
+	log.Entry().Info("xs logout has been performed")
 
 	return nil
 }
