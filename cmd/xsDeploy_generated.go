@@ -31,8 +31,8 @@ func XsDeployCommand() *cobra.Command {
 		Long:  `Performs xs deployment`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			log.SetStepName("xsDeploy")
-			log.SetVerbose(generalConfig.verbose)
-			return PrepareConfig(cmd, &metadata, "xsDeploy", &myXsDeployOptions, openPiperFile)
+			log.SetVerbose(GeneralConfig.Verbose)
+			return PrepareConfig(cmd, &metadata, "xsDeploy", &myXsDeployOptions, OpenPiperFile)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return xsDeploy(myXsDeployOptions)
