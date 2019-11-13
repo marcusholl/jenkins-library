@@ -3,3 +3,24 @@ metadata:
   description: Returns the version of the piper binary
   longDescription: |
     Writes the commit hash and the tag (if any) to stdout and exits with 0.
+spec:
+  inputs:
+    params:
+      - name: Weekday
+        type: enum
+        description: The days of the week
+        default: SUNDAY
+        values:
+        - SUNDAY
+        - MONDAY
+        - TUESDAY
+        - WEDNESDAY
+        - THURSDAY
+        - FRIDAY
+        - SATURDAY
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+
