@@ -7,6 +7,7 @@ import (
 )
 
 type versionOptions struct {
+	Weekday string `json:"Weekday,omitempty"`
 }
 
 var myVersionOptions versionOptions
@@ -34,6 +35,7 @@ func VersionCommand() *cobra.Command {
 }
 
 func addVersionFlags(cmd *cobra.Command) {
+	cmd.Flags().StringVar(&myVersionOptions.Weekday, "Weekday", "SUNDAY", "The days of the week")
 
 }
 
@@ -42,7 +44,14 @@ func versionMetadata() config.StepData {
 	var theMetaData = config.StepData{
 		Spec: config.StepSpec{
 			Inputs: config.StepInputs{
-				Parameters: []config.StepParameters{},
+				Parameters: []config.StepParameters{
+					{
+						Name:      "Weekday",
+						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
+						Type:      "enum",
+						Mandatory: false,
+					},
+				},
 			},
 		},
 	}
