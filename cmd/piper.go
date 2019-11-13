@@ -42,6 +42,15 @@ var GeneralConfig GeneralConfigOptions
 // Execute is the starting point of the piper command line tool
 func Execute() {
 
+	fmt.Printf("Day of week: %v, %v, %v\n", SUNDAY, MONDAY, TUESDAY)
+	wd, err := ValueOf("WEDNESDAY")
+
+	if err != nil {
+		fmt.Printf("Weekday not known: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("WD: %v\n", wd)
+
 	rootCmd.AddCommand(ConfigCommand())
 	rootCmd.AddCommand(VersionCommand())
 	rootCmd.AddCommand(KarmaExecuteTestsCommand())
