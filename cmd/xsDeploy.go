@@ -316,18 +316,25 @@ func deploy(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner,
 		xsSessionFile = XsDeployOptions.XsSessionFile
 	}
 
-	log.Entry().Debugf("Performing xs deploy.")
-
 	if fCopy == nil {
 		fCopy = piperutils.Copy
 	}
+
+	var d string
+
+	switch mode {
+		case Deploy: d = "deploy"
+		case BGDeploy: d = "bg-deploy"
+		default: errors.New(fmt.Sprintf("Invalid deploy mode: '%s'.", mode))
+	}
+
+	log.Entry().Debugf("Performing xs %s.", d)
 
 	src, dest := fmt.Sprintf("./%s", xsSessionFile), fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile)
 	if _, err := fCopy(src, dest); err != nil {
 		return errors.Wrapf(err, "Cannot copy xssession file from '%s' to '%s'", src, dest)
 	}
 
-	d := "deploy"
 	deployScript := `#!/bin/bash
 	xs $d $MTA_PATH $DEPLOY_OPTS`
 
@@ -336,11 +343,13 @@ func deploy(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner,
 		"$MTA_PATH", XsDeployOptions.MtaPath,
 		"$DEPLOY_OPTS", XsDeployOptions.DeployOpts)
 
-	loginScript = r.Replace(loginScript)
+	deployScript = r.Replace(deployScript)
 
-	if e := s.RunShell("/bin/bash", logoutScript); e != nil {
-		return e
+	if e := s.RunShell("/bin/bash", deployScript); e != nil {
+		return errors.Wrapf(e, "Cannot perform xs %s", d)
 	}
+
+	log.Entry().Infof("... xs %s performed.", d)
 
 	return nil
 
