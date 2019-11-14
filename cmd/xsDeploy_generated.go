@@ -44,7 +44,7 @@ func XsDeployCommand() *cobra.Command {
 }
 
 func addXsDeployFlags(cmd *cobra.Command) {
-	cmd.Flags().StringVar(&myXsDeployOptions.Mode, "Mode", "xxx", "The mode")
+	cmd.Flags().StringVar(&myXsDeployOptions.Mode, "Mode", "None", "The mode")
 	cmd.Flags().StringVar(&myXsDeployOptions.APIURL, "ApiUrl", os.Getenv("PIPER_ApiUrl"), "The api url (e.g. https://example.org:12345")
 	cmd.Flags().StringVar(&myXsDeployOptions.User, "User", os.Getenv("PIPER_User"), "User")
 	cmd.Flags().StringVar(&myXsDeployOptions.Password, "Password", os.Getenv("PIPER_Password"), "Password")

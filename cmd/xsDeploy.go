@@ -18,16 +18,16 @@ import (
 type DeployMode int
 
 const (
+	// None ...
+	None DeployMode = iota
 	//Deploy ...
 	Deploy DeployMode = iota
 	//BGDeploy ...
 	BGDeploy DeployMode = iota
-	// None ...
-	None DeployMode = iota
 )
 
-//ValueOf ...
-func ValueOf(str string) (DeployMode, error) {
+//ValueOfMode ...
+func ValueOfMode(str string) (DeployMode, error) {
 	switch str {
 	case "None":
 		return None, nil
@@ -38,6 +38,15 @@ func ValueOf(str string) (DeployMode, error) {
 	default:
 		return None, errors.New(fmt.Sprintf("Unknown DeployMode: '%s'", str))
 	}
+}
+
+// String
+func (m DeployMode) String() string {
+	return [...]string{
+			"None",
+			"Deploy",
+			"BGDeploy",
+	}[m]
 }
 
 // END DeployMode
@@ -75,7 +84,18 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 		wg.Done()
 	}()
 
-	err := xsLogin(XsDeployOptions, s, nil, nil)
+	mode, err := ValueOfMode(XsDeployOptions.Mode)
+
+	if err != nil {
+		fmt.Printf("ValueOf failed: %v\n", err)
+	}
+
+	if mode == None {
+		log.Entry().Infof("Deployment skipped intentionally. Deploy mode '%s'", mode.String())
+		return nil
+	}
+
+	err = xsLogin(XsDeployOptions, s, nil, nil)
 
 	if err == nil {
 		err = xsLogout(XsDeployOptions, s, nil, nil, nil)
