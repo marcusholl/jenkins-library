@@ -156,13 +156,24 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 		return errors.New(fmt.Sprintf("Cannot perform action '%s' in mode '%s'. Only action '%s' is allowed.", action, mode, None))
 	}
 
+	performLogin  := mode == Deploy || (mode == BGDeploy && ! (action == Resume || action == Abort))
+	performLogout := mode == Deploy || (mode == BGDeploy && action != None)
 
-	_ = action
 
-	err = xsLogin(XsDeployOptions, s, nil, nil)
+	// TODO: check: session file must exist in case we do not perform a login
 
-	if err == nil {
-		err = xsLogout(XsDeployOptions, s, nil, nil, nil)
+	// TODO: check: for action NONE --> deployable must exist
+
+	if performLogin {
+		if err = xsLogin(XsDeployOptions, s, nil, nil); err != nil {
+			return err
+		}
+	}
+
+	if(performLogout) {
+		if err = xsLogout(XsDeployOptions, s, nil, nil, nil); err != nil {
+			return err
+		}
 	}
 
 	pwOut.Close()
