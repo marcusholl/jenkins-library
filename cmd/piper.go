@@ -7,7 +7,6 @@ import (
 	"os"
 	"strings"
 
-	"reflect"
 	"github.com/SAP/jenkins-library/pkg/config"
 	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
