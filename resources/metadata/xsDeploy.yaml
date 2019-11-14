@@ -8,6 +8,25 @@ spec:
   inputs:
     resources:
     params:
+      - name: DeployOpts
+        type: string
+        description: Additional deploy options
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: false
+        default:
+      - name: MtaPath
+        type: string
+        description: Path to deployable
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: true
       - name: Action
         type: string
         description: The action
