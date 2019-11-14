@@ -8,6 +8,16 @@ spec:
   inputs:
     resources:
     params:
+      - name: Action
+        type: string
+        description: The action
+        default: None
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: false
       - name: Mode
         type: string
         description: The mode

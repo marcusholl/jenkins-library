@@ -9,6 +9,7 @@ import (
 )
 
 type xsDeployOptions struct {
+	Action		  string `json:Action, omitempty`
 	Mode          string `json:"Mode,omitempty"`
 	APIURL        string `json:"ApiUrl,omitempty"`
 	User          string `json:"User,omitempty"`
@@ -44,6 +45,7 @@ func XsDeployCommand() *cobra.Command {
 }
 
 func addXsDeployFlags(cmd *cobra.Command) {
+	cmd.Flags().StringVar(&myXsDeployOptions.Action, "Action", "None", "The action")
 	cmd.Flags().StringVar(&myXsDeployOptions.Mode, "Mode", "None", "The mode")
 	cmd.Flags().StringVar(&myXsDeployOptions.APIURL, "ApiUrl", os.Getenv("PIPER_ApiUrl"), "The api url (e.g. https://example.org:12345")
 	cmd.Flags().StringVar(&myXsDeployOptions.User, "User", os.Getenv("PIPER_User"), "User")
@@ -53,6 +55,7 @@ func addXsDeployFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&myXsDeployOptions.LoginOpts, "LoginOpts", os.Getenv("PIPER_LoginOpts"), "Additional options for performing xs login.")
 	cmd.Flags().StringVar(&myXsDeployOptions.XsSessionFile, "XsSessionFile", os.Getenv("PIPER_XsSessionFile"), "The file keeping the xs session.")
 
+	cmd.MarkFlagRequired("Action")
 	cmd.MarkFlagRequired("Mode")
 	cmd.MarkFlagRequired("ApiUrl")
 	cmd.MarkFlagRequired("User")
@@ -68,6 +71,12 @@ func xsDeployMetadata() config.StepData {
 		Spec: config.StepSpec{
 			Inputs: config.StepInputs{
 				Parameters: []config.StepParameters{
+					{
+						Name:      "Action",
+						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
+						Type:      "string",
+						Mandatory: true,
+					},
 					{
 						Name:      "Mode",
 						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},

@@ -18,8 +18,10 @@ import (
 type DeployMode int
 
 const (
-	// None ...
-	None DeployMode = iota
+	//UnknownMode ...
+	UnknownMode = iota
+	// NoDeploy ...
+	NoDeploy DeployMode = iota
 	//Deploy ...
 	Deploy DeployMode = iota
 	//BGDeploy ...
@@ -29,20 +31,23 @@ const (
 //ValueOfMode ...
 func ValueOfMode(str string) (DeployMode, error) {
 	switch str {
-	case "None":
-		return None, nil
+	case "UnknownMode":
+		return UnknownMode, nil
+	case "NoDeploy":
+		return NoDeploy, nil
 	case "Deploy":
 		return Deploy, nil
 	case "BGDeploy":
 		return BGDeploy, nil
 	default:
-		return None, errors.New(fmt.Sprintf("Unknown DeployMode: '%s'", str))
+		return UnknownMode, errors.New(fmt.Sprintf("Unknown DeployMode: '%s'", str))
 	}
 }
 
 // String
 func (m DeployMode) String() string {
 	return [...]string{
+			"UnknownMode",
 			"None",
 			"Deploy",
 			"BGDeploy",
@@ -51,6 +56,52 @@ func (m DeployMode) String() string {
 
 // END DeployMode
 //
+
+//
+// START Action
+type Action int
+
+const (
+	//None ...
+	None Action = iota
+	//Resume ...
+	Resume Action = iota
+	//Abort ...
+	Abort Action = iota
+	//Retry ...
+	Retry Action = iota
+)
+
+//ValueOfAction ...
+func ValueOfAction(str string) (Action, error) {
+	switch str {
+	case "None":
+		return None, nil
+	case "Resume":
+		return Resume, nil
+	case "Abort":
+		return Abort, nil
+	case "Retry":
+		return Retry, nil
+
+	default:
+		return None, errors.New(fmt.Sprintf("Unknown Action: '%s'", str))
+	}
+}
+
+// String
+func (a Action) String() string {
+	return [...]string{
+			"None",
+			"Resume",
+			"Abort",
+			"Retry",
+	}[a]
+}
+
+// END Action
+//
+
 
 func xsDeploy(myXsDeployOptions xsDeployOptions) error {
 	c := command.Command{}
@@ -85,15 +136,28 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 	}()
 
 	mode, err := ValueOfMode(XsDeployOptions.Mode)
-
 	if err != nil {
-		fmt.Printf("ValueOf failed: %v\n", err)
+		fmt.Printf("Extracting mode failed: %v\n", err)
+		return err
 	}
 
-	if mode == None {
+	if mode == NoDeploy {
 		log.Entry().Infof("Deployment skipped intentionally. Deploy mode '%s'", mode.String())
 		return nil
 	}
+
+	action, err := ValueOfAction(XsDeployOptions.Action)
+	if err != nil {
+		fmt.Printf("Extracting action failed: %v\n", err)
+		return err
+	}
+
+	if mode == Deploy && action != None {
+		return errors.New(fmt.Sprintf("Cannot perform action '%s' in mode '%s'. Only action '%s' is allowed.", action, mode, None))
+	}
+
+
+	_ = action
 
 	err = xsLogin(XsDeployOptions, s, nil, nil)
 
