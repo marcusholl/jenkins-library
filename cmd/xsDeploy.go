@@ -176,7 +176,7 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 	if action == Resume || action == Abort || action == Retry {
 		complete(mode, XsDeployOptions, s)
 	} else {
-		deploy(mode, XsDeployOptions, s)
+		deploy(mode, XsDeployOptions, s, nil)
 	}
 
 	if(performLogout) {
@@ -308,8 +308,40 @@ func xsLogout(XsDeployOptions xsDeployOptions, s shellRunner,
 	return nil
 }
 
-func deploy(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner) error {
+func deploy(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner,
+	fCopy func(string, string) (int64, error)) error {
+
+	xsSessionFile := ".xsconfig"
+	if len(XsDeployOptions.XsSessionFile) > 0 {
+		xsSessionFile = XsDeployOptions.XsSessionFile
+	}
+
 	log.Entry().Debugf("Performing xs deploy.")
+
+	if fCopy == nil {
+		fCopy = piperutils.Copy
+	}
+
+	src, dest := fmt.Sprintf("./%s", xsSessionFile), fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile)
+	if _, err := fCopy(src, dest); err != nil {
+		return errors.Wrapf(err, "Cannot copy xssession file from '%s' to '%s'", src, dest)
+	}
+
+	d := "deploy"
+	deployScript := `#!/bin/bash
+	xs $d $MTA_PATH $DEPLOY_OPTS`
+
+	r := strings.NewReplacer(
+		"$d", d,
+		"$MTA_PATH", XsDeployOptions.MtaPath,
+		"$DEPLOY_OPTS", XsDeployOptions.DeployOpts)
+
+	loginScript = r.Replace(loginScript)
+
+	if e := s.RunShell("/bin/bash", logoutScript); e != nil {
+		return e
+	}
+
 	return nil
 
 }
