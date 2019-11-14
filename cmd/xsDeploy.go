@@ -3,23 +3,45 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/pkg/errors"
 	"github.com/SAP/jenkins-library/pkg/command"
 	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
+	"github.com/pkg/errors"
 	"io"
 	"os"
 	"strings"
 	"sync"
 )
 
+//
+// START DeployMode
 type DeployMode int
 
 const (
-	DEPLOY DeployMode = iota
-	BG_DEPLOY DeployMode = iota
-	NONE DeployMode = iota
+	//Deploy ...
+	Deploy DeployMode = iota
+	//BGDeploy ...
+	BGDeploy DeployMode = iota
+	// None ...
+	None DeployMode = iota
 )
+
+//ValueOf ...
+func ValueOf(str string) (DeployMode, error) {
+	switch str {
+	case "None":
+		return None, nil
+	case "Deploy":
+		return Deploy, nil
+	case "BGDeploy":
+		return BGDeploy, nil
+	default:
+		return None, errors.New(fmt.Sprintf("Unknown DeployMode: '%s'", str))
+	}
+}
+
+// END DeployMode
+//
 
 func xsDeploy(myXsDeployOptions xsDeployOptions) error {
 	c := command.Command{}
@@ -81,7 +103,7 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 		fExists = piperutils.FileExists
 	}
 
-	if(fCopy == nil) {
+	if fCopy == nil {
 		fCopy = piperutils.Copy
 	}
 
@@ -119,7 +141,7 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 	src, dest := fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile), fmt.Sprintf("./%s", xsSessionFile)
 	log.Entry().Debugf("Copying xs session file from '%s' to '%s' (%v)", src, dest, fCopy)
 	if _, err := fCopy(src, dest); err != nil {
-		return  errors.Wrapf(err, "Cannot copy xssession file from '%s' to '%s'", src, dest)
+		return errors.Wrapf(err, "Cannot copy xssession file from '%s' to '%s'", src, dest)
 	}
 
 	log.Entry().Debugf("xs session file copied from '%s' to '%s'", src, dest)
@@ -147,7 +169,7 @@ func xsLogout(XsDeployOptions xsDeployOptions, s shellRunner,
 	}
 
 	if fCopy == nil {
-		fCopy =  piperutils.Copy
+		fCopy = piperutils.Copy
 	}
 
 	if fExists == nil {
@@ -181,4 +203,3 @@ func xsLogout(XsDeployOptions xsDeployOptions, s shellRunner,
 
 	return nil
 }
-
