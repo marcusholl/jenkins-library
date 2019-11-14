@@ -13,6 +13,14 @@ import (
 	"sync"
 )
 
+type DeployMode int
+
+const (
+	DEPLOY DeployMode = iota
+	BG_DEPLOY DeployMode = iota
+	NONE DeployMode = iota
+)
+
 func xsDeploy(myXsDeployOptions xsDeployOptions) error {
 	c := command.Command{}
 	return runXsDeploy(myXsDeployOptions, &c)
