@@ -351,6 +351,8 @@ func deploy(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner,
 
 	log.Entry().Infof("... xs %s performed.", d)
 
+	// TODO: in case of bg-deploy and successful deployment: read deployment id from log
+
 	return nil
 
 }
