@@ -9,8 +9,8 @@ import (
 	"github.com/pkg/errors"
 	"io"
 	"os"
-	"strings"
 	"sync"
+	"text/template"
 )
 
 //
@@ -103,14 +103,14 @@ func (a Action) String() string {
 //
 
 const loginScript = `#!/bin/bash
-xs login -a $API_URL -u $USERNAME -p '$PASSWORD' -o $ORG -s $SPACE $LOGIN_OPTS
+xs login -a {{.APIURL}} -u {{.User}} -p '{{.Password}}' -o {{.Org}} -s {{.Space}} {{.LoginOpts}}
 `
 
 const logoutScript = `#!/bin/bash
 xs logout`
 
 const deployScript = `#!/bin/bash
-xs $d $MTA_PATH $DEPLOY_OPTS`
+xs {{.Mode}} {{.MtaPath}} {{.DeployOpts}}`
 
 
 func xsDeploy(myXsDeployOptions xsDeployOptions) error {
@@ -226,16 +226,11 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 		xsSessionFile = XsDeployOptions.XsSessionFile
 	}
 
-	r := strings.NewReplacer(
-		"$API_URL", XsDeployOptions.APIURL,
-		"$USERNAME", XsDeployOptions.User,
-		"$PASSWORD", XsDeployOptions.Password,
-		"$ORG", XsDeployOptions.Org,
-		"$SPACE", XsDeployOptions.Space,
-		"$LOGIN_OPTS", XsDeployOptions.LoginOpts,
-		"$XS_SESSION_FILE", xsSessionFile)
+	tmpl, _ := template.New("login").Parse(loginScript)
+	var loginScript bytes.Buffer
+	tmpl.Execute(&loginScript, XsDeployOptions)
 
-	if e := s.RunShell("/bin/bash", r.Replace(loginScript)); e != nil {
+	if e := s.RunShell("/bin/bash", loginScript.String()); e != nil {
 		return e
 	}
 
@@ -311,31 +306,36 @@ func deploy(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner,
 		fCopy = piperutils.Copy
 	}
 
-	var d string
+	var deployCommand string
 
 	switch mode {
-		case Deploy: d = "deploy"
-		case BGDeploy: d = "bg-deploy"
+		case Deploy: deployCommand= "deploy"
+		case BGDeploy: deployCommand = "bg-deploy"
 		default: errors.New(fmt.Sprintf("Invalid deploy mode: '%s'.", mode))
 	}
 
-	log.Entry().Debugf("Performing xs %s.", d)
+	type deployProperties struct {
+		xsDeployOptions
+		Mode string
+	}
+
+	DeployProperties := deployProperties{xsDeployOptions: XsDeployOptions, Mode: deployCommand}
+	log.Entry().Debugf("Performing xs %s.", deployCommand)
 
 	src, dest := fmt.Sprintf("./%s", xsSessionFile), fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile)
 	if _, err := fCopy(src, dest); err != nil {
 		return errors.Wrapf(err, "Cannot copy xssession file from '%s' to '%s'", src, dest)
 	}
 
-	r := strings.NewReplacer(
-		"$d", d,
-		"$MTA_PATH", XsDeployOptions.MtaPath,
-		"$DEPLOY_OPTS", XsDeployOptions.DeployOpts)
+	tmpl, _ := template.New("deploy").Parse(deployScript)
+	var deployScript bytes.Buffer
+	tmpl.Execute(&deployScript, DeployProperties)
 
-	if e := s.RunShell("/bin/bash", r.Replace(deployScript)); e != nil {
-		return errors.Wrapf(e, "Cannot perform xs %s", d)
+	if e := s.RunShell("/bin/bash", deployScript.String()); e != nil {
+		return errors.Wrapf(e, "Cannot perform xs %s", deployCommand)
 	}
 
-	log.Entry().Infof("... xs %s performed.", d)
+	log.Entry().Infof("... xs %s performed.", deployCommand)
 
 	// TODO: in case of bg-deploy and successful deployment: read deployment id from log
 
