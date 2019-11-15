@@ -347,13 +347,11 @@ func deploy(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner,
 		fCopy = piperutils.Copy
 	}
 
-	var deployCommand string
-
-	switch mode {
-		case Deploy: deployCommand= "deploy"
-		case BGDeploy: deployCommand = "bg-deploy"
-		default: errors.New(fmt.Sprintf("Invalid deploy mode: '%s'.", mode))
+	deployCommand, err := mode.GetDeployCommand()
+	if(err != nil) {
+		return err
 	}
+
 
 	type deployProperties struct {
 		xsDeployOptions
@@ -397,3 +395,14 @@ func executeCmd(templateID string, commandPattern string, properties interface{}
 
 	return nil
 }
+
+//GetDeployCommand ...
+func (m DeployMode) GetDeployCommand() (string, error) {
+
+	switch m {
+		case Deploy: return "deploy", nil
+		case BGDeploy: return "bg-deploy", nil
+	}
+	return "", errors.New(fmt.Sprintf("Invalid deploy mode: '%s'.", m))
+}
+
