@@ -211,7 +211,7 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 			}
 		}
 	} else {
-		if loginErr == nil {
+		if loginErr != nil {
 			log.Entry().Info("Logout skipped since login did not succeed.")
 		} else if ! performLogout {
 			log.Entry().Info("Logout skipped in order to be able to resume or abort later")
