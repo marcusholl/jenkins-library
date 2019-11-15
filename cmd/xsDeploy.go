@@ -175,26 +175,30 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 	// TODO: check: for action NONE --> deployable must exist.
 	// Should be done before even trying to login
 
+	var loginErr error
+
 	if performLogin {
-		if err = xsLogin(XsDeployOptions, s, nil, nil); err != nil {
-			return err
-		}
+		loginErr = xsLogin(XsDeployOptions, s, nil, nil)
 	} else {
 		// TODO: check: session file must exist in case we do not perform a login
 	}
 
-	if action == Resume || action == Abort || action == Retry {
+	if loginErr == nil && (action == Resume || action == Abort || action == Retry) {
 		err = complete(mode, XsDeployOptions, s)
 	} else {
 		err = deploy(mode, XsDeployOptions, s, nil)
 	}
 
-	if(performLogout || err != nil) {
+	if loginErr == nil && (performLogout || err != nil) {
 		if logoutErr := xsLogout(XsDeployOptions, s, nil, nil, nil); err != nil {
 			if err == nil {
 				err = logoutErr
 			}
 		}
+	}
+
+	if err == nil {
+		err = loginErr
 	}
 
 	pwOut.Close()
