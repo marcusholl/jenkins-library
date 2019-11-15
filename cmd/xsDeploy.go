@@ -118,7 +118,12 @@ func xsDeploy(myXsDeployOptions xsDeployOptions) error {
 	return runXsDeploy(myXsDeployOptions, &c)
 }
 
-func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
+func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
+	fExists func(string) bool) error {
+
+	if(fExists == null) {
+		fExists = piperutils.FileExists
+	}
 
 	mode, err := ValueOfMode(XsDeployOptions.Mode)
 	if err != nil {
@@ -180,7 +185,15 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 	if performLogin {
 		loginErr = xsLogin(XsDeployOptions, s, nil, nil)
 	} else {
-		// TODO: check: session file must exist in case we do not perform a login
+
+		xsSessionFile := ".xsconfig"
+		if len(XsDeployOptions.XsSessionFile) > 0 {
+			xsSessionFile = XsDeployOptions.XsSessionFile
+		}
+
+		if !fExists(xsSessionFile) {
+			return fmt.Errorf("xs session file does not exist (%s)", xsSessionFile)
+		}
 	}
 
 	if loginErr == nil && (action == Resume || action == Abort || action == Retry) {
