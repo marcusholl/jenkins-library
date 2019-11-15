@@ -245,7 +245,7 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 	}
 
 	src, dest := fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile), fmt.Sprintf("./%s", xsSessionFile)
-	log.Entry().Debugf("Copying xs session file from '%s' to '%s' (%v)", src, dest, fCopy)
+	log.Entry().Debugf("Copying xs session file from '%s' to '%s'", src, dest)
 	if _, err := fCopy(src, dest); err != nil {
 		return errors.Wrapf(err, "Cannot copy xssession file from '%s' to '%s'", src, dest)
 	}
