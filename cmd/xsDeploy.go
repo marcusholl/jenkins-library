@@ -218,9 +218,6 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 
 	loginScript := `#!/bin/bash
 		xs login -a $API_URL -u $USERNAME -p '$PASSWORD' -o $ORG -s $SPACE $LOGIN_OPTS
-		RC=$?
-		[[ $RC == 0 && -f "${HOME}/$XS_SESSION_FILE" ]]  && cp "${HOME}/$XS_SESSION_FILE" .
-		exit $RC
 	`
 
 	r := strings.NewReplacer(
