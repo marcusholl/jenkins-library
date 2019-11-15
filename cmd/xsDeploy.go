@@ -102,6 +102,17 @@ func (a Action) String() string {
 // END Action
 //
 
+const loginScript = `#!/bin/bash
+xs login -a $API_URL -u $USERNAME -p '$PASSWORD' -o $ORG -s $SPACE $LOGIN_OPTS
+`
+
+const logoutScript = `#!/bin/bash
+cp $XS_SESSION_FILE ${HOME}
+xs logout`
+
+const deployScript = `#!/bin/bash
+xs $d $MTA_PATH $DEPLOY_OPTS`
+
 
 func xsDeploy(myXsDeployOptions xsDeployOptions) error {
 	c := command.Command{}
@@ -216,10 +227,6 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 		xsSessionFile = XsDeployOptions.XsSessionFile
 	}
 
-	loginScript := `#!/bin/bash
-		xs login -a $API_URL -u $USERNAME -p '$PASSWORD' -o $ORG -s $SPACE $LOGIN_OPTS
-	`
-
 	r := strings.NewReplacer(
 		"$API_URL", XsDeployOptions.APIURL,
 		"$USERNAME", XsDeployOptions.User,
@@ -229,9 +236,7 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 		"$LOGIN_OPTS", XsDeployOptions.LoginOpts,
 		"$XS_SESSION_FILE", xsSessionFile)
 
-	loginScript = r.Replace(loginScript)
-
-	if e := s.RunShell("/bin/bash", loginScript); e != nil {
+	if e := s.RunShell("/bin/bash", r.Replace(loginScript)); e != nil {
 		return e
 	}
 
@@ -281,16 +286,10 @@ func xsLogout(XsDeployOptions xsDeployOptions, s shellRunner,
 		return fmt.Errorf("xs session file does not exist (%s)", xsSessionFile)
 	}
 
-	logoutScript := `#!/bin/bash
-	cp $XS_SESSION_FILE ${HOME}
-	xs logout`
-
 	r := strings.NewReplacer(
 		"$XS_SESSION_FILE", xsSessionFile)
 
-	logoutScript = r.Replace(logoutScript)
-
-	if e := s.RunShell("/bin/bash", logoutScript); e != nil {
+	if e := s.RunShell("/bin/bash", r.Replace(logoutScript)); e != nil {
 		return e
 	}
 
@@ -332,17 +331,12 @@ func deploy(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner,
 		return errors.Wrapf(err, "Cannot copy xssession file from '%s' to '%s'", src, dest)
 	}
 
-	deployScript := `#!/bin/bash
-	xs $d $MTA_PATH $DEPLOY_OPTS`
-
 	r := strings.NewReplacer(
 		"$d", d,
 		"$MTA_PATH", XsDeployOptions.MtaPath,
 		"$DEPLOY_OPTS", XsDeployOptions.DeployOpts)
 
-	deployScript = r.Replace(deployScript)
-
-	if e := s.RunShell("/bin/bash", deployScript); e != nil {
+	if e := s.RunShell("/bin/bash", r.Replace(deployScript)); e != nil {
 		return errors.Wrapf(e, "Cannot perform xs %s", d)
 	}
 
