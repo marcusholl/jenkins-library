@@ -240,6 +240,9 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 		return e
 	}
 
+	log.Entry().Infof("xs login has been performed. api-url: '%s', org: '%s', space: '%s'",
+		XsDeployOptions.APIURL, XsDeployOptions.Org, XsDeployOptions.Space)
+
 	if !fExists(xsSessionFile) {
 		return fmt.Errorf("xs session file does not exist (%s)", xsSessionFile)
 	}
@@ -251,9 +254,6 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 	}
 
 	log.Entry().Debugf("xs session file copied from '%s' to '%s'", src, dest)
-
-	log.Entry().Infof("xs login has been performed. api-url: '%s', org: '%s', space: '%s'",
-		XsDeployOptions.APIURL, XsDeployOptions.Org, XsDeployOptions.Space)
 
 	return nil
 }
