@@ -184,14 +184,16 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 	}
 
 	if action == Resume || action == Abort || action == Retry {
-		complete(mode, XsDeployOptions, s)
+		err = complete(mode, XsDeployOptions, s)
 	} else {
-		deploy(mode, XsDeployOptions, s, nil)
+		err = deploy(mode, XsDeployOptions, s, nil)
 	}
 
-	if(performLogout) {
-		if err = xsLogout(XsDeployOptions, s, nil, nil, nil); err != nil {
-			return err
+	if(performLogout || err != nil) {
+		if logoutErr = xsLogout(XsDeployOptions, s, nil, nil, nil); err != nil {
+			if err == nil {
+				err = logoutErr
+			}
 		}
 	}
 
