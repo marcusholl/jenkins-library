@@ -10,7 +10,9 @@ import (
 	"io"
 	"os"
 	"sync"
+	"strings"
 	"text/template"
+	"regexp"
 )
 
 //
@@ -227,6 +229,24 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 
 	fmt.Printf("STDOUT: %v\n", o)
 	fmt.Printf("STDERR: %v\n", e)
+
+	if(mode == BGDeploy) {
+		re := regexp.MustCompile(`^.*xs bg-deploy -i (.*) -a.*$`)
+		lines := strings.Split(o,"\n")
+		var deploymentID string
+		for _, line := range lines {
+			matched := re.FindStringSubmatch(line)
+			if len(matched) >= 1 {
+				deploymentID = matched[1]
+			}
+		}
+
+		if len(deploymentID) > 0 {
+			log.Entry().Infof("Deployment identifier: '%s'", deploymentID)
+		} else {
+			log.Entry().Infof("No deployment identifier found in >>>>%s<<<<<<<<.", o)
+		}
+	}
 
 	return err
 }
