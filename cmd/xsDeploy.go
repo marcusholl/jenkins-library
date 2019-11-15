@@ -115,13 +115,13 @@ xs {{.Mode}} {{.MtaPath}} {{.DeployOpts}}`
 
 func xsDeploy(myXsDeployOptions xsDeployOptions) error {
 	c := command.Command{}
-	return runXsDeploy(myXsDeployOptions, &c)
+	return runXsDeploy(myXsDeployOptions, &c, nil)
 }
 
 func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 	fExists func(string) bool) error {
 
-	if(fExists == null) {
+	if(fExists == nil) {
 		fExists = piperutils.FileExists
 	}
 
@@ -207,6 +207,12 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 			if err == nil {
 				err = logoutErr
 			}
+		}
+	} else {
+		if loginErr == nil {
+			log.Entry().Info("Logout skipped since login did not succeed.")
+		} else if ! performLogout {
+			log.Entry().Info("Logout skipped in order to be able to resume or abort later")
 		}
 	}
 
