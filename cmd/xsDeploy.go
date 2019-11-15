@@ -131,6 +131,22 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 		return nil
 	}
 
+	action, err := ValueOfAction(XsDeployOptions.Action)
+	if err != nil {
+		fmt.Printf("Extracting action failed: %v\n", err)
+		return err
+	}
+
+	if mode == Deploy && action != None {
+		return errors.New(fmt.Sprintf("Cannot perform action '%s' in mode '%s'. Only action '%s' is allowed.", action, mode, None))
+	}
+
+	log.Entry().Debugf("Mode: '%s', Action: '%s'", mode, action)
+
+	performLogin  := mode == Deploy || (mode == BGDeploy && ! (action == Resume || action == Abort))
+	performLogout := mode == Deploy || (mode == BGDeploy && action != None)
+	log.Entry().Debugf("performLogin: %t, performLogout: %t", performLogin, performLogout)
+
 	prOut, pwOut := io.Pipe()
 	prErr, pwErr := io.Pipe()
 
@@ -155,22 +171,6 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 		e = buf.String()
 		wg.Done()
 	}()
-
-	action, err := ValueOfAction(XsDeployOptions.Action)
-	if err != nil {
-		fmt.Printf("Extracting action failed: %v\n", err)
-		return err
-	}
-
-	if mode == Deploy && action != None {
-		return errors.New(fmt.Sprintf("Cannot perform action '%s' in mode '%s'. Only action '%s' is allowed.", action, mode, None))
-	}
-
-	log.Entry().Debugf("Mode: '%s', Action: '%s'", mode, action)
-
-	performLogin  := mode == Deploy || (mode == BGDeploy && ! (action == Resume || action == Abort))
-	performLogout := mode == Deploy || (mode == BGDeploy && action != None)
-	log.Entry().Debugf("performLogin: %t, performLogout: %t", performLogin, performLogout)
 
 	// TODO: check: for action NONE --> deployable must exist.
 	// Should be done before even trying to login
