@@ -112,7 +112,7 @@ func TestXSLogout(t *testing.T) {
 
 		cmds := strings.Split(s.calls[0], "\n")
 		assert.Equal(t, cmds[0], "#!/bin/bash")
-		assert.Contains(t, cmds[2], "xs logout")
+		assert.Contains(t, cmds[1], "xs logout")
 	})
 
 	t.Run("Logout fails", func(t *testing.T) {

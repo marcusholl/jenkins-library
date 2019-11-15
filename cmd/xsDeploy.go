@@ -107,7 +107,6 @@ xs login -a $API_URL -u $USERNAME -p '$PASSWORD' -o $ORG -s $SPACE $LOGIN_OPTS
 `
 
 const logoutScript = `#!/bin/bash
-cp $XS_SESSION_FILE ${HOME}
 xs logout`
 
 const deployScript = `#!/bin/bash
@@ -247,7 +246,7 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 		return fmt.Errorf("xs session file does not exist (%s)", xsSessionFile)
 	}
 
-	src, dest := fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile), fmt.Sprintf("./%s", xsSessionFile)
+	src, dest := fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile), fmt.Sprintf("%s", xsSessionFile)
 	log.Entry().Debugf("Copying xs session file from '%s' to '%s'", src, dest)
 	if _, err := fCopy(src, dest); err != nil {
 		return errors.Wrapf(err, "Cannot copy xssession file from '%s' to '%s'", src, dest)
@@ -286,20 +285,16 @@ func xsLogout(XsDeployOptions xsDeployOptions, s shellRunner,
 		return fmt.Errorf("xs session file does not exist (%s)", xsSessionFile)
 	}
 
-	r := strings.NewReplacer(
-		"$XS_SESSION_FILE", xsSessionFile)
-
-	if e := s.RunShell("/bin/bash", r.Replace(logoutScript)); e != nil {
+	if e := s.RunShell("/bin/bash", logoutScript); e != nil {
 		return e
 	}
+	log.Entry().Info("xs logout has been performed")
 
 	if e := fRemove(xsSessionFile); e != nil {
 		return e
 	}
 
 	log.Entry().Debugf("xs session file '%s' has been deleted", xsSessionFile)
-
-	log.Entry().Info("xs logout has been performed")
 
 	return nil
 }
