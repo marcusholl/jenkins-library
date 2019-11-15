@@ -72,7 +72,6 @@ func TestXSLogin(t *testing.T) {
 		cmds := strings.Split(s.calls[0], "\n")
 		assert.Equal(t, cmds[0], "#!/bin/bash")
 		assert.Contains(t, cmds[1], "xs login -a https://example.org:12345 -u me -p 'secret' -o myOrg -s mySpace --skip-ssl-validation")
-		assert.Contains(t, cmds[3], "cp \"${HOME}/.xs_session\" .")
 	})
 }
 
