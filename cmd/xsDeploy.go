@@ -120,6 +120,17 @@ func xsDeploy(myXsDeployOptions xsDeployOptions) error {
 
 func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 
+	mode, err := ValueOfMode(XsDeployOptions.Mode)
+	if err != nil {
+		fmt.Printf("Extracting mode failed: %v\n", err)
+		return err
+	}
+
+	if mode == NoDeploy {
+		log.Entry().Infof("Deployment skipped intentionally. Deploy mode '%s'", mode.String())
+		return nil
+	}
+
 	prOut, pwOut := io.Pipe()
 	prErr, pwErr := io.Pipe()
 
@@ -144,17 +155,6 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 		e = buf.String()
 		wg.Done()
 	}()
-
-	mode, err := ValueOfMode(XsDeployOptions.Mode)
-	if err != nil {
-		fmt.Printf("Extracting mode failed: %v\n", err)
-		return err
-	}
-
-	if mode == NoDeploy {
-		log.Entry().Infof("Deployment skipped intentionally. Deploy mode '%s'", mode.String())
-		return nil
-	}
 
 	action, err := ValueOfAction(XsDeployOptions.Action)
 	if err != nil {
@@ -190,7 +190,7 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner) error {
 	}
 
 	if(performLogout || err != nil) {
-		if logoutErr = xsLogout(XsDeployOptions, s, nil, nil, nil); err != nil {
+		if logoutErr := xsLogout(XsDeployOptions, s, nil, nil, nil); err != nil {
 			if err == nil {
 				err = logoutErr
 			}
