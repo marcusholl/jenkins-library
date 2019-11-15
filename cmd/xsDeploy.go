@@ -210,9 +210,6 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 	fExists func(string) bool,
 	fCopy func(string, string) (int64, error)) error {
 
-	log.Entry().Debugf("Performing xs login. api-url: '%s', org: '%s', space: '%s'",
-		XsDeployOptions.APIURL, XsDeployOptions.Org, XsDeployOptions.Space)
-
 	if fExists == nil {
 		fExists = piperutils.FileExists
 	}
@@ -226,11 +223,10 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 		xsSessionFile = XsDeployOptions.XsSessionFile
 	}
 
-	tmpl, _ := template.New("login").Parse(loginScript)
-	var loginScript bytes.Buffer
-	tmpl.Execute(&loginScript, XsDeployOptions)
+	log.Entry().Debugf("Performing xs login. api-url: '%s', org: '%s', space: '%s'",
+	XsDeployOptions.APIURL, XsDeployOptions.Org, XsDeployOptions.Space)
 
-	if e := s.RunShell("/bin/bash", loginScript.String()); e != nil {
+	if e := executeCmd("login", loginScript, XsDeployOptions, s); e != nil {
 		return e
 	}
 
@@ -280,7 +276,7 @@ func xsLogout(XsDeployOptions xsDeployOptions, s shellRunner,
 		return fmt.Errorf("xs session file does not exist (%s)", xsSessionFile)
 	}
 
-	if e := s.RunShell("/bin/bash", logoutScript); e != nil {
+	if e := executeCmd("logout", logoutScript, XsDeployOptions, s); e != nil {
 		return e
 	}
 	log.Entry().Info("xs logout has been performed")
@@ -319,22 +315,15 @@ func deploy(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner,
 		Mode string
 	}
 
-	DeployProperties := deployProperties{xsDeployOptions: XsDeployOptions, Mode: deployCommand}
-	log.Entry().Debugf("Performing xs %s.", deployCommand)
-
 	src, dest := fmt.Sprintf("./%s", xsSessionFile), fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile)
 	if _, err := fCopy(src, dest); err != nil {
 		return errors.Wrapf(err, "Cannot copy xssession file from '%s' to '%s'", src, dest)
 	}
 
-	tmpl, _ := template.New("deploy").Parse(deployScript)
-	var deployScript bytes.Buffer
-	tmpl.Execute(&deployScript, DeployProperties)
-
-	if e := s.RunShell("/bin/bash", deployScript.String()); e != nil {
-		return errors.Wrapf(e, "Cannot perform xs %s", deployCommand)
+	log.Entry().Debugf("Performing xs %s.", deployCommand)
+	if e := executeCmd("deploy", deployScript, deployProperties{xsDeployOptions: XsDeployOptions, Mode: deployCommand}, s); e != nil {
+		return e
 	}
-
 	log.Entry().Infof("... xs %s performed.", deployCommand)
 
 	// TODO: in case of bg-deploy and successful deployment: read deployment id from log
@@ -345,5 +334,21 @@ func deploy(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner,
 
 func complete(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner) error {
 	log.Entry().Debugf("Performing xs complete.")
+	return nil
+}
+
+func executeCmd(templateID string, commandPattern string, properties interface{}, s shellRunner) error {
+
+	tmpl, e := template.New(templateID).Parse(commandPattern)
+	if(e != nil) {
+		return e
+	}
+
+	var script bytes.Buffer
+	tmpl.Execute(&script, properties)
+	if e := s.RunShell("/bin/bash", script.String()); e != nil {
+		return e
+	}
+
 	return nil
 }
