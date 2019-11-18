@@ -255,6 +255,7 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 			matched := re.FindStringSubmatch(line)
 			if len(matched) >= 1 {
 				deploymentID = matched[1]
+				break
 			}
 		}
 
