@@ -9,10 +9,10 @@ import (
 	"github.com/pkg/errors"
 	"io"
 	"os"
-	"sync"
-	"strings"
-	"text/template"
 	"regexp"
+	"strings"
+	"sync"
+	"text/template"
 )
 
 //
@@ -49,10 +49,10 @@ func ValueOfMode(str string) (DeployMode, error) {
 // String
 func (m DeployMode) String() string {
 	return [...]string{
-			"UnknownMode",
-			"None",
-			"Deploy",
-			"BGDeploy",
+		"UnknownMode",
+		"None",
+		"Deploy",
+		"BGDeploy",
 	}[m]
 }
 
@@ -94,10 +94,10 @@ func ValueOfAction(str string) (Action, error) {
 // String
 func (a Action) String() string {
 	return [...]string{
-			"None",
-			"Resume",
-			"Abort",
-			"Retry",
+		"None",
+		"Resume",
+		"Abort",
+		"Retry",
 	}[a]
 }
 
@@ -126,7 +126,7 @@ func xsDeploy(myXsDeployOptions xsDeployOptions) error {
 func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 	fExists func(string) bool) error {
 
-	if(fExists == nil) {
+	if fExists == nil {
 		fExists = piperutils.FileExists
 	}
 
@@ -153,7 +153,7 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 
 	log.Entry().Debugf("Mode: '%s', Action: '%s'", mode, action)
 
-	performLogin  := mode == Deploy || (mode == BGDeploy && ! (action == Resume || action == Abort))
+	performLogin := mode == Deploy || (mode == BGDeploy && !(action == Resume || action == Abort))
 	performLogout := mode == Deploy || (mode == BGDeploy && action != None)
 	log.Entry().Debugf("performLogin: %t, performLogout: %t", performLogin, performLogout)
 
@@ -223,7 +223,7 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 	} else {
 		if loginErr != nil {
 			log.Entry().Info("Logout skipped since login did not succeed.")
-		} else if ! performLogout {
+		} else if !performLogout {
 			log.Entry().Info("Logout skipped in order to be able to resume or abort later")
 		}
 	}
@@ -240,9 +240,9 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 	fmt.Printf("STDOUT: %v\n", o)
 	fmt.Printf("STDERR: %v\n", e)
 
-	if(mode == BGDeploy) {
+	if mode == BGDeploy {
 		re := regexp.MustCompile(`^.*xs bg-deploy -i (.*) -a.*$`)
-		lines := strings.Split(o,"\n")
+		lines := strings.Split(o, "\n")
 		var deploymentID string
 		for _, line := range lines {
 			matched := re.FindStringSubmatch(line)
@@ -279,7 +279,7 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 	}
 
 	log.Entry().Debugf("Performing xs login. api-url: '%s', org: '%s', space: '%s'",
-	XsDeployOptions.APIURL, XsDeployOptions.Org, XsDeployOptions.Space)
+		XsDeployOptions.APIURL, XsDeployOptions.Org, XsDeployOptions.Space)
 
 	if e := executeCmd("login", loginScript, XsDeployOptions, s); e != nil {
 		return e
@@ -358,10 +358,9 @@ func deploy(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner,
 	}
 
 	deployCommand, err := mode.GetDeployCommand()
-	if(err != nil) {
+	if err != nil {
 		return err
 	}
-
 
 	type deployProperties struct {
 		xsDeployOptions
@@ -390,13 +389,12 @@ func complete(mode DeployMode, action Action, s shellRunner) error {
 
 	type completeProperties struct {
 		xsDeployOptions
-		Mode DeployMode
-		Action Action
+		Mode         DeployMode
+		Action       Action
 		DeploymentID string
 	}
 
 	CompleteProperties := completeProperties{Mode: mode, Action: action, DeploymentID: "1234"}
-
 
 	if e := executeCmd("complete", completeScript, CompleteProperties, s); e != nil {
 		return e
@@ -408,7 +406,7 @@ func complete(mode DeployMode, action Action, s shellRunner) error {
 func executeCmd(templateID string, commandPattern string, properties interface{}, s shellRunner) error {
 
 	tmpl, e := template.New(templateID).Parse(commandPattern)
-	if(e != nil) {
+	if e != nil {
 		return e
 	}
 
@@ -424,18 +422,21 @@ func executeCmd(templateID string, commandPattern string, properties interface{}
 //GetAction ...
 func (a Action) GetAction() (string, error) {
 	switch a {
-		case Resume, Abort, Retry: return strings.ToLower(a.String()), nil
+	case Resume, Abort, Retry:
+		return strings.ToLower(a.String()), nil
 	}
 	return "", errors.New(fmt.Sprintf("Invalid deploy mode: '%s'.", a))
 
 }
+
 //GetDeployCommand ...
 func (m DeployMode) GetDeployCommand() (string, error) {
 
 	switch m {
-		case Deploy: return "deploy", nil
-		case BGDeploy: return "bg-deploy", nil
+	case Deploy:
+		return "deploy", nil
+	case BGDeploy:
+		return "bg-deploy", nil
 	}
 	return "", errors.New(fmt.Sprintf("Invalid deploy mode: '%s'.", m))
 }
-
