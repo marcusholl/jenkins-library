@@ -284,17 +284,9 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 	log.Entry().Infof("xs login has been performed. api-url: '%s', org: '%s', space: '%s'",
 		XsDeployOptions.APIURL, XsDeployOptions.Org, XsDeployOptions.Space)
 
-	if !fExists(xsSessionFile) {
-		return fmt.Errorf("xs session file does not exist (%s)", xsSessionFile)
+	if e := copyFileFromHomeToPwd(xsSessionFile, fCopy); e != nil {
+		return e
 	}
-
-	src, dest := fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile), fmt.Sprintf("%s", xsSessionFile)
-	log.Entry().Debugf("Copying xs session file from home directory ('%s') to workspace ('%s')", src, dest)
-	if _, err := fCopy(src, dest); err != nil {
-		return errors.Wrapf(err, "Cannot copy xssession file from home directory ('%s') to workspace ('%s')", src, dest)
-	}
-
-	log.Entry().Debugf("xs session file copied from home directory ('%s') to workspace ('%s')", src, dest)
 
 	return nil
 }
@@ -380,6 +372,16 @@ func deploy(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner,
 
 	return nil
 
+}
+
+func copyFileFromHomeToPwd(xsSessionFile string, fCopy func(string, string) (int64, error)) error {
+	src, dest := fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile), fmt.Sprintf("%s", xsSessionFile)
+	log.Entry().Debugf("Copying xs session file from home directory ('%s') to workspace ('%s')", src, dest)
+	if _, err := fCopy(src, dest); err != nil {
+		return errors.Wrapf(err, "Cannot copy xssess	ion file from home directory ('%s') to workspace ('%s')", src, dest)
+	}
+	log.Entry().Debugf("xs session file copied from home directory ('%s') to workspace ('%s')", src, dest)
+	return nil
 }
 
 func complete(mode DeployMode, action Action, deploymentID string, s shellRunner) error {
