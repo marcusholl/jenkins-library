@@ -289,12 +289,12 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 	}
 
 	src, dest := fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile), fmt.Sprintf("%s", xsSessionFile)
-	log.Entry().Debugf("Copying xs session file from '%s' to '%s'", src, dest)
+	log.Entry().Debugf("Copying xs session file from home directory ('%s') to workspace ('%s')", src, dest)
 	if _, err := fCopy(src, dest); err != nil {
-		return errors.Wrapf(err, "Cannot copy xssession file from '%s' to '%s'", src, dest)
+		return errors.Wrapf(err, "Cannot copy xssession file from home directory ('%s') to workspace ('%s')", src, dest)
 	}
 
-	log.Entry().Debugf("xs session file copied from '%s' to '%s'", src, dest)
+	log.Entry().Debugf("xs session file copied from home directory ('%s') to workspace ('%s')", src, dest)
 
 	return nil
 }
@@ -336,7 +336,9 @@ func xsLogout(XsDeployOptions xsDeployOptions, s shellRunner,
 		return e
 	}
 
-	log.Entry().Debugf("xs session file '%s' has been deleted", xsSessionFile)
+	// we delete the xs session file from workspace. From home directory it is deleted by the
+	// xs command itself.
+	log.Entry().Debugf("xs session file '%s' has been deleted from workspace", xsSessionFile)
 
 	return nil
 }
