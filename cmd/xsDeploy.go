@@ -114,6 +114,9 @@ xs logout`
 const deployScript = `#!/bin/bash
 xs {{.Mode}} {{.MtaPath}} {{.DeployOpts}}`
 
+const completeScript = `#!/bin/bash
+xs {{.Mode.GetDeployCommand}} -i {{.DeploymentID}} -a {{.Action.GetAction}}
+`
 
 func xsDeploy(myXsDeployOptions xsDeployOptions) error {
 	c := command.Command{}
@@ -198,10 +201,17 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 		}
 	}
 
-	if loginErr == nil && (action == Resume || action == Abort || action == Retry) {
-		err = complete(mode, XsDeployOptions, s)
-	} else {
-		err = deploy(mode, XsDeployOptions, s, nil)
+	if loginErr == nil {
+		switch action {
+		case Resume:
+			err = complete(mode, action, s)
+		case Abort:
+			err = complete(mode, action, s)
+		case Retry:
+			err = complete(mode, action, s)
+		default:
+			err = deploy(mode, XsDeployOptions, s, nil)
+		}
 	}
 
 	if loginErr == nil && (performLogout || err != nil) {
@@ -375,8 +385,23 @@ func deploy(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner,
 
 }
 
-func complete(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner) error {
-	log.Entry().Debugf("Performing xs complete.")
+func complete(mode DeployMode, action Action, s shellRunner) error {
+	log.Entry().Debugf("Performing xs %s", action)
+
+	type completeProperties struct {
+		xsDeployOptions
+		Mode DeployMode
+		Action Action
+		DeploymentID string
+	}
+
+	CompleteProperties := completeProperties{Mode: mode, Action: action, DeploymentID: "1234"}
+
+
+	if e := executeCmd("complete", completeScript, CompleteProperties, s); e != nil {
+		return e
+	}
+
 	return nil
 }
 
@@ -396,6 +421,16 @@ func executeCmd(templateID string, commandPattern string, properties interface{}
 	return nil
 }
 
+//GetAction ...
+func (a Action) GetAction() (string, error) {
+	switch a {
+		case Resume: return strings.ToLower(a.String()), nil
+		case Abort: return strings.ToLower(a.String()), nil
+		case Retry: return strings.ToLower(a.String()), nil
+	}
+	return "", errors.New(fmt.Sprintf("Invalid deploy mode: '%s'.", a))
+
+}
 //GetDeployCommand ...
 func (m DeployMode) GetDeployCommand() (string, error) {
 
