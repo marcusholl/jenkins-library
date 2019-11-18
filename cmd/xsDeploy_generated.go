@@ -13,6 +13,7 @@ type xsDeployOptions struct {
 	MtaPath       string `json:"MtaPath,omitempty"`
 	Action        string `json:"Action,omitempty"`
 	Mode          string `json:"Mode,omitempty"`
+	DeploymentID  string `json:"DeploymentID,omitempty"`
 	APIURL        string `json:"ApiUrl,omitempty"`
 	User          string `json:"User,omitempty"`
 	Password      string `json:"Password,omitempty"`
@@ -51,6 +52,7 @@ func addXsDeployFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&myXsDeployOptions.MtaPath, "MtaPath", os.Getenv("PIPER_MtaPath"), "Path to deployable")
 	cmd.Flags().StringVar(&myXsDeployOptions.Action, "Action", "None", "The action")
 	cmd.Flags().StringVar(&myXsDeployOptions.Mode, "Mode", "xxx", "The mode")
+	cmd.Flags().StringVar(&myXsDeployOptions.DeploymentID, "DeploymentID", os.Getenv("PIPER_DeploymentID"), "The deployment ID")
 	cmd.Flags().StringVar(&myXsDeployOptions.APIURL, "ApiUrl", os.Getenv("PIPER_ApiUrl"), "The api url (e.g. https://example.org:12345")
 	cmd.Flags().StringVar(&myXsDeployOptions.User, "User", os.Getenv("PIPER_User"), "User")
 	cmd.Flags().StringVar(&myXsDeployOptions.Password, "Password", os.Getenv("PIPER_Password"), "Password")
@@ -98,6 +100,12 @@ func xsDeployMetadata() config.StepData {
 						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
 						Type:      "string",
 						Mandatory: true,
+					},
+					{
+						Name:      "DeploymentID",
+						Scope:     []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
+						Type:      "string",
+						Mandatory: false,
 					},
 					{
 						Name:      "ApiUrl",

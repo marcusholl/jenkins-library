@@ -47,6 +47,16 @@ spec:
         - STAGES
         - STEPS
         mandatory: true
+      - name: DeploymentID
+        type: string
+        description: The deployment ID
+        default:
+        scope:
+        - GENERAL
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: false
       - name: ApiUrl
         type: string
         description: The api url (e.g. https://example.org:12345
