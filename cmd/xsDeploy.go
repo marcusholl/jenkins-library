@@ -424,9 +424,7 @@ func executeCmd(templateID string, commandPattern string, properties interface{}
 //GetAction ...
 func (a Action) GetAction() (string, error) {
 	switch a {
-		case Resume: return strings.ToLower(a.String()), nil
-		case Abort: return strings.ToLower(a.String()), nil
-		case Retry: return strings.ToLower(a.String()), nil
+		case Resume, Abort, Retry: return strings.ToLower(a.String()), nil
 	}
 	return "", errors.New(fmt.Sprintf("Invalid deploy mode: '%s'.", a))
 
