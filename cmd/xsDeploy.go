@@ -203,12 +203,8 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 
 	if loginErr == nil {
 		switch action {
-		case Resume:
-			err = complete(mode, action, s)
-		case Abort:
-			err = complete(mode, action, s)
-		case Retry:
-			err = complete(mode, action, s)
+		case Resume, Abort, Retry:
+			err = complete(mode, action, XsDeployOptions.DeploymentID, s)
 		default:
 			err = deploy(mode, XsDeployOptions, s, nil)
 		}
@@ -240,7 +236,7 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 	fmt.Printf("STDOUT: %v\n", o)
 	fmt.Printf("STDERR: %v\n", e)
 
-	if mode == BGDeploy {
+	if err == nil && (mode == BGDeploy && action == None) {
 		re := regexp.MustCompile(`^.*xs bg-deploy -i (.*) -a.*$`)
 		lines := strings.Split(o, "\n")
 		var deploymentID string
@@ -384,8 +380,12 @@ func deploy(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner,
 
 }
 
-func complete(mode DeployMode, action Action, s shellRunner) error {
+func complete(mode DeployMode, action Action, deploymentID string, s shellRunner) error {
 	log.Entry().Debugf("Performing xs %s", action)
+
+	if len(deploymentID) == 0 {
+		return errors.New(fmt.Sprintf("deploymentID was not provided. This is required for action '%s'.", action))
+	}
 
 	type completeProperties struct {
 		xsDeployOptions
@@ -394,7 +394,7 @@ func complete(mode DeployMode, action Action, s shellRunner) error {
 		DeploymentID string
 	}
 
-	CompleteProperties := completeProperties{Mode: mode, Action: action, DeploymentID: "1234"}
+	CompleteProperties := completeProperties{Mode: mode, Action: action, DeploymentID: deploymentID}
 
 	if e := executeCmd("complete", completeScript, CompleteProperties, s); e != nil {
 		return e
