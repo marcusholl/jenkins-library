@@ -120,15 +120,13 @@ xs {{.Mode.GetDeployCommand}} -i {{.DeploymentID}} -a {{.Action.GetAction}}
 
 func xsDeploy(myXsDeployOptions xsDeployOptions) error {
 	c := command.Command{}
-	return runXsDeploy(myXsDeployOptions, &c, nil)
+	return runXsDeploy(myXsDeployOptions, &c, piperutils.FileExists, piperutils.Copy, os.Remove)
 }
 
 func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
-	fExists func(string) bool) error {
-
-	if fExists == nil {
-		fExists = piperutils.FileExists
-	}
+	fExists func(string) bool,
+	fCopy func(string, string) (int64, error),
+	fRemove func(string) error) error {
 
 	mode, err := ValueOfMode(XsDeployOptions.Mode)
 	if err != nil {
@@ -187,34 +185,47 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 
 	var loginErr error
 
-	if performLogin {
-		loginErr = xsLogin(XsDeployOptions, s, nil, nil)
-	} else {
+	xsSessionFile := ".xsconfig"
+	if len(XsDeployOptions.XsSessionFile) > 0 {
+		xsSessionFile = XsDeployOptions.XsSessionFile
+	}
 
-		xsSessionFile := ".xsconfig"
-		if len(XsDeployOptions.XsSessionFile) > 0 {
-			xsSessionFile = XsDeployOptions.XsSessionFile
+	if performLogin {
+		loginErr = xsLogin(XsDeployOptions, s)
+		if loginErr == nil {
+			err = copyFileFromHomeToPwd(xsSessionFile, fCopy)
 		}
+	}
+
+	if loginErr == nil || err == nil {
 
 		if !fExists(xsSessionFile) {
 			return fmt.Errorf("xs session file does not exist (%s)", xsSessionFile)
 		}
-	}
 
-	if loginErr == nil {
+		copyFileFromPwdToHome(xsSessionFile, fCopy)
+
 		switch action {
 		case Resume, Abort, Retry:
 			err = complete(mode, action, XsDeployOptions.DeploymentID, s)
 		default:
-			err = deploy(mode, XsDeployOptions, s, nil)
+			err = deploy(mode, XsDeployOptions, s)
 		}
 	}
 
 	if loginErr == nil && (performLogout || err != nil) {
-		if logoutErr := xsLogout(XsDeployOptions, s, nil, nil, nil); err != nil {
+		if logoutErr := xsLogout(XsDeployOptions, s); logoutErr != nil {
 			if err == nil {
 				err = logoutErr
 			}
+		} else {
+
+			// we delete the xs session file from workspace. From home directory it is deleted by the
+			// xs command itself.
+			if e := fRemove(xsSessionFile); e != nil {
+				err = e
+			}
+			log.Entry().Debugf("xs session file '%s' has been deleted from workspace", xsSessionFile)
 		}
 	} else {
 		if loginErr != nil {
@@ -257,22 +268,7 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 	return err
 }
 
-func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
-	fExists func(string) bool,
-	fCopy func(string, string) (int64, error)) error {
-
-	if fExists == nil {
-		fExists = piperutils.FileExists
-	}
-
-	if fCopy == nil {
-		fCopy = piperutils.Copy
-	}
-
-	xsSessionFile := ".xsconfig"
-	if len(XsDeployOptions.XsSessionFile) > 0 {
-		xsSessionFile = XsDeployOptions.XsSessionFile
-	}
+func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner) error {
 
 	log.Entry().Debugf("Performing xs login. api-url: '%s', org: '%s', space: '%s'",
 		XsDeployOptions.APIURL, XsDeployOptions.Org, XsDeployOptions.Space)
@@ -284,68 +280,22 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner,
 	log.Entry().Infof("xs login has been performed. api-url: '%s', org: '%s', space: '%s'",
 		XsDeployOptions.APIURL, XsDeployOptions.Org, XsDeployOptions.Space)
 
-	if e := copyFileFromHomeToPwd(xsSessionFile, fCopy); e != nil {
-		return e
-	}
-
 	return nil
 }
 
-func xsLogout(XsDeployOptions xsDeployOptions, s shellRunner,
-	fExists func(string) bool,
-	fCopy func(string, string) (int64, error),
-	fRemove func(string) error) error {
+func xsLogout(XsDeployOptions xsDeployOptions, s shellRunner) error {
 
 	log.Entry().Debug("Performing xs logout.")
-
-	xsSessionFile := ".xsconfig"
-	if len(XsDeployOptions.XsSessionFile) > 0 {
-		xsSessionFile = XsDeployOptions.XsSessionFile
-	}
-
-	if fRemove == nil {
-		fRemove = os.Remove
-	}
-
-	if fCopy == nil {
-		fCopy = piperutils.Copy
-	}
-
-	if fExists == nil {
-		fExists = piperutils.FileExists
-	}
-
-	if !fExists(xsSessionFile) {
-		return fmt.Errorf("xs session file does not exist (%s)", xsSessionFile)
-	}
 
 	if e := executeCmd("logout", logoutScript, XsDeployOptions, s); e != nil {
 		return e
 	}
 	log.Entry().Info("xs logout has been performed")
 
-	if e := fRemove(xsSessionFile); e != nil {
-		return e
-	}
-
-	// we delete the xs session file from workspace. From home directory it is deleted by the
-	// xs command itself.
-	log.Entry().Debugf("xs session file '%s' has been deleted from workspace", xsSessionFile)
-
 	return nil
 }
 
-func deploy(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner,
-	fCopy func(string, string) (int64, error)) error {
-
-	xsSessionFile := ".xsconfig"
-	if len(XsDeployOptions.XsSessionFile) > 0 {
-		xsSessionFile = XsDeployOptions.XsSessionFile
-	}
-
-	if fCopy == nil {
-		fCopy = piperutils.Copy
-	}
+func deploy(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner) error {
 
 	deployCommand, err := mode.GetDeployCommand()
 	if err != nil {
@@ -357,30 +307,12 @@ func deploy(mode DeployMode, XsDeployOptions xsDeployOptions, s shellRunner,
 		Mode string
 	}
 
-	src, dest := fmt.Sprintf("./%s", xsSessionFile), fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile)
-	if _, err := fCopy(src, dest); err != nil {
-		return errors.Wrapf(err, "Cannot copy xssession file from '%s' to '%s'", src, dest)
-	}
-
 	log.Entry().Debugf("Performing xs %s.", deployCommand)
 	if e := executeCmd("deploy", deployScript, deployProperties{xsDeployOptions: XsDeployOptions, Mode: deployCommand}, s); e != nil {
 		return e
 	}
 	log.Entry().Infof("... xs %s performed.", deployCommand)
 
-	// TODO: in case of bg-deploy and successful deployment: read deployment id from log
-
-	return nil
-
-}
-
-func copyFileFromHomeToPwd(xsSessionFile string, fCopy func(string, string) (int64, error)) error {
-	src, dest := fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile), fmt.Sprintf("%s", xsSessionFile)
-	log.Entry().Debugf("Copying xs session file from home directory ('%s') to workspace ('%s')", src, dest)
-	if _, err := fCopy(src, dest); err != nil {
-		return errors.Wrapf(err, "Cannot copy xssess	ion file from home directory ('%s') to workspace ('%s')", src, dest)
-	}
-	log.Entry().Debugf("xs session file copied from home directory ('%s') to workspace ('%s')", src, dest)
 	return nil
 }
 
@@ -420,6 +352,32 @@ func executeCmd(templateID string, commandPattern string, properties interface{}
 		return e
 	}
 
+	return nil
+}
+
+func copyFileFromHomeToPwd(xsSessionFile string, fCopy func(string, string) (int64, error)) error {
+	if(fCopy == nil) {
+		fCopy = piperutils.Copy
+	}
+	src, dest := fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile), fmt.Sprintf("%s", xsSessionFile)
+	log.Entry().Debugf("Copying xs session file from home directory ('%s') to workspace ('%s')", src, dest)
+	if _, err := fCopy(src, dest); err != nil {
+		return errors.Wrapf(err, "Cannot copy xssession file from home directory ('%s') to workspace ('%s')", src, dest)
+	}
+	log.Entry().Debugf("xs session file copied from home directory ('%s') to workspace ('%s')", src, dest)
+	return nil
+}
+
+func copyFileFromPwdToHome(xsSessionFile string, fCopy func(string, string) (int64, error)) error {
+	if(fCopy == nil) {
+		fCopy = piperutils.Copy
+	}
+	src, dest := fmt.Sprintf("%s", xsSessionFile), fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile)
+	log.Entry().Debugf("Copying xs session file from workspace ('%s') to home directory ('%s')", src, dest)
+	if _, err := fCopy(src, dest); err != nil {
+		return errors.Wrapf(err, "Cannot copy xssession file from workspace ('%s') to home directory ('%s')", src, dest)
+	}
+	log.Entry().Debugf("xs session file copied from workspace ('%s') to home directory ('%s')", src, dest)
 	return nil
 }
 
