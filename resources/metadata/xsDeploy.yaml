@@ -40,7 +40,7 @@ spec:
       - name: Mode
         type: string
         description: The mode
-        default: xxx
+        default: Deploy
         scope:
         - GENERAL
         - PARAMETERS
