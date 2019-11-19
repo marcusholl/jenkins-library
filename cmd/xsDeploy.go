@@ -155,7 +155,7 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 	performLogout := mode == Deploy || (mode == BGDeploy && action != None)
 	log.Entry().Debugf("performLogin: %t, performLogout: %t", performLogin, performLogout)
 
-	if action == None && ! fExists(XsDeployOptions.MtaPath) {
+	if action == None && !fExists(XsDeployOptions.MtaPath) {
 		return errors.New(fmt.Sprintf("Deployable '%s' does not exist", XsDeployOptions.MtaPath))
 	}
 
@@ -358,7 +358,7 @@ func executeCmd(templateID string, commandPattern string, properties interface{}
 }
 
 func copyFileFromHomeToPwd(xsSessionFile string, fCopy func(string, string) (int64, error)) error {
-	if(fCopy == nil) {
+	if fCopy == nil {
 		fCopy = piperutils.Copy
 	}
 	src, dest := fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile), fmt.Sprintf("%s", xsSessionFile)
@@ -371,7 +371,7 @@ func copyFileFromHomeToPwd(xsSessionFile string, fCopy func(string, string) (int
 }
 
 func copyFileFromPwdToHome(xsSessionFile string, fCopy func(string, string) (int64, error)) error {
-	if(fCopy == nil) {
+	if fCopy == nil {
 		fCopy = piperutils.Copy
 	}
 	src, dest := fmt.Sprintf("%s", xsSessionFile), fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile)
