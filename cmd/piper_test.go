@@ -72,7 +72,7 @@ func (m *shellMockRunner) Stdout(out io.Writer) {
 	m.stdout = out
 }
 
-func (m * shellMockRunner) Stderr(err io.Writer) {
+func (m *shellMockRunner) Stderr(err io.Writer) {
 	m.stderr = err
 }
 
