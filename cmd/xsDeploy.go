@@ -155,6 +155,10 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 	performLogout := mode == Deploy || (mode == BGDeploy && action != None)
 	log.Entry().Debugf("performLogin: %t, performLogout: %t", performLogin, performLogout)
 
+	if action == None && ! fExists(XsDeployOptions.MtaPath) {
+		return errors.New(fmt.Sprintf("Deployable '%s' does not exist", XsDeployOptions.MtaPath))
+	}
+
 	prOut, pwOut := io.Pipe()
 	prErr, pwErr := io.Pipe()
 
@@ -179,9 +183,6 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 		e = buf.String()
 		wg.Done()
 	}()
-
-	// TODO: check: for action NONE --> deployable must exist.
-	// Should be done before even trying to login
 
 	var loginErr error
 
