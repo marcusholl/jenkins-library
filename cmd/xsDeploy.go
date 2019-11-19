@@ -240,6 +240,19 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 		err = loginErr
 	}
 
+	if err != nil {
+		if _, e := os.Stat(fmt.Sprintf("%s/%s", os.Getenv("HOME"), ".xs_logs")); ! os.IsNotExist(e) {
+			s.RunShell("/bin/bash",
+			`#!/bin/bash
+			echo "Here are the logs (cat ${HOME}/.xs_logs/*):" > /dev/stderr
+			cat ${HOME}/.xs_logs/* > /dev/stderr`)
+		} else {
+			s.RunShell("/bin/bash",
+			`#!/bin/bash
+			echo "Cannot provide xs logs. Log directory '${HOME}/.xs_logs' does not exist." > /dev/stderr`)
+		}
+	}
+
 	pwOut.Close()
 	pwErr.Close()
 
@@ -247,6 +260,7 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 
 	fmt.Printf("STDOUT: %v\n", o)
 	fmt.Printf("STDERR: %v\n", e)
+
 
 	if err == nil && (mode == BGDeploy && action == None) {
 		re := regexp.MustCompile(`^.*xs bg-deploy -i (.*) -a.*$`)
