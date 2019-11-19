@@ -198,7 +198,7 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 		}
 	}
 
-	if loginErr == nil || err == nil {
+	if loginErr == nil && err == nil {
 
 		if !fExists(xsSessionFile) {
 			return fmt.Errorf("xs session file does not exist (%s)", xsSessionFile)
