@@ -276,6 +276,7 @@ func xsLogin(XsDeployOptions xsDeployOptions, s shellRunner) error {
 		XsDeployOptions.APIURL, XsDeployOptions.Org, XsDeployOptions.Space)
 
 	if e := executeCmd("login", loginScript, XsDeployOptions, s); e != nil {
+		log.Entry().Errorf("xs login failed: %s", e.Error())
 		return e
 	}
 
