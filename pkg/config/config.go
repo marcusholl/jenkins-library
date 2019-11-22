@@ -14,9 +14,11 @@ import (
 
 // Config defines the structure of the config files
 type Config struct {
-	General map[string]interface{}            `json:"general"`
-	Stages  map[string]map[string]interface{} `json:"stages"`
-	Steps   map[string]map[string]interface{} `json:"steps"`
+	CustomDefaults []string                          `json:"customDefaults,omitempty"`
+	General        map[string]interface{}            `json:"general"`
+	Stages         map[string]map[string]interface{} `json:"stages"`
+	Steps          map[string]map[string]interface{} `json:"steps"`
+	openFile       func(s string) (io.ReadCloser, error)
 }
 
 // StepConfig defines the structure for merged step configuration
@@ -54,7 +56,7 @@ func (c *Config) ApplyAliasConfig(parameters []StepParameters, filters StepFilte
 }
 
 func setParamValueFromAlias(configMap map[string]interface{}, filter []string, p StepParameters) map[string]interface{} {
-	if configMap[p.Name] == nil && sliceContains(filter, p.Name) {
+	if configMap != nil && configMap[p.Name] == nil && sliceContains(filter, p.Name) {
 		for _, a := range p.Aliases {
 			configMap[p.Name] = getDeepAliasValue(configMap, a.Name)
 			if configMap[p.Name] != nil {
@@ -87,6 +89,20 @@ func (c *Config) GetStepConfig(flagValues map[string]interface{}, paramJSON stri
 		}
 	}
 	c.ApplyAliasConfig(parameters, filters, stageName, stepName)
+
+	// consider custom defaults defined in config.yml
+	if c.CustomDefaults != nil && len(c.CustomDefaults) > 0 {
+		if c.openFile == nil {
+			c.openFile = OpenPiperFile
+		}
+		for _, f := range c.CustomDefaults {
+			fc, err := c.openFile(f)
+			if err != nil {
+				return StepConfig{}, errors.Wrapf(err, "getting default '%v' failed", f)
+			}
+			defaults = append(defaults, fc)
+		}
+	}
 
 	if err := d.ReadPipelineDefaults(defaults); err != nil {
 		switch err.(type) {
@@ -175,6 +191,15 @@ func GetJSON(data interface{}) (string, error) {
 		return "", errors.Wrapf(err, "error marshalling json: %v", err)
 	}
 	return string(result), nil
+}
+
+// OpenPiperFile provides functionality to retrieve configuration via file or http
+func OpenPiperFile(name string) (io.ReadCloser, error) {
+	//ToDo: support also https as source
+	if !strings.HasPrefix(name, "http") {
+		return os.Open(name)
+	}
+	return nil, fmt.Errorf("file location not yet supported for '%v'", name)
 }
 
 func envValues(filter []string) map[string]interface{} {
