@@ -73,6 +73,8 @@ void call(Map parameters = [:]) {
             step: STEP_NAME,
         ], config)
 
+        echo "DOCKER-CONFIG: §{config.docker}"
+
 
         // for now we copy the piper bin into the workspace (in order to be able to use it from xs docker image)
         sh "cp \${JENKINS_HOME}/piper ."
