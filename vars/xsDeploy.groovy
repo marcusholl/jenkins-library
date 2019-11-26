@@ -79,11 +79,11 @@ void call(Map parameters = [:]) {
                     credentialsId: config.credentialsId,
                     passwordVariable: 'PASSWORD',
                     usernameVariable: 'USERNAME')]) {
-		sh """#!/bin/bash
-                    \${JENKINS_HOME}/piper --customConfig .pipeline/config.yml xsDeploy --user \${USERNAME} --password \${PASSWORD}
-         
-                """
-
+                dockerExecute([script: script].plus(config.docker)) {
+		    sh """#!/bin/bash
+                        \${JENKINS_HOME}/piper --customConfig .pipeline/config.yml xsDeploy --user \${USERNAME} --password \${PASSWORD}
+                    """
+                }
             }
         }
     }
