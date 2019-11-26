@@ -73,6 +73,10 @@ void call(Map parameters = [:]) {
             step: STEP_NAME,
         ], config)
 
+
+        // for now we copy the piper bin into the workspace (in order to be able to use it from xs docker image)
+        sh "cp \${JENKINS_HOME}/piper ."
+
         lock(getLockIdentifier(config)) {
 
             withCredentials([usernamePassword(
@@ -81,7 +85,7 @@ void call(Map parameters = [:]) {
                     usernameVariable: 'USERNAME')]) {
                 dockerExecute([script: script].plus(config.docker)) {
 		    sh """#!/bin/bash
-                        \${JENKINS_HOME}/piper --customConfig .pipeline/config.yml xsDeploy --user \${USERNAME} --password \${PASSWORD}
+                        ./piper --customConfig .pipeline/config.yml xsDeploy --user \${USERNAME} --password \${PASSWORD}
                     """
                 }
             }
