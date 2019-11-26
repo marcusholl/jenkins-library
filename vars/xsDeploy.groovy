@@ -80,7 +80,7 @@ void call(Map parameters = [:]) {
                     passwordVariable: 'PASSWORD',
                     usernameVariable: 'USERNAME')]) {
 		sh """#!/bin/bash
-                    \${JENKINS_HOME}/piper --customConfig .pipeline/myconfig.yml xsDeploy --user \${USERNAME} --password \${PASSWORD}
+                    \${JENKINS_HOME}/piper --customConfig .pipeline/config.yml xsDeploy --user \${USERNAME} --password \${PASSWORD}
          
                 """
 
