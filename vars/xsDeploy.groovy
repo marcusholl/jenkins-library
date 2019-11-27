@@ -100,7 +100,7 @@ void call(Map parameters = [:]) {
 
                     dockerExecute([script: this].plus(config.docker)) {
                         sh """#!/bin/bash
-                        ./piper --verbose --customConfig .pipeline/config.yml xsDeploy --user \${USERNAME} --password \${PASSWORD}
+                        ./piper --verbose xsDeploy --user \${USERNAME} --password \${PASSWORD}
                         """
                     }
                 }
