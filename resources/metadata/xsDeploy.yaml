@@ -3,10 +3,12 @@ metadata:
   description: Performs xs deployment
   longDescription: |
     Performs xs deployment
-
 spec:
   inputs:
-    resources:
+    secrets:
+      - name: xsDeployUserCredentialsId
+        description: Jenkins username/password credential for accessing xs endpoint.
+        type: jenkins
     params:
       - name: deployOpts
         type: string
@@ -109,8 +111,6 @@ spec:
         - STEPS
         mandatory: false
   containers:
-    - name: maven
-      image: maven:3.5-jdk-8
-      volumeMounts:
-      - mountPath: /dev/shm
-        name: dev-shm
+    - name: xs
+      image: ppiper/xs-cli
+      pullImage: false
