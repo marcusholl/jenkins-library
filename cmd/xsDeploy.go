@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/SAP/jenkins-library/pkg/command"
+	"github.com/SAP/jenkins-library/pkg/fileutils"
 	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
 	"github.com/pkg/errors"
@@ -116,13 +117,11 @@ xs {{.Mode.GetDeployCommand}} -i {{.DeploymentID}} -a {{.Action.GetAction}}
 
 func xsDeploy(myXsDeployOptions xsDeployOptions) error {
 	c := command.Command{}
-	return runXsDeploy(myXsDeployOptions, &c, piperutils.FileExists, piperutils.Copy, os.Remove)
+	f := fileutils.FileUtils{}
+	return runXsDeploy(myXsDeployOptions, &c, &f)
 }
 
-func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
-	fExists func(string) bool,
-	fCopy func(string, string) (int64, error),
-	fRemove func(string) error) error {
+func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner, fs fileSystem) error {
 
 	mode, err := ValueOfMode(XsDeployOptions.Mode)
 	if err != nil {
@@ -149,7 +148,7 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 	performLogout := mode == Deploy || (mode == BGDeploy && action != None)
 	log.Entry().Debugf("performLogin: %t, performLogout: %t", performLogin, performLogout)
 
-	if action == None && !fExists(XsDeployOptions.MtaPath) {
+	if exists, _ := fs.FileExists(XsDeployOptions.MtaPath); action == None && !exists {
 		return errors.New(fmt.Sprintf("Deployable '%s' does not exist", XsDeployOptions.MtaPath))
 	}
 
@@ -194,17 +193,17 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 	if performLogin {
 		loginErr = xsLogin(XsDeployOptions, s)
 		if loginErr == nil {
-			err = copyFileFromHomeToPwd(xsSessionFile, fCopy)
+			err = copyFileFromHomeToPwd(xsSessionFile, fs.Copy)
 		}
 	}
 
 	if loginErr == nil && err == nil {
 
-		if !fExists(xsSessionFile) {
+		if fExists, _ := fs.FileExists(xsSessionFile); !fExists {
 			return fmt.Errorf("xs session file does not exist (%s)", xsSessionFile)
 		}
 
-		copyFileFromPwdToHome(xsSessionFile, fCopy)
+		copyFileFromPwdToHome(xsSessionFile, fs.Copy)
 
 		switch action {
 		case Resume, Abort, Retry:
@@ -223,7 +222,7 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 
 			// we delete the xs session file from workspace. From home directory it is deleted by the
 			// xs command itself.
-			if e := fRemove(xsSessionFile); e != nil {
+			if e := fs.Remove(xsSessionFile); e != nil {
 				err = e
 			}
 			log.Entry().Debugf("xs session file '%s' has been deleted from workspace", xsSessionFile)

@@ -8,6 +8,23 @@ import (
 	"testing"
 )
 
+type fileSystemMock struct{}
+
+func (f fileSystemMock) FileExists(path string) (bool, error) {
+	return path == "dummy.mtar" || path == ".xs_session", nil
+}
+func (f fileSystemMock) Copy(src string, dest string) (int64, error) {
+	copiedFiles = append(copiedFiles, fmt.Sprintf("%s->%s", src, dest))
+	return 0, nil
+}
+func (f fileSystemMock) Remove(path string) error {
+	removedFiles = append(removedFiles, path)
+	return nil
+}
+
+var copiedFiles []string
+var removedFiles []string
+
 func TestDeploy(t *testing.T) {
 	myXsDeployOptions := xsDeployOptions{
 		APIURL:        "https://example.org:12345",
@@ -24,23 +41,7 @@ func TestDeploy(t *testing.T) {
 	}
 
 	s := shellMockRunner{}
-
-	var copiedFiles []string
-	var removedFiles []string
-
-	fExists := func(path string) bool {
-		return path == "dummy.mtar" || path == ".xs_session"
-	}
-
-	fCopy := func(src, dest string) (int64, error) {
-		copiedFiles = append(copiedFiles, fmt.Sprintf("%s->%s", src, dest))
-		return 0, nil
-	}
-
-	fRemove := func(path string) error {
-		removedFiles = append(removedFiles, path)
-		return nil
-	}
+	fs := fileSystemMock{}
 
 	t.Run("Standard deploy succeeds", func(t *testing.T) {
 
@@ -50,7 +51,7 @@ func TestDeploy(t *testing.T) {
 			s.calls = nil
 		}()
 
-		e := runXsDeploy(myXsDeployOptions, &s, fExists, fCopy, fRemove)
+		e := runXsDeploy(myXsDeployOptions, &s, &fs)
 		checkErr(t, e, "")
 
 		// Contains --> we do not check for the shebang
@@ -90,7 +91,7 @@ func TestDeploy(t *testing.T) {
 		// this file is not denoted in the file exists mock
 		myXsDeployOptions.MtaPath = "doesNotExist"
 
-		e := runXsDeploy(myXsDeployOptions, &s, fExists, fCopy, fRemove)
+		e := runXsDeploy(myXsDeployOptions, &s, &fs)
 		checkErr(t, e, "Deployable 'doesNotExist' does not exist")
 	})
 
@@ -107,7 +108,7 @@ func TestDeploy(t *testing.T) {
 			myXsDeployOptions.Action = "NONE"
 		}()
 
-		e := runXsDeploy(myXsDeployOptions, &s, fExists, fCopy, fRemove)
+		e := runXsDeploy(myXsDeployOptions, &s, &fs)
 		checkErr(t, e, "Cannot perform action 'RETRY' in mode 'DEPLOY'. Only action 'NONE' is allowed.")
 	})
 
@@ -122,7 +123,7 @@ func TestDeploy(t *testing.T) {
 
 		s.shouldFailWith = errors.New("Error from underlying process")
 
-		e := runXsDeploy(myXsDeployOptions, &s, fExists, fCopy, fRemove)
+		e := runXsDeploy(myXsDeployOptions, &s, &fs)
 		checkErr(t, e, "Error from underlying process")
 	})
 
@@ -142,7 +143,7 @@ func TestDeploy(t *testing.T) {
 
 		myXsDeployOptions.Mode = "BG_DEPLOY"
 
-		e := runXsDeploy(myXsDeployOptions, &s, fExists, fCopy, fRemove)
+		e := runXsDeploy(myXsDeployOptions, &s, &fs)
 		checkErr(t, e, "")
 
 		assert.Contains(t, s.calls[0], "xs login")
@@ -171,7 +172,7 @@ func TestDeploy(t *testing.T) {
 		myXsDeployOptions.Action = "ABORT"
 		myXsDeployOptions.DeploymentID = "12345"
 
-		e := runXsDeploy(myXsDeployOptions, &s, fExists, fCopy, fRemove)
+		e := runXsDeploy(myXsDeployOptions, &s, &fs)
 		checkErr(t, e, "")
 
 		assert.Contains(t, s.calls[0], "xs bg-deploy -i 12345 -a abort")
@@ -198,7 +199,7 @@ func TestDeploy(t *testing.T) {
 		myXsDeployOptions.Mode = "BG_DEPLOY"
 		myXsDeployOptions.Action = "ABORT"
 
-		e := runXsDeploy(myXsDeployOptions, &s, fExists, fCopy, fRemove)
+		e := runXsDeploy(myXsDeployOptions, &s, &fs)
 		checkErr(t, e, "deploymentID was not provided")
 	})
 }
@@ -208,7 +209,7 @@ func TestRetrieveDeploymentID(t *testing.T) {
 	Uploading 1 files:
         myFolder/dummy.mtar
 	File upload finished
-	
+
 	Detected MTA schema version: "3.1.0"
 	Detected deploy target as "myOrg mySpace"
 	Detected deployed MTA with ID "my_mta" and version "0.0.1"
