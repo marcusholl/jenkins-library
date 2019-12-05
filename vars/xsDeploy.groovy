@@ -48,7 +48,7 @@ void call(Map parameters = [:]) {
 
         final script = checkScript(this, parameters) ?: null
 
-	if(! script) {
+        if(! script) {
             error "Reference to surrounding pipeline script not provided (script: this)."
         }
 
@@ -57,7 +57,7 @@ void call(Map parameters = [:]) {
         //
         // The parameters map in provided from outside. That map might be used elsewhere in the pipeline
         // hence we should not modify it here. So we create a new map based on the parameters map.
-	parameters = [:] << parameters
+        parameters = [:] << parameters
 
         // hard to predict how these two parameters looks like in its serialized form. Anyhow it is better
         // not to have these parameters forwarded somehow to the go layer.
@@ -73,8 +73,8 @@ void call(Map parameters = [:]) {
         //
         // Printing the piper-go version. Should not be done here, but somewhere during materializing
         // the piper binary.
-	def piperGoVersion = sh(returnStdout: true, script: "./piper version")
-	echo "PiperGoVersion: ${piperGoVersion}"
+        def piperGoVersion = sh(returnStdout: true, script: "./piper version")
+        echo "PiperGoVersion: ${piperGoVersion}"
 
         //
         // since there is no valid config provided (... null) telemetry is disabled.
@@ -155,4 +155,3 @@ void call(Map parameters = [:]) {
 String getLockIdentifier(Map config) {
     "$STEP_NAME:${config.apiUrl}:${config.org}:${config.space}"
 }
-
