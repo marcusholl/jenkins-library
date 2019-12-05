@@ -1,3 +1,5 @@
+import static com.sap.piper.Prerequisites.checkScript
+
 import com.sap.piper.JenkinsUtils
 import com.sap.piper.PiperGoUtils
 
@@ -10,6 +12,28 @@ import groovy.transform.Field
 @Field String METADATA_FILE = 'metadata/xsDeploy.yaml'
 @Field String STEP_NAME = getClass().getName()
 
+
+enum DeployMode {
+    DEPLOY,
+    BG_DEPLOY,
+    NONE
+
+    String toString() {
+        name().toLowerCase(Locale.ENGLISH).replaceAll('_', '-')
+    }
+}
+
+enum Action {
+    RESUME,
+    ABORT,
+    RETRY,
+    NONE
+
+    String toString() {
+        name().toLowerCase(Locale.ENGLISH)
+    }
+}
+
 /**
   * Performs an XS deployment
   *
@@ -21,6 +45,12 @@ import groovy.transform.Field
 void call(Map parameters = [:]) {
 
     handlePipelineStepErrors (stepName: STEP_NAME, stepParameters: parameters) {
+
+        final script = checkScript(this, parameters) ?: null
+
+	if(! script) {
+            error "Reference to surrounding pipeline script not provided (script: this)."
+        }
 
         def utils = parameters.juStabUtils ?: new Utils()
 
@@ -54,11 +84,10 @@ void call(Map parameters = [:]) {
 
         writeFile(file: METADATA_FILE, text: libraryResource(METADATA_FILE))
 
+
         withEnv([
             "PIPER_parametersJSON=${groovy.json.JsonOutput.toJson(parameters)}",
         ]) {
-
-            sh "echo \"Parameters: \${PIPER_parametersJSON}\""
 
             //
             // context config gives us e.g. the docker image name. --> How does this work for customer maintained images?
@@ -66,17 +95,15 @@ void call(Map parameters = [:]) {
             // The user has to build that for her/his own. How do we expect to configure this?
             Map contextConfig = readJSON (text: sh(returnStdout: true, script: "./piper getConfig --contextConfig --stepMetadata '${METADATA_FILE}'"))
 
-            //
-            // The project config is used since we have project related parameters in the groovy layer. This is not handed over to the "payload"
-            // go step at the moment. That step does the evaluation again on its own. Maybe it would be better to handover the project config via
-            // --parametersJSON. But not sure how this works since we have also the corresponding environment variable (I think the command line parameters
-            // has precedence.
-            // The idea in this case would be to fully calculate the config ouside and just give it to the second call of the piper lib
-            // --> we should discuss in order to find a suitable pattern here.
-            Map projectConfig = readJSON (text: sh(returnStdout: true, script: "./piper getConfig --stepMetadata '${METADATA_FILE}'"))
+            Map projectConfig = readJSON (text: sh(returnStdout: true, script: "./piper ${parameters.verbose ? '--verbose' :''} getConfig --stepMetadata '${METADATA_FILE}'"))
 
-            echo "Context-Config: ${contextConfig}"
-            echo "Project-Config: ${projectConfig}"
+            if(parameters.verbose) {
+                echo "[INFO] Context-Config: ${contextConfig}"
+                echo "[INFO] Project-Config: ${projectConfig}"
+            }
+
+            Action action = projectConfig.action
+            DeployMode mode = projectConfig.mode
 
             // That config map here is only used in the groovy layer. Nothing is handed over to go.
             Map config = contextConfig <<
@@ -91,6 +118,13 @@ void call(Map parameters = [:]) {
                     ]
                 ]
 
+            def operationId
+            if(mode == DeployMode.BG_DEPLOY && action != Action.NONE) {
+                operationId = script.commonPipelineEnvironment.xsDeploymentId
+            }
+
+            def xsDeployStdout
+
             lock(getLockIdentifier(config)) {
 
                 withCredentials([usernamePassword(
@@ -99,11 +133,20 @@ void call(Map parameters = [:]) {
                         usernameVariable: 'USERNAME')]) {
 
                     dockerExecute([script: this].plus(config.docker)) {
-                        sh """#!/bin/bash
-                        ./piper --verbose xsDeploy --user \${USERNAME} --password \${PASSWORD}
+                        xsDeployStdout = sh returnStdout: true, script: """#!/bin/bash
+                        ./piper ${parameters.verbose ? '--verbose' : ''} xsDeploy --user \${USERNAME} --password \${PASSWORD} ${operationId ? "--operationId " + operationId : "" }
                         """
                     }
+
                 }
+            }
+
+            if(mode == DeployMode.BG_DEPLOY && action == Action.NONE) {
+                script.commonPipelineEnvironment.xsDeploymentId = readJSON(text: xsDeployStdout).operationId
+                if (!script.commonPipelineEnvironment.xsDeploymentId) {
+                    error "No Operation id returned from xs deploy step. This is required for mode '${mode}' and action '${action}'."
+                }
+                echo "[INFO] OperationId for subsequent resume or abort: '${script.commonPipelineEnvironment.xsDeploymentId}'."
             }
         }
     }
