@@ -7,17 +7,25 @@ class DefaultValueCache implements Serializable {
     private static DefaultValueCache instance
 
     private Map defaultValues
+    private List additionalConfigs = []
 
-    private DefaultValueCache(Map defaultValues){
+    private DefaultValueCache(Map defaultValues, List additionalConfigs = []){
         this.defaultValues = defaultValues
+        if(additionalConfigs) {
+            this.additionalConfigs << additionalConfigs
+        }
+    }
+
+    List getAdditionalConfigurations() {
+        [] << this.additionalConfigs
     }
 
     static getInstance(){
         return instance
-    }
+   }
 
-    static createInstance(Map defaultValues){
-        instance = new DefaultValueCache(defaultValues)
+    static createInstance(Map defaultValues, List additionalConfigs = []) {
+        instance = new DefaultValueCache(defaultValues, additionalConfigs)
     }
 
     Map getDefaultValues(){
@@ -46,7 +54,7 @@ class DefaultValueCache implements Serializable {
                         MapUtils.pruneNulls(defaultValues),
                         MapUtils.pruneNulls(configuration))
             }
-            DefaultValueCache.createInstance(defaultValues)
+            DefaultValueCache.createInstance(defaultValues, customDefaults)
         }
     }
 }

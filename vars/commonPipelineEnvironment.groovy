@@ -143,4 +143,7 @@ class commonPipelineEnvironment implements Serializable {
         config = ConfigurationMerger.merge(configuration.get('stages')?.get(stageName) ?: [:], null, config)
         return config
     }
+    List getAdditionalConfiguration() {
+        DefaultValueCache.getInstance().getAdditionalConfigurations()
+    }
 }
