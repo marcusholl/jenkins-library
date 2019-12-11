@@ -53,6 +53,7 @@ void call(Map parameters = [:]) {
         }
 
         def utils = parameters.juStabUtils ?: new Utils()
+        def piperGoUtils = parameters.piperGoUtils ?: new PiperGoUtils(utils)
 
         //
         // The parameters map in provided from outside. That map might be used elsewhere in the pipeline
@@ -68,7 +69,7 @@ void call(Map parameters = [:]) {
         // For now - since the xsDeploy step is not merged and covered by a release - we stash
         // a locally built version of the piper-go binary in the pipeline script (Jenkinsfile) with
         // stash name "piper-bin". That stash is used inside method "unstashPiperBin".
-        new PiperGoUtils(this, utils).unstashPiperBin()
+        piperGoUtils.unstashPiperBin()
 
         //
         // Printing the piper-go version. Should not be done here, but somewhere during materializing
