@@ -368,19 +368,25 @@ class XsDeployTest extends BasePiperTest {
         thrown.expect(IllegalArgumentException)
         thrown.expectMessage(
             allOf(
-                containsString('No deployment id provided'),
+                containsString('No operation id provided'),
                 containsString('Was there a deployment before?')))
+
+        helper.registerAllowedMethod('libraryResource', [String], { configFile -> "{name: ${configFile}}"})
+        helper.registerAllowedMethod('withEnv', [List, Closure], {l, c -> c()})
+
+        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, '.*getConfig --contextConfig --stepMetadata.*', '{"dockerImage": "xs"}')
+        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, '.*getConfig --stepMetadata.*', '{"mode": "BG_DEPLOY", "action": "NONE", "apiUrl": "https://example.org/xs", "org": "myOrg", "space": "mySpace"}')
+
+        PiperGoUtils goUtils = new PiperGoUtils(null) {
+            void unstashPiperBin() {
+            }
+        }
 
         nullScript.commonPipelineEnvironment.xsDeploymentId = null // is null anyway, just for clarification
 
         stepRule.step.xsDeploy(
             script: nullScript,
-            apiUrl: 'https://example.org/xs',
-            org: 'myOrg',
-            space: 'mySpace',
-            credentialsId: 'myCreds',
-            mode: 'BG_DEPLOY',
-            action: 'RESUME'
+            piperGoUtils: goUtils,
         )
     }
 

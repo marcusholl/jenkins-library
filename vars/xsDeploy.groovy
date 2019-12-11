@@ -123,7 +123,7 @@ void call(Map parameters = [:]) {
             if(mode == DeployMode.BG_DEPLOY && action != Action.NONE) {
                 operationId = script.commonPipelineEnvironment.xsDeploymentId
                 if (! operationId) {
-                    error 'No deployment id provided. Was there a deployment before?'
+                    error 'No operationId provided. Was there a deployment before?'
                 }
             }
 
