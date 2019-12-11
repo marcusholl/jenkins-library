@@ -1,10 +1,14 @@
 import static org.junit.Assert.assertThat
 
+import java.util.regex.Matcher
+
 import org.hamcrest.Matchers
 
 import static org.hamcrest.Matchers.allOf
 import static org.hamcrest.Matchers.contains
 import static org.hamcrest.Matchers.containsString
+import static org.hamcrest.Matchers.equalTo
+import static org.hamcrest.Matchers.equals
 import static org.hamcrest.Matchers.hasSize
 import static org.hamcrest.Matchers.is
 
@@ -21,11 +25,14 @@ import util.JenkinsFileExistsRule
 import util.JenkinsLockRule
 import util.JenkinsLoggingRule
 import util.JenkinsReadYamlRule
+import util.JenkinsReadJsonRule
 import util.JenkinsShellCallRule
 import util.JenkinsStepRule
+import util.JenkinsWriteFileRule
 import util.Rules
 
 import com.sap.piper.JenkinsUtils
+import com.sap.piper.PiperGoUtils
 
 import hudson.AbortException
 
@@ -42,14 +49,19 @@ class XsDeployTest extends BasePiperTest {
     private JenkinsShellCallRule shellRule = new JenkinsShellCallRule(this)
     private JenkinsLockRule lockRule = new JenkinsLockRule(this)
     private JenkinsLoggingRule logRule = new JenkinsLoggingRule(this)
+    private JenkinsDockerExecuteRule dockerRule = new JenkinsDockerExecuteRule(this)
+    private JenkinsWriteFileRule writeFileRule = new JenkinsWriteFileRule(this)
 
     @Rule
     public RuleChain ruleChain = Rules.getCommonRules(this)
                                         .around(new JenkinsReadYamlRule(this))
+                                        .around(new JenkinsReadJsonRule(this))
                                         .around(stepRule)
-                                        .around(new JenkinsDockerExecuteRule(this))
+                                        .around(dockerRule)
+                                        .around(writeFileRule)
                                         .around(new JenkinsCredentialsRule(this)
-                                            .withCredentials('myCreds', 'cred_xs', 'topSecret'))
+                                            .withCredentials('myCreds', 'cred_xs', 'topSecret')
+                                            .withCredentials('XS2', 'user', 'pass'))
                                         .around(new JenkinsFileExistsRule(this, existingFiles))
                                         .around(lockRule)
                                         .around(shellRule)
@@ -298,33 +310,19 @@ class XsDeployTest extends BasePiperTest {
     @Test
     public void testBlueGreenDeployStraighForward() {
 
-        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, '#!/bin/bash.*xs bg-deploy .*',
-            ((CharSequence)'''  |
-                                |
-                                |Uploading 1 files:
-                                |/myFolder/my.mtar
-                                |File upload finished
-                                |
-                                |Detected MTA schema version: "3.1.0"
-                                |Detected deploy target as "myOrg mySpace"
-                                |Detected deployed MTA with ID "my_mta" and version "0.0.1"
-                                |Deployed MTA color: blue
-                                |New MTA color: green
-                                |Detected new MTA version: "0.0.1"
-                                |Deployed MTA version: 0.0.1
-                                |Service "xxx" is not modified and will not be updated
-                                |Creating application "db-green" from MTA module "xx"...
-                                |Uploading application "xx-green"...
-                                |Staging application "xx-green"...
-                                |Application "xx-green" staged
-                                |Executing task "deploy" on application "xx-green"...
-                                |Task execution status: succeeded
-                                |Process has entered validation phase. After testing your new deployment you can resume or abort the process.
-                                |Use "xs bg-deploy -i 1234 -a resume" to resume the process.
-                                |Use "xs bg-deploy -i 1234 -a abort" to abort the process.
-                                |Hint: Use the '--no-confirm' option of the bg-deploy command to skip this phase.
-                                |''').stripMargin())
+        boolean unstashCalled
 
+        helper.registerAllowedMethod('libraryResource', [String], { configFile -> "{name: ${configFile}}"})
+        helper.registerAllowedMethod('withEnv', [List, Closure], {l, c -> c()})
+        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, '.*xsDeploy .*', '{"operationId": "1234"}')
+        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, '.*getConfig --contextConfig --stepMetadata.*', '{"dockerImage": "xs"}')
+        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, '.*getConfig --stepMetadata.*', '{"mode": "BG_DEPLOY", "action": "NONE", "apiUrl": "https://example.org/xs", "org": "myOrg", "space": "mySpace"}')
+
+        PiperGoUtils goUtils = new PiperGoUtils(null) {
+            void unstashPiperBin() {
+                unstashCalled = true
+            }
+        }
         stepRule.step.xsDeploy(
             script: nullScript,
             apiUrl: 'https://example.org/xs',
@@ -333,26 +331,29 @@ class XsDeployTest extends BasePiperTest {
             credentialsId: 'myCreds',
             deployOpts: '-t 60',
             mtaPath: 'myApp.mta',
-            mode: 'BG_DEPLOY'
+            mode: 'BG_DEPLOY',
+            piperGoUtils: goUtils
         )
+
+        assertThat(unstashCalled, equalTo(true))
 
         assertThat(nullScript.commonPipelineEnvironment.xsDeploymentId, is('1234'))
 
+        assertThat(writeFileRule.files.keySet(), contains('metadata/xsDeploy.yaml'))
+        
+        assertThat(dockerRule.dockerParams.dockerImage, equalTo('xs'))
+        assertThat(dockerRule.dockerParams.dockerPullImage, equalTo(false))
+        
         assertThat(shellRule.shell,
             allOf(
                 new CommandLineMatcher()
-                    .hasProlog("#!/bin/bash xs login")
-                    .hasOption('a', 'https://example.org/xs')
-                    .hasOption('u', 'cred_xs')
-                    .hasSingleQuotedOption('p', 'topSecret')
-                    .hasOption('o', 'myOrg')
-                    .hasOption('s', 'mySpace'),
+                    .hasProlog('./piper version'),
                 new CommandLineMatcher()
-                    .hasProlog("#!/bin/bash")
-                    .hasOption('t', '60')
-                    .hasArgument('\'myApp.mta\''),
+                    .hasProlog('./piper getConfig --contextConfig --stepMetadata \'metadata/xsDeploy.yaml\''),
                 new CommandLineMatcher()
-                    .hasProlog("#!/bin/bash")
+                    .hasProlog('./piper getConfig --stepMetadata \'metadata/xsDeploy.yaml\''),
+                new CommandLineMatcher()
+                    .hasProlog('#!/bin/bash ./piper xsDeploy --user \\$\\{USERNAME\\} --password \\$\\{PASSWORD\\}') //  
             )
         )
 
