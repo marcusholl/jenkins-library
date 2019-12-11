@@ -325,13 +325,6 @@ class XsDeployTest extends BasePiperTest {
         }
         stepRule.step.xsDeploy(
             script: nullScript,
-            apiUrl: 'https://example.org/xs',
-            org: 'myOrg',
-            space: 'mySpace',
-            credentialsId: 'myCreds',
-            deployOpts: '-t 60',
-            mtaPath: 'myApp.mta',
-            mode: 'BG_DEPLOY',
             piperGoUtils: goUtils
         )
 
