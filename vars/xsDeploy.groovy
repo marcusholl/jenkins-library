@@ -63,6 +63,7 @@ void call(Map parameters = [:]) {
         // hard to predict how these two parameters looks like in its serialized form. Anyhow it is better
         // not to have these parameters forwarded somehow to the go layer.
         parameters.remove('juStabUtils')
+        parameters.remove('piperGoUtils')
         parameters.remove('script')
 
         //

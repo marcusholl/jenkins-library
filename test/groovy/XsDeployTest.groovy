@@ -305,10 +305,40 @@ class XsDeployTest extends BasePiperTest {
 
             throw e
         }
-}
+    }
 
     @Test
-    public void testBlueGreenDeployStraighForward() {
+    public void testParametersViaSignature() {
+
+        String paramsAsJson
+
+        helper.registerAllowedMethod('libraryResource', [String], { configFile -> "{name: ${configFile}}"})
+        helper.registerAllowedMethod('withEnv', [List, Closure], {l, c -> println "PARAMS: ${l}" ; paramsAsJson = l[0];  c()})
+        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, '.*xsDeploy .*', '{"operationId": "1234"}')
+        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, '.*getConfig --contextConfig --stepMetadata.*', '{"dockerImage": "xs"}')
+        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, '.*getConfig --stepMetadata.*', '{"mode": "BG_DEPLOY", "action": "NONE", "apiUrl": "https://example.org/xs", "org": "myOrg", "space": "mySpace"}')
+
+        PiperGoUtils goUtils = new PiperGoUtils(null) {
+            void unstashPiperBin() {
+            }
+        }
+        stepRule.step.xsDeploy(
+            script: nullScript,
+            apiUrl: 'https://example.org/xs',
+            org: 'myOrg',
+            space: 'mySpace',
+            credentialsId: 'myCreds',
+            deployOpts: '-t 60',
+            mtaPath: 'myApp.mta',
+            mode: 'BG_DEPLOY',
+            piperGoUtils: goUtils
+        )
+
+        assertThat(paramsAsJson, equalTo('PIPER_parametersJSON={"apiUrl":"https://example.org/xs","org":"myOrg","space":"mySpace","credentialsId":"myCreds","deployOpts":"-t 60","mtaPath":"myApp.mta","mode":"BG_DEPLOY"}'))
+    }
+
+    @Test
+    public void testBlueGreenDeployInitStraighForward() {
 
         boolean unstashCalled
 
