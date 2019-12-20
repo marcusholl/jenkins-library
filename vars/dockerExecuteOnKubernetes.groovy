@@ -230,8 +230,6 @@ void executeOnPod(Map config, utils, Closure body, Script script) {
      * In case third case, we need to create the 'container' stash to bring the modified content back to the host.
      */
 
-    echo "[MARCUS] inside executeOnPod"
-
     try {
         SidecarUtils sidecarUtils = new SidecarUtils(script)
         def stashContent = config.stashContent
@@ -255,11 +253,8 @@ void executeOnPod(Map config, utils, Closure body, Script script) {
                             utils.unstashAll(stashContent)
                             echo "invalidate stash workspace-${config.uniqueId}"
                             stash name: "workspace-${config.uniqueId}", excludes: '**/*', allowEmpty: true
-                            echo "[MARCUS] Executing body ..."
                             body()
-                            echo "[MARCUS] Body executed"
                         } catch(Exception e1) {
-                            echo "[MARCUS] Exception caught"
                             e = e1
                         } finally {
                             try {
