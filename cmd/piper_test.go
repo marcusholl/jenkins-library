@@ -27,6 +27,7 @@ type execCall struct {
 
 type shellMockRunner struct {
 	dir            string
+	env            []string
 	calls          []string
 	shell          []string
 	stdout         io.Writer
@@ -57,6 +58,10 @@ func (m *execMockRunner) Stderr(err io.Writer) {
 
 func (m *shellMockRunner) Dir(d string) {
 	m.dir = d
+}
+
+func (m *shellMockRunner) Env(e []string) {
+	m.env = e
 }
 
 func (m *shellMockRunner) RunShell(s string, c string) error {

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 )
 
@@ -42,6 +43,14 @@ func TestShellRun(t *testing.T) {
 					t.Errorf("expected: %v got: %v", expectedErr, eStr)
 				}
 			})
+		})
+		s = Command{stdout: o, stderr: e, env: []string{"HOME=.", "DEBUG=true"}}
+		t.Run("environment", func(t *testing.T) {
+			s.RunShell("env", "foo")
+			oStr := o.String()
+			if !strings.Contains(oStr, "HOME=.") || !strings.Contains(oStr, "DEBUG=true") {
+				t.Errorf("expected Environment variables not found")
+			}
 		})
 	})
 }
@@ -173,6 +182,10 @@ func TestHelperProcess(*testing.T) {
 		}
 		fmt.Println(iargs...)
 		fmt.Fprintf(os.Stderr, "Stderr: command %v\n", cmd)
+	case "env":
+		for _, e := range os.Environ() {
+			fmt.Println(e)
+		}
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %q\n", cmd)
 		os.Exit(2)

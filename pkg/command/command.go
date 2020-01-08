@@ -14,6 +14,7 @@ import (
 // Command defines the information required for executing a call to any executable
 type Command struct {
 	dir    string
+	env    []string
 	stdout io.Writer
 	stderr io.Writer
 }
@@ -21,6 +22,11 @@ type Command struct {
 // Dir sets the working directory for the execution
 func (c *Command) Dir(d string) {
 	c.dir = d
+}
+
+// Env sets the environment variables for the execution
+func (c *Command) Env(e []string) {
+	c.env = e
 }
 
 // Stdout ..
@@ -44,6 +50,14 @@ func (c *Command) RunShell(shell, script string) error {
 	cmd := ExecCommand(shell)
 
 	cmd.Dir = c.dir
+
+	if cmd.Env == nil {
+		cmd.Env = os.Environ()
+	} else {
+		cmd.Env = append(os.Environ(), cmd.Env...)
+	}
+	cmd.Env = append(cmd.Env, c.env...)
+
 	in := bytes.Buffer{}
 	in.Write([]byte(script))
 	cmd.Stdin = &in

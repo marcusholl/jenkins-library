@@ -14,6 +14,7 @@ type execRunner interface {
 type shellRunner interface {
 	RunShell(s string, c string) error
 	Dir(d string)
+	Env(e []string)
 	Stdout(out io.Writer)
 	Stderr(err io.Writer)
 }
