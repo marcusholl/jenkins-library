@@ -109,12 +109,11 @@ xs {{.Mode.GetDeployCommand}} -i {{.OperationID}} -a {{.Action.GetAction}}
 
 func xsDeploy(XsDeployOptions xsDeployOptions) error {
 	c := command.Command{}
-	return runXsDeploy(XsDeployOptions, &c, piperutils.FileExists, piperutils.Copy, os.Remove, os.Stdout)
+	return runXsDeploy(XsDeployOptions, &c, piperutils.FileExists, os.Remove, os.Stdout)
 }
 
 func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 	fExists func(string) (bool, error),
-	fCopy func(string, string) (int64, error),
 	fRemove func(string) error,
 	stdout io.Writer) error {
 
@@ -193,9 +192,6 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 
 	if performLogin {
 		loginErr = xsLogin(XsDeployOptions, s)
-		if loginErr == nil {
-			err = copyFileFromHomeToPwd(xsSessionFile, fCopy)
-		}
 	}
 
 	if loginErr == nil && err == nil {
@@ -209,8 +205,6 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 				return fmt.Errorf("xs session file does not exist (%s)", xsSessionFile)
 			}
 		}
-
-		copyFileFromPwdToHome(xsSessionFile, fCopy)
 
 		switch action {
 		case Resume, Abort, Retry:
@@ -247,7 +241,18 @@ func runXsDeploy(XsDeployOptions xsDeployOptions, s shellRunner,
 	}
 
 	if err != nil {
-		if e := handleLog(fmt.Sprintf("%s/%s", os.Getenv("HOME"), ".xs_logs")); e != nil {
+
+		// We relocate the xs config file into the current working directory. That directory
+		// is inside the workspace, normally it is the root of the workspace.
+		// As a side effect the logs are also relocated beside the xs config file. Hence the
+		// directory containg the logs is also in the current working directory.
+
+		wd, e := os.Getwd()
+		if e == nil {
+			e = handleLog(fmt.Sprintf("%s/%s", wd, ".xs_logs"))
+		}
+
+		if e != nil {
 			log.Entry().Warningf("Cannot provide the logs: %s", e.Error())
 		}
 	}
@@ -422,44 +427,17 @@ func executeCmd(templateID string, commandPattern string, properties interface{}
 
 	var script bytes.Buffer
 	tmpl.Execute(&script, properties)
+	wd, e := os.Getwd()
+	if e != nil {
+		return e
+	}
+
+	s.Env([]string{fmt.Sprintf("XSCLIENT_CONTEXTFILE=%s/%s", wd, ".xsconfig")})
+
 	if e := s.RunShell("/bin/bash", script.String()); e != nil {
 		return e
 	}
 
-	return nil
-}
-
-func copyFileFromHomeToPwd(xsSessionFile string, fCopy func(string, string) (int64, error)) error {
-	if fCopy == nil {
-		fCopy = piperutils.Copy
-	}
-	src, dest := fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile), fmt.Sprintf("%s", xsSessionFile)
-	log.Entry().Debugf("Copying xs session file from home directory ('%s') to workspace ('%s')", src, dest)
-	if _, err := fCopy(src, dest); err != nil {
-		return errors.Wrapf(err, "Cannot copy xssession file from home directory ('%s') to workspace ('%s')", src, dest)
-	}
-	log.Entry().Debugf("xs session file copied from home directory ('%s') to workspace ('%s')", src, dest)
-	return nil
-}
-
-func copyFileFromPwdToHome(xsSessionFile string, fCopy func(string, string) (int64, error)) error {
-
-	//
-	// We rely on running inside a docker container which is discarded after a single use.
-	// In general it is not a good idea to update files in the build users home directory in case
-	// we are on an infrastructure which is used not only for single builds since updates at that level
-	// affects also other builds.
-	//
-
-	if fCopy == nil {
-		fCopy = piperutils.Copy
-	}
-	src, dest := fmt.Sprintf("%s", xsSessionFile), fmt.Sprintf("%s/%s", os.Getenv("HOME"), xsSessionFile)
-	log.Entry().Debugf("Copying xs session file from workspace ('%s') to home directory ('%s')", src, dest)
-	if _, err := fCopy(src, dest); err != nil {
-		return errors.Wrapf(err, "Cannot copy xssession file from workspace ('%s') to home directory ('%s')", src, dest)
-	}
-	log.Entry().Debugf("xs session file copied from workspace ('%s') to home directory ('%s')", src, dest)
 	return nil
 }
 
