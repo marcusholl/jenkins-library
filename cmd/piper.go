@@ -101,7 +101,7 @@ func PrepareConfig(cmd *cobra.Command, metadata *config.StepData, stepName strin
 		var err error
 		//accept that config file and defaults cannot be loaded since both are not mandatory here
 		{
-			exists, e := piperutils.FileExists(GeneralConfig.CustomConfig)
+			exists, e := piperutils.FileUtils{}.FileExists(GeneralConfig.CustomConfig)
 
 			if e != nil {
 				return e

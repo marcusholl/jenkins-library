@@ -58,7 +58,7 @@ func generateConfig() error {
 
 	var customConfig io.ReadCloser
 	{
-		exists, e := piperutils.FileExists(GeneralConfig.CustomConfig)
+		exists, e := piperutils.FileUtils{}.FileExists(GeneralConfig.CustomConfig)
 
 		if e != nil {
 			return e
