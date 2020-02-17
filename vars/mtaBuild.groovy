@@ -65,6 +65,8 @@ void call(Map parameters = [:]) {
 
         final script = checkScript(this, parameters) ?: this
 
+        piperGoUtils.unstashPiperBin()
+
         // load default & individual configuration
         Map configuration = ConfigurationHelper.newInstance(this)
             .loadStepDefaults()
@@ -161,12 +163,12 @@ void call(Map parameters = [:]) {
 
             //[Q]: Why extending the path? [A]: To be sure e.g. grunt can be found
             //[Q]: Why escaping \$PATH ? [A]: We want to extend the PATH variable in e.g. the container and not substituting it with the Jenkins environment when using ${PATH}
-            sh """#!/bin/bash
-            export PATH=./node_modules/.bin:\$PATH
-            $mtaCall
-            """
 
-            script?.commonPipelineEnvironment?.setMtarFilePath("${mtarName}")
+            sh """#!/bin/bash
+                ./piper mtaBuild --help"""
+
+            script.commonPipelineEnvironment.readFromDisk()
+
         }
     }
 }
