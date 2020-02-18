@@ -80,12 +80,6 @@ void call(Map parameters = [:]) {
             .dependingOn('mtaBuildTool').mixin('dockerImage')
             .use()
 
-        new Utils().pushToSWA([
-            step: STEP_NAME,
-            stepParamKey1: 'scriptMissing',
-            stepParam1: parameters?.script == null
-        ], configuration)
-
         dockerExecute(
             script: script,
             dockerImage: configuration.dockerImage,
@@ -93,74 +87,6 @@ void call(Map parameters = [:]) {
             dockerOptions: configuration.dockerOptions,
             dockerWorkspace: configuration.dockerWorkspace
         ) {
-
-            String projectSettingsFile = configuration.projectSettingsFile?.trim()
-            if (projectSettingsFile) {
-                if (projectSettingsFile.startsWith("http")) {
-                    projectSettingsFile = downloadSettingsFromUrl(this, projectSettingsFile, 'project-settings.xml')
-                }
-                sh 'mkdir -p $HOME/.m2'
-                sh "cp ${projectSettingsFile} \$HOME/.m2/settings.xml"
-            }
-
-            String globalSettingsFile = configuration.globalSettingsFile?.trim()
-            if (globalSettingsFile) {
-                if (globalSettingsFile.startsWith("http")) {
-                    globalSettingsFile = downloadSettingsFromUrl(this, globalSettingsFile, 'global-settings.xml')
-                }
-                sh "cp ${globalSettingsFile} \$M2_HOME/conf/settings.xml"
-            }
-
-            String defaultNpmRegistry = configuration.defaultNpmRegistry?.trim()
-            if (defaultNpmRegistry) {
-                sh "npm config set registry $defaultNpmRegistry"
-            }
-
-            def mtaYamlName = "mta.yaml"
-            def applicationName = configuration.applicationName
-
-            if (!fileExists(mtaYamlName)) {
-                if (!applicationName) {
-                    error "'${mtaYamlName}' not found in project sources and 'applicationName' not provided as parameter - cannot generate '${mtaYamlName}' file."
-                } else {
-                    echo "[INFO] '${mtaYamlName}' file not found in project sources, but application name provided as parameter - generating '${mtaYamlName}' file."
-                    MtaUtils mtaUtils = new MtaUtils(this)
-                    mtaUtils.generateMtaDescriptorFromPackageJson("package.json", mtaYamlName, applicationName)
-                }
-            } else {
-                echo "[INFO] '${mtaYamlName}' file found in project sources."
-            }
-
-            //[Q]: Why not yaml.dump()? [A]: This reformats the whole file.
-            sh "sed -ie \"s/\\\${timestamp}/`date +%Y%m%d%H%M%S`/g\" \"${mtaYamlName}\""
-
-            def mtaCall
-            def options = []
-
-            String mtarName = configuration.mtarName?.trim()
-            if (!mtarName) {
-                def mtaId = getMtaId(mtaYamlName)
-                mtarName = "${mtaId}.mtar"
-            }
-            options.push("--mtar ${mtarName}")
-
-            switch(configuration.mtaBuildTool) {
-                case 'classic':
-                    // If it is not configured, it is expected on the PATH
-                    def mtaJar = configuration.mtaJarLocation ?: 'mta.jar'
-                    options.push("--build-target=${configuration.buildTarget}")
-                    if (configuration.extension) options.push("--extension=${configuration.extension}")
-                    mtaCall = "java -jar ${mtaJar} ${options.join(' ')} build"
-                    break
-                case 'cloudMbt':
-                    options.push("--platform ${configuration.platform}")
-                    options.push("--target ./")
-                    if (configuration.extension) options.push("--extensions=${configuration.extension}")
-                    mtaCall = "mbt build ${options.join(' ')}"
-                    break
-                default:
-                    error "[ERROR][${STEP_NAME}] MTA build tool '${configuration.mtaBuildTool}' not supported!"
-            }
 
             sh """#!/bin/bash
                 ./piper mtaBuild --mtaJarLocation=/opt/sap/mta/lib/mta.jar  --mtaBuildTool classic --buildTarget CF"""
