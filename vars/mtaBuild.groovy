@@ -13,6 +13,11 @@ import static com.sap.piper.Utils.downloadSettingsFromUrl
 
 @Field Set GENERAL_CONFIG_KEYS = []
 @Field Set STEP_CONFIG_KEYS = [
+    /**
+     * Tool to use when building the MTA
+     * @possibleValues 'classic', 'cloudMbt'
+     */
+    'mtaBuildTool',
     /** @see dockerExecute */
     'dockerImage',
     /** @see dockerExecute */
