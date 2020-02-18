@@ -7,8 +7,6 @@ import com.sap.piper.Utils
 import com.sap.piper.PiperGoUtils
 import groovy.transform.Field
 
-import static com.sap.piper.Utils.downloadSettingsFromUrl
-
 @Field def STEP_NAME = getClass().getName()
 
 @Field Set GENERAL_CONFIG_KEYS = []
