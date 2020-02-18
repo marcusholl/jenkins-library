@@ -93,9 +93,8 @@ void call(Map parameters = [:]) {
 
             script.commonPipelineEnvironment.readFromDisk(script)
 
-            echo "mtar file: ${script.commonPipelineEnvironment.mtarFilePath}"
-
         }
+        echo "mtar file: ${script.commonPipelineEnvironment.mtarFilePath}"
     }
 }
 
