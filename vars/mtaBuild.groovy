@@ -162,11 +162,6 @@ void call(Map parameters = [:]) {
                     error "[ERROR][${STEP_NAME}] MTA build tool '${configuration.mtaBuildTool}' not supported!"
             }
 
-            echo "[INFO] Executing mta build call: '${mtaCall}'."
-
-            //[Q]: Why extending the path? [A]: To be sure e.g. grunt can be found
-            //[Q]: Why escaping \$PATH ? [A]: We want to extend the PATH variable in e.g. the container and not substituting it with the Jenkins environment when using ${PATH}
-
             sh """#!/bin/bash
                 ./piper mtaBuild"""
 
