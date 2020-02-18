@@ -163,7 +163,7 @@ void call(Map parameters = [:]) {
             }
 
             sh """#!/bin/bash
-                ./piper mtaBuild --platform CF"""
+                ./piper mtaBuild --mtaBuildTool classic --buildTarget CF"""
 
             script.commonPipelineEnvironment.readFromDisk()
 
