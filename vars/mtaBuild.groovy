@@ -67,10 +67,3 @@ void call(Map parameters = [:]) {
     }
 }
 
-def String getMtaId(String fileName){
-    def mtaYaml = readYaml file: fileName
-    if (!mtaYaml.ID) {
-        error "Property 'ID' not found in ${fileName} file."
-    }
-    return mtaYaml.ID
-}
