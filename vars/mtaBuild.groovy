@@ -165,7 +165,7 @@ void call(Map parameters = [:]) {
             sh """#!/bin/bash
                 ./piper mtaBuild --mtaJarLocation=/opt/sap/mta/lib/mta.jar  --mtaBuildTool classic --buildTarget CF"""
 
-            script.commonPipelineEnvironment.readFromDisk()
+            script.commonPipelineEnvironment.readFromDisk(script)
 
         }
     }
