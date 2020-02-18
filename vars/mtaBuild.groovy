@@ -13,18 +13,6 @@ import static com.sap.piper.Utils.downloadSettingsFromUrl
 
 @Field Set GENERAL_CONFIG_KEYS = []
 @Field Set STEP_CONFIG_KEYS = [
-    /** The name of the application which is being built. If the parameter has been provided and no `mta.yaml` exists, the `mta.yaml` will be automatically generated using this parameter and the information (`name` and `version`) from `package.json` before the actual build starts.*/
-    'applicationName',
-    /**
-     * mtaBuildTool classic only: The target platform to which the mtar can be deployed.
-     * @possibleValues 'CF', 'NEO', 'XSA'
-     */
-    'buildTarget',
-    /**
-     * Tool to use when building the MTA
-     * @possibleValues 'classic', 'cloudMbt'
-     */
-    'mtaBuildTool',
     /** @see dockerExecute */
     'dockerImage',
     /** @see dockerExecute */
@@ -33,29 +21,8 @@ import static com.sap.piper.Utils.downloadSettingsFromUrl
     'dockerOptions',
     /** @see dockerExecute */
     'dockerWorkspace',
-    /** The path to the extension descriptor file.*/
-    'extension',
-    /**
-     * The location of the SAP Multitarget Application Archive Builder jar file, including file name and extension.
-     * If you run on Docker, this must match the location of the jar file in the container as well.
-     */
-    'mtaJarLocation',
-    /** Path or url to the mvn settings file that should be used as global settings file.*/
-    'globalSettingsFile',
-    /** The name of the generated mtar file including its extension. */
-    'mtarName',
-    /**
-     * mtaBuildTool cloudMbt only: The target platform to which the mtar can be deployed.
-     * @possibleValues 'CF', 'NEO', 'XSA'
-     */
-    'platform',
-    /** Path or url to the mvn settings file that should be used as project settings file.*/
-    'projectSettingsFile'
 ]
-@Field Set PARAMETER_KEYS = STEP_CONFIG_KEYS.plus([
-    /** Url to the npm registry that should be used for installing npm dependencies.*/
-    'defaultNpmRegistry'
-])
+@Field Set PARAMETER_KEYS = STEP_CONFIG_KEYS
 
 /**
  * Executes the SAP Multitarget Application Archive Builder to create an mtar archive of the application.
