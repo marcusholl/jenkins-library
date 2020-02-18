@@ -66,6 +66,7 @@ void call(Map parameters = [:]) {
 
         final script = checkScript(this, parameters) ?: this
 
+        def utils = parameters.juStabUtils ?: new Utils()
         def piperGoUtils = parameters.piperGoUtils ?: new PiperGoUtils(utils)
         piperGoUtils.unstashPiperBin()
 
