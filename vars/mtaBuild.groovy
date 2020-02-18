@@ -4,6 +4,7 @@ import com.sap.piper.GenerateDocumentation
 import com.sap.piper.ConfigurationHelper
 import com.sap.piper.MtaUtils
 import com.sap.piper.Utils
+import com.sap.piper.PiperGoUtils
 import groovy.transform.Field
 
 import static com.sap.piper.Utils.downloadSettingsFromUrl
