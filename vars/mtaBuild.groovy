@@ -168,7 +168,7 @@ void call(Map parameters = [:]) {
             //[Q]: Why escaping \$PATH ? [A]: We want to extend the PATH variable in e.g. the container and not substituting it with the Jenkins environment when using ${PATH}
 
             sh """#!/bin/bash
-                ./piper mtaBuild --help"""
+                ./piper mtaBuild"""
 
             script.commonPipelineEnvironment.readFromDisk()
 
