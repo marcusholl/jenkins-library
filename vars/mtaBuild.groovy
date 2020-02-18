@@ -89,7 +89,7 @@ void call(Map parameters = [:]) {
         ) {
 
             sh """#!/bin/bash
-                ./piper mtaBuild --mtaBuildTool classic --buildTarget CF"""
+                ./piper mtaBuild"""
 
             script.commonPipelineEnvironment.readFromDisk(script)
 
