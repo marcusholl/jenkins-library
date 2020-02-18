@@ -66,6 +66,7 @@ void call(Map parameters = [:]) {
 
         final script = checkScript(this, parameters) ?: this
 
+        def piperGoUtils = parameters.piperGoUtils ?: new PiperGoUtils(utils)
         piperGoUtils.unstashPiperBin()
 
         // load default & individual configuration
