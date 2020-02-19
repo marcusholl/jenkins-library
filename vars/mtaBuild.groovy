@@ -7,7 +7,7 @@ import com.sap.piper.Utils
 import com.sap.piper.PiperGoUtils
 import groovy.transform.Field
 
-@Field String METADATA_FILE = 'metadata/xsDeploy.yaml'
+@Field String METADATA_FILE = 'metadata/mtaBuild.yaml'
 @Field def STEP_NAME = getClass().getName()
 @Field String PIPER_DEFAULTS = 'default_pipeline_environment.yml'
 @Field String METADATA_FOLDER = '.pipeline' // metadata file contains already the "metadata" folder level, hence we end up in a folder ".pipeline/metadata"
@@ -55,13 +55,12 @@ void call(Map parameters = [:]) {
             .use()
 
         String configFiles = GoConfigHelper.prepareConfigurations(script, [PIPER_DEFAULTS].plus(script.commonPipelineEnvironment.getCustomDefaults()), ADDITIONAL_CONFIGS_FOLDER)
+        writeFile(file: "${METADATA_FOLDER}/${METADATA_FILE}", text: libraryResource(METADATA_FILE))
         def contextConfig = sh(returnStdout: true, script: "./piper getConfig --stepMetadata '${METADATA_FOLDER}/${METADATA_FILE}' --defaultConfig ${configFiles} --contextConfig")
 
         echo "CONTEXT_CONFIG: ${contextConfig}"
 
 //Map contextConfig = readJSON (text: sh(returnStdout: true, script: contextConfigScript))
-
-        writeFile(file: "${METADATA_FOLDER}/${METADATA_FILE}", text: libraryResource(METADATA_FILE))
 
         withEnv([
             "PIPER_parametersJSON=${groovy.json.JsonOutput.toJson(parameters)}",
