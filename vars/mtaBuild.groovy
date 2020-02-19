@@ -54,7 +54,7 @@ void call(Map parameters = [:]) {
             .dependingOn('mtaBuildTool').mixin('dockerImage')
             .use()
 
-        String configFiles = GoConfigHelper.prepareConfigurations([PIPER_DEFAULTS].plus(script.commonPipelineEnvironment.getCustomDefaults()), ADDITIONAL_CONFIGS_FOLDER)
+        String configFiles = GoConfigHelper.prepareConfigurations(script, [PIPER_DEFAULTS].plus(script.commonPipelineEnvironment.getCustomDefaults()), ADDITIONAL_CONFIGS_FOLDER)
         def contextConfig = sh(returnStdout: true, script: "./piper getConfig --stepMetadata '${METADATA_FOLDER}/${METADATA_FILE}' --defaultConfig ${configFiles} --contextConfig")
 
         echo "CONTEXT_CONFIG: ${contextConfig}"
