@@ -75,10 +75,10 @@ void call(Map parameters = [:]) {
 
             dockerExecute(
                 script: script,
-                dockerImage: configuration.dockerImage ?: contextConfig.dockerImage
-                dockerEnvVars: configuration.dockerEnvVars ?: contextConfig.dockerEnvVars
-                dockerOptions: configuration.dockerOptions ?: contextConfig.dockerOptions
-                dockerWorkspace: configuration.dockerWorkspace ?: contextConfig.dockerWorkspace
+                dockerImage: configuration.dockerImage ?: contextConfig.dockerImage,
+                dockerEnvVars: configuration.dockerEnvVars ?: contextConfig.dockerEnvVars,
+                dockerOptions: configuration.dockerOptions ?: contextConfig.dockerOptions,
+                dockerWorkspace: configuration.dockerWorkspace ?: contextConfig.dockerWorkspace,
             ) {
 
                 sh """#!/bin/bash
