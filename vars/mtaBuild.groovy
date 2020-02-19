@@ -64,8 +64,6 @@ void call(Map parameters = [:]) {
 
         writeFile(file: "${METADATA_FOLDER}/${METADATA_FILE}", text: libraryResource(METADATA_FILE))
 
-        def contextConfig = "./piper getConfig --stepMetadata '${METADATA_FOLDER}/${METADATA_FILE}' --defaultConfig ${configFiles} --contextConfig"
-
         withEnv([
             "PIPER_parametersJSON=${groovy.json.JsonOutput.toJson(parameters)}",
         ]) {
