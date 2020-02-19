@@ -58,7 +58,16 @@ void call(Map parameters = [:]) {
         writeFile(file: "${METADATA_FOLDER}/${METADATA_FILE}", text: libraryResource(METADATA_FILE))
         Map contextConfig = readJSON(text: sh(returnStdout: true, script: "./piper getConfig --stepMetadata '${METADATA_FOLDER}/${METADATA_FILE}' --defaultConfig ${configFiles} --contextConfig"))
 
-        echo "CONTEXT_CONFIG: ${contextConfig}"
+        parameters = [:] << parameters
+        parameters.remove('juStabUtils')
+        parameters.remove('piperGoUtils')
+        parameters.remove('script')
+
+        if(parameters.verbose) {
+            echo "Context Config: ${contextConfig}"
+            echo "Project config: ${configuration}"
+            echo "Parameters: ${parameters}"
+        }
 
         withEnv([
             "PIPER_parametersJSON=${groovy.json.JsonOutput.toJson(parameters)}",
@@ -66,10 +75,10 @@ void call(Map parameters = [:]) {
 
             dockerExecute(
                 script: script,
-                dockerImage: configuration.dockerImage,
-                dockerEnvVars: configuration.dockerEnvVars,
-                dockerOptions: configuration.dockerOptions,
-                dockerWorkspace: configuration.dockerWorkspace
+                dockerImage: configuration.dockerImage ?: contextConfig.dockerImage,
+                dockerEnvVars: configuration.dockerEnvVars ?: contextConfig.dockerEnvVars,
+                dockerOptions: configuration.dockerOptions ?: contextConfig.dockerOptions
+                dockerWorkspace: configuration.dockerWorkspace ?: contextConfig.dockerWorkspace
             ) {
 
                 sh """#!/bin/bash
