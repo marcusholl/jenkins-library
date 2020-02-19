@@ -2,7 +2,7 @@ package com.sap.piper
 
 public class GoConfigHelper {
 
-    static String ADDITIONAL_CONFIGS_FOLDER = ""
+    static String ADDITIONAL_CONFIGS_FOLDER = ".pipeline/additionalConfigs"
     /*
      * The returned string can be used directly in the command line for retrieving the configuration via go
      */
