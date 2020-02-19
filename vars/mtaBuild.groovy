@@ -7,6 +7,7 @@ import com.sap.piper.Utils
 import com.sap.piper.PiperGoUtils
 import groovy.transform.Field
 
+@Field String METADATA_FILE = 'metadata/xsDeploy.yaml'
 @Field def STEP_NAME = getClass().getName()
 @Field String PIPER_DEFAULTS = 'default_pipeline_environment.yml'
 @Field String METADATA_FOLDER = '.pipeline' // metadata file contains already the "metadata" folder level, hence we end up in a folder ".pipeline/metadata"
