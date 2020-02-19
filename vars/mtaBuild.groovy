@@ -99,7 +99,7 @@ Map backwardCompatibleEnvVars(List env) {
         if (parts.size() != 2) {
             throw new RuntimeException("Unexpected environment variable format. We expect something like key=value, but we got ${e}")
         }
-        m[parts[0]] = parts[1]
+        result[parts[0]] = parts[1]
     }
     result
 }
