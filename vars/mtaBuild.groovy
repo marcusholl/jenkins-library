@@ -56,11 +56,9 @@ void call(Map parameters = [:]) {
 
         String configFiles = GoConfigHelper.prepareConfigurations(script, [PIPER_DEFAULTS].plus(script.commonPipelineEnvironment.getCustomDefaults()), ADDITIONAL_CONFIGS_FOLDER)
         writeFile(file: "${METADATA_FOLDER}/${METADATA_FILE}", text: libraryResource(METADATA_FILE))
-        def contextConfig = sh(returnStdout: true, script: "./piper getConfig --stepMetadata '${METADATA_FOLDER}/${METADATA_FILE}' --defaultConfig ${configFiles} --contextConfig")
+        Map contextConfig = readJSON(text: sh(returnStdout: true, script: "./piper getConfig --stepMetadata '${METADATA_FOLDER}/${METADATA_FILE}' --defaultConfig ${configFiles} --contextConfig"))
 
         echo "CONTEXT_CONFIG: ${contextConfig}"
-
-//Map contextConfig = readJSON (text: sh(returnStdout: true, script: contextConfigScript))
 
         withEnv([
             "PIPER_parametersJSON=${groovy.json.JsonOutput.toJson(parameters)}",
