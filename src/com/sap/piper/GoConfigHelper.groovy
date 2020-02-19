@@ -1,16 +1,15 @@
 package com.sap.piper
 
-
 public class GoConfigHelper {
 
-    
+    static String ADDITIONAL_CONFIGS_FOLDER = ""
     /*
      * The returned string can be used directly in the command line for retrieving the configuration via go
      */
-    static String prepareConfigurations(List configs, String configCacheFolder) {
+    static String prepareConfigurations(Script steps, List configs, String configCacheFolder) {
     
         for(def customDefault : configs) {
-            writeFile(file: "${ADDITIONAL_CONFIGS_FOLDER}/${customDefault}", text: libraryResource(customDefault))
+            steps.writeFile(file: "${ADDITIONAL_CONFIGS_FOLDER}/${customDefault}", text: steps.libraryResource(customDefault))
         }
         joinAndQuote(configs.reverse(), configCacheFolder)
     }
@@ -19,8 +18,9 @@ public class GoConfigHelper {
      * prefix is supposed to be provided without trailing slash
      */
     static String joinAndQuote(List l, String prefix = '') {
-        _l = []
-    
+
+        Iterable _l = []
+
         if(prefix == null) {
             prefix = ''
         }
