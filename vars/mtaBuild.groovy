@@ -92,17 +92,17 @@ void call(Map parameters = [:]) {
             echo "mtar file created by the build: '${script.commonPipelineEnvironment.mtarFilePath}'"
         }
     }
+}
 
-    Map backwardCompatibleEnvVars(List env) {
-        Map result = [:]
-        for (e in env) {
-            String[] parts = e.split('=')
-            if (parts.length() != 2) {
-                throw new RuntimeException("Unexpected environment variable format. We expect something like key=value, but we got ${e}")
-            }
-            m[parts[0]] = parts[1]
+Map backwardCompatibleEnvVars(List env) {
+    Map result = [:]
+    for (e in env) {
+        String[] parts = e.split('=')
+        if (parts.length() != 2) {
+            throw new RuntimeException("Unexpected environment variable format. We expect something like key=value, but we got ${e}")
         }
-        result
+        m[parts[0]] = parts[1]
     }
+    result
 }
 
