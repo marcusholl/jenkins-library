@@ -62,7 +62,6 @@ public class MtaBuildTest extends BasePiperTest {
         oldReadFromDisk = null
     }
 
-    
     @Test
     void callMtaPiperGo() {
         stepRule.step.mtaBuild(
@@ -70,6 +69,19 @@ public class MtaBuildTest extends BasePiperTest {
             piperGoUtils: goUtils)
 
         assert shellRule.shell[0].contains('./piper mtaBuild')
+    }
+
+    @Test
+    void callMtaPiperGoFailure() {
+
+        thrown.expect(AbortException)
+        thrown.expectMessage("mta build failed")
+
+        shellRule.setReturnValue(JenkinsShellCallRule.Type.REGEX, "\\./piper.*mtaBuild", { throw new AbortException("mta build failed.")})
+
+        stepRule.step.mtaBuild(
+            script: nullScript,
+            piperGoUtils: goUtils)
     }
 
     @Test
