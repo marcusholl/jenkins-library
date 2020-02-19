@@ -75,7 +75,7 @@ void call(Map parameters = [:]) {
             ) {
 
                 sh """#!/bin/bash
-                    ./piper mtaBuild"""
+                    ./piper mtaBuild --defaultConfig ${configFiles}"""
 
                 script.commonPipelineEnvironment.readFromDisk(script)
 
