@@ -69,8 +69,6 @@ void call(Map parameters = [:]) {
             echo "Parameters: ${parameters}"
         }
 
-        dockerEnvVars = backwardCompatibleEnvVars(configuration.dockerEnvVars ?: contextConfig.dockerEnvVars)
-
         withEnv([
             "PIPER_parametersJSON=${groovy.json.JsonOutput.toJson(parameters)}",
         ]) {
@@ -78,7 +76,7 @@ void call(Map parameters = [:]) {
             dockerExecute(
                 script: script,
                 dockerImage: configuration.dockerImage ?: contextConfig.dockerImage,
-                dockerEnvVars: dockerEnvVars,
+                dockerEnvVars: configuration.dockerEnvVars ?: backwardCompatibleEnvVars(contextConfig.dockerEnvVars),
                 dockerOptions: configuration.dockerOptions ?: contextConfig.dockerOptions,
                 dockerWorkspace: configuration.dockerWorkspace ?: contextConfig.dockerWorkspace,
             ) {
