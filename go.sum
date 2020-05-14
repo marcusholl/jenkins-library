@@ -32,6 +32,8 @@ github.com/Jeffail/gabs/v2 v2.5.0 h1:ERXffrksCEPjKVDWbZDBcOwrpXctXfeFGXxOQh1umOE
 github.com/Jeffail/gabs/v2 v2.5.0/go.mod h1:xCn81vdHKxFUuWWAaD5jCTQDNPBMh5pPs9IJ+NcziBI=
 github.com/Joker/hpp v1.0.0/go.mod h1:8x5n+M1Hp5hC0g8okX3sR3vFQwynaX/UgSOM9MeBKzY=
 github.com/Joker/jade v1.0.1-0.20190614124447-d475f43051e7/go.mod h1:6E6s8o2AE4KhCrqr6GRJjdC/gNfTdxkIXvuGZZda2VM=
+github.com/MichaelTJones/walk v0.0.0-20161122175330-4748e29d5718 h1:FSsoaa1q4jAaeiAUxf9H0PgFP7eA/UL6c3PdJH+nMN4=
+github.com/MichaelTJones/walk v0.0.0-20161122175330-4748e29d5718/go.mod h1:VVwKsx9Dc8rNG55BWqogoJzGubjKnRoXdUvpGbWqeCc=
 github.com/Microsoft/go-winio v0.4.11/go.mod h1:VhR8bwka0BXejwEJY73c50VrPtXAaKcyvVC4A4RozmA=
 github.com/Microsoft/go-winio v0.4.14/go.mod h1:qXqCSQ3Xa7+6tgxaGTIe4Kpcdsi+P8jBhyzoq1bpyYA=
 github.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5 h1:ygIc8M6trr62pF5DucadTWGdEB4mEyvzi0e2nbcmcyA=
@@ -334,6 +336,8 @@ github.com/matttproud/golang_protobuf_extensions v1.0.1/go.mod h1:D8He9yQNgCq6Z5
 github.com/maxbrunsfeld/counterfeiter/v6 v6.2.2/go.mod h1:eD9eIE7cdwcMi9rYluz88Jz2VyhSmden33/aXg4oVIY=
 github.com/mediocregopher/mediocre-go-lib v0.0.0-20181029021733-cb65787f37ed/go.mod h1:dSsfyI2zABAdhcbvkXqgxOxrCsbYeHCPgrZkku60dSg=
 github.com/mediocregopher/radix/v3 v3.3.0/go.mod h1:EmfVyvspXz1uZEyPBMyGK+kjWiKQGvsUt6O3Pj+LDCQ=
+github.com/mgutz/str v1.2.0 h1:4IzWSdIz9qPQWLfKZ0rJcV0jcUDpxvP4JVZ4GXQyvSw=
+github.com/mgutz/str v1.2.0/go.mod h1:w1v0ofgLaJdoD0HpQ3fycxKD1WtxpjSo151pK/31q6w=
 github.com/microcosm-cc/bluemonday v1.0.2/go.mod h1:iVP4YcDBq+n/5fb23BhYFvIMq/leAFZyRl6bYmGDlGc=
 github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG+4E0Y=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
@@ -660,6 +664,8 @@ gopkg.in/fsnotify.v1 v1.4.7/go.mod h1:Tz8NjZHkW78fSQdbUxIjBTcgA1z1m8ZHf0WmKUhAMy
 gopkg.in/gcfg.v1 v1.2.0/go.mod h1:yesOnuUOFQAhST5vPY4nbZsb/huCgGGXlipJsBn0b3o=
 gopkg.in/go-playground/assert.v1 v1.2.1/go.mod h1:9RXL0bg/zibRAgZUYszZSwO/z8Y/a8bDuhia5mkpMnE=
 gopkg.in/go-playground/validator.v8 v8.18.2/go.mod h1:RX2a/7Ha8BgOhfk7j780h4/u/RRjR0eouCJSH80/M2Y=
+gopkg.in/godo.v2 v2.0.9 h1:jnbznTzXVk0JDKOxN3/LJLDPYJzIl0734y+Z0cEJb4A=
+gopkg.in/godo.v2 v2.0.9/go.mod h1:wgvPPKLsWN0hPIJ4JyxvFGGbIW3fJMSrXhdvSuZ1z/8=
 gopkg.in/inf.v0 v0.9.1/go.mod h1:cWUDdTG/fYaXco+Dcufb5Vnc6Gp2YChqWtbxRZE0mXw=
 gopkg.in/ini.v1 v1.55.0 h1:E8yzL5unfpW3M6fz/eB7Cb5MQAYSZ7GKo4Qth+N2sgQ=
 gopkg.in/ini.v1 v1.55.0/go.mod h1:pNLf8WUiyNEtQjuu5G5vTm06TEv9tsIgeAvK8hOrP4k=

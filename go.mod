@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/GoogleContainerTools/container-diff v0.15.0
 	github.com/Jeffail/gabs/v2 v2.5.0
+	github.com/MichaelTJones/walk v0.0.0-20161122175330-4748e29d5718 // indirect
 	github.com/Microsoft/hcsshim v0.8.7 // indirect
 	github.com/bmatcuk/doublestar v1.2.4
 	github.com/containerd/containerd v1.3.4 // indirect
@@ -19,6 +20,7 @@ require (
 	github.com/google/go-github/v28 v28.1.1
 	github.com/google/uuid v1.1.1
 	github.com/magiconair/properties v1.8.0
+	github.com/mgutz/str v1.2.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.5.0
 	github.com/spf13/cobra v1.0.0
@@ -33,5 +35,6 @@ require (
 	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/genproto v0.0.0-20200417142217-fb6d0575620b // indirect
 	google.golang.org/grpc v1.28.1 // indirect
+	gopkg.in/godo.v2 v2.0.9
 	gopkg.in/ini.v1 v1.55.0
 )
