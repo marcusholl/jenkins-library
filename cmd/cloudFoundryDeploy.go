@@ -3,6 +3,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"bytes"
 	"github.com/SAP/jenkins-library/pkg/cloudfoundry"
 	"github.com/SAP/jenkins-library/pkg/command"
 	"github.com/SAP/jenkins-library/pkg/log"
@@ -201,7 +202,16 @@ func deployCfNative(deployConfig deployConfig, config *cloudFoundryDeployOptions
 
 	stopOldAppIfRunning := func(command execRunner) error {
 
-		// TOOD: implement
+		if config.KeepOldInstance && config.DeployType == "blue-green" {
+			oldAppName := deployConfig.AppName + "-old"
+			_ = oldAppName
+		}
+
+		var buff bytes.Buffer
+		oldOut := command.Stdout
+		_ = oldOut
+		command.Stdout(&buff)
+		defer func() {/* TODO: set old out */ _ = oldOut }()
 		return nil
 	}
 
@@ -255,7 +265,13 @@ func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) (string, 
 		return "", []string{}, []string{}, err
 	}
 
-	return "blue-green-deploy", []string{}, []string{"--smoke-test", fmt.Sprintf("%s/%s", pwd, config.SmokeTestScript)}, nil
+	var deployOptions = []string{}
+
+	if config.KeepOldInstance {
+		deployOptions = append(deployOptions, "--delete-old-apps")
+	}
+
+	return "blue-green-deploy", deployOptions, []string{"--smoke-test", fmt.Sprintf("%s/%s", pwd, config.SmokeTestScript)}, nil
 }
 
 func prepareCfPushCfNativeDeploy(config *cloudFoundryDeployOptions) (string, []string, []string, error) {
