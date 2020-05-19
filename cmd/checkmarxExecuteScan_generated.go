@@ -216,7 +216,6 @@ thresholds instead of ` + "`" + `percentage` + "`" + ` whereas we strongly recom
 			telemetry.Initialize(GeneralConfig.NoTelemetry, STEP_NAME)
 			checkmarxExecuteScan(stepConfig, &telemetryData, &influx)
 			telemetryData.ErrorCode = "0"
-			log.Entry().Info("SUCCESS")
 		},
 	}
 

@@ -106,7 +106,6 @@ func XsDeployCommand() *cobra.Command {
 			telemetry.Initialize(GeneralConfig.NoTelemetry, STEP_NAME)
 			xsDeploy(stepConfig, &telemetryData, &commonPipelineEnvironment)
 			telemetryData.ErrorCode = "0"
-			log.Entry().Info("SUCCESS")
 		},
 	}
 

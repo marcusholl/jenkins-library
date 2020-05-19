@@ -65,7 +65,6 @@ func NpmExecuteScriptsCommand() *cobra.Command {
 			telemetry.Initialize(GeneralConfig.NoTelemetry, STEP_NAME)
 			npmExecuteScripts(stepConfig, &telemetryData)
 			telemetryData.ErrorCode = "0"
-			log.Entry().Info("SUCCESS")
 		},
 	}
 

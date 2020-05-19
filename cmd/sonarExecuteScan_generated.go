@@ -119,7 +119,6 @@ func SonarExecuteScanCommand() *cobra.Command {
 			telemetry.Initialize(GeneralConfig.NoTelemetry, STEP_NAME)
 			sonarExecuteScan(stepConfig, &telemetryData, &influx)
 			telemetryData.ErrorCode = "0"
-			log.Entry().Info("SUCCESS")
 		},
 	}
 

@@ -131,7 +131,6 @@ func ProtecodeExecuteScanCommand() *cobra.Command {
 			telemetry.Initialize(GeneralConfig.NoTelemetry, STEP_NAME)
 			protecodeExecuteScan(stepConfig, &telemetryData, &influx)
 			telemetryData.ErrorCode = "0"
-			log.Entry().Info("SUCCESS")
 		},
 	}
 
