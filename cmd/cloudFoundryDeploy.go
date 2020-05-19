@@ -93,6 +93,7 @@ func handleMTADeployment(config *cloudFoundryDeployOptions, command execRunner) 
 
 type deployConfig struct {
 	DeployCommand   string
+	DeployOptions   []string
 	AppName         string
 	ManifestFile    string
 	SmokeTestScript []string
@@ -114,16 +115,17 @@ func handleCFNativeDeployment(config *cloudFoundryDeployOptions, command execRun
 
 	var deployCommand string
 	var smokeTestScript []string
+	var deployOptions []string
 
 	// deploy command will be provided by the prepare functions below
 
 	if deployType == "blue-green" {
-		deployCommand, smokeTestScript, err = prepareBlueGreenCfNativeDeploy(config)
+		deployCommand, deployOptions, smokeTestScript, err = prepareBlueGreenCfNativeDeploy(config)
 		if err != nil {
 			return errors.Wrapf(err, "Cannot prepare cf native deployment. DeployType '%s'", deployType)
 		}
 	} else {
-		deployCommand, smokeTestScript, err = prepareCfPushCfNativeDeploy(config)
+		deployCommand, deployOptions, smokeTestScript, err = prepareCfPushCfNativeDeploy(config)
 		if err != nil {
 			return errors.Wrapf(err, "Cannot prepare cf push native deployment. DeployType '%s'", deployType)
 		}
@@ -155,6 +157,7 @@ func handleCFNativeDeployment(config *cloudFoundryDeployOptions, command execRun
 
 	myDeployConfig := deployConfig{
 		DeployCommand:   deployCommand,
+		DeployOptions:   deployOptions,
 		AppName:         appName,
 		ManifestFile:    manifestFile,
 		SmokeTestScript: smokeTestScript,
@@ -175,8 +178,10 @@ func deployCfNative(deployConfig deployConfig, config *cloudFoundryDeployOptions
 		"cf",
 		deployConfig.DeployCommand,
 		deployConfig.AppName,
+	}
 
-		//config.deployOptions,
+	if len(deployConfig.DeployOptions) > 0 {
+		deployStatement = append(deployStatement, deployConfig.DeployOptions...)
 	}
 
 	if len(deployConfig.ManifestFile) > 0 {
@@ -189,9 +194,9 @@ func deployCfNative(deployConfig deployConfig, config *cloudFoundryDeployOptions
 	}
 
 	if len(config.CfNativeDeployParameters) > 0 {
-		deployStatement = append(deployStatement, strings.FieldsFunc(config.CfNativeDeployParameters, func(c rune)bool {
+		deployStatement = append(deployStatement, strings.FieldsFunc(config.CfNativeDeployParameters, func(c rune) bool {
 			return c == ' '
-		}) ...)
+		})...)
 	}
 
 	stopOldAppIfRunning := func(command execRunner) error {
@@ -228,13 +233,13 @@ func getAppNameOrFail(config *cloudFoundryDeployOptions, manifestFile string) (s
 	return "", fmt.Errorf("Cannot resolve app name")
 }
 
-func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) (string, []string, error) {
+func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) (string, []string, []string, error) {
 
 	if config.SmokeTestScript == "blueGreenCheckScript.sh" {
 		// what should we do if there is already a script with the given name? Should we really overwrite ...
 		err := fileUtils.FileWrite(config.SmokeTestScript, []byte(smokeTestScript), 0755)
 		if err != nil {
-			return "", []string{}, err
+			return "", []string{}, []string{}, err
 		}
 		log.Entry().Debugf("smoke test script '%s' has been written.", config.SmokeTestScript)
 	}
@@ -242,19 +247,19 @@ func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) (string, 
 	if len(config.SmokeTestScript) > 0 {
 		err := os.Chmod(config.SmokeTestScript, 0755)
 		if err != nil {
-			return "", []string{}, err
+			return "", []string{}, []string{}, err
 		}
 	}
 	pwd, err := os.Getwd()
 	if err != nil {
-		return "", []string{}, err
+		return "", []string{}, []string{}, err
 	}
 
-	return "blue-green-deploy", []string{"--smoke-test", fmt.Sprintf("%s/%s", pwd, config.SmokeTestScript)}, nil
+	return "blue-green-deploy", []string{}, []string{"--smoke-test", fmt.Sprintf("%s/%s", pwd, config.SmokeTestScript)}, nil
 }
 
-func prepareCfPushCfNativeDeploy(config *cloudFoundryDeployOptions) (string, []string, error) {
-	return "push", []string{}, nil
+func prepareCfPushCfNativeDeploy(config *cloudFoundryDeployOptions) (string, []string, []string, error) {
+	return "push", []string{}, []string{}, nil
 }
 
 func checkAndUpdateDeployTypeForNotSupportedManifest(config *cloudFoundryDeployOptions, manifestFile string) (string, error) {
