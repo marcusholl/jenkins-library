@@ -8,6 +8,7 @@ import (
 	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
 	"github.com/SAP/jenkins-library/pkg/telemetry"
+	"github.com/pkg/errors"
 	"gopkg.in/godo.v2/glob"
 	"io"
 	"os"
@@ -100,14 +101,20 @@ func handleCFNativeDeployment(config *cloudFoundryDeployOptions, command execRun
 		return err
 	}
 
-	deployCommand := "push"
+	var deployCommand string
 
 	// deploy command will be provided by the prepare functions below
 
 	if deployType == "blue-green" {
-		prepareBlueGreenCfNativeDeploy(config)
+		deployCommand, err = prepareBlueGreenCfNativeDeploy(config)
+		if err != nil {
+			return errors.Wrapf(err, "Cannot prepare cf native deployment. DeployType '%s'", deployType)
+		}
 	} else {
-		prepareCfPushCfNativeDeploy(config)
+		deployCommand, err = prepareCfPushCfNativeDeploy(config)
+		if err != nil {
+			return errors.Wrapf(err, "Cannot prepare cf push native deployment. DeployType '%s'", deployType)
+		}
 	}
 
 	appName, err := getAppNameOrFail(config, manifestFile)
@@ -191,12 +198,12 @@ func getAppNameOrFail(config *cloudFoundryDeployOptions, manifestFile string) (s
 	return "", fmt.Errorf("Cannot resolve app name")
 }
 
-func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) error {
-	return nil
+func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) (string, error) {
+	return "blue-green-deploy", nil
 }
 
-func prepareCfPushCfNativeDeploy(config *cloudFoundryDeployOptions) error {
-	return nil
+func prepareCfPushCfNativeDeploy(config *cloudFoundryDeployOptions) (string, error) {
+	return "push", nil
 }
 
 func checkAndUpdateDeployTypeForNotSupportedManifest(config *cloudFoundryDeployOptions, manifestFile string) (string, error) {
