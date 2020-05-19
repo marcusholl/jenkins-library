@@ -187,7 +187,10 @@ func deployCfNative(deployConfig deployConfig, config *cloudFoundryDeployOptions
 	if len(deployConfig.SmokeTestScript) > 0 {
 		deployStatement = append(deployStatement, deployConfig.SmokeTestScript...)
 	}
-	//			config.cfNativeDeployParameters
+
+	if len(config.cfNativeDeployParameters) > 0 {
+		deployStatement = append(deployStatement, config.cfNativeDeployParameters...)
+	}
 
 	stopOldAppIfRunning := func(command execRunner) error {
 
