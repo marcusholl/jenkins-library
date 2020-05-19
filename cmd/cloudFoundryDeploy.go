@@ -20,6 +20,10 @@ var _cfLogin = cloudfoundry.Login
 var _cfLogout = cloudfoundry.Logout
 var fileUtils = piperutils.Files{}
 
+const smokeTestScript = `#!/usr/bin/env bash
+# this is simply testing if the application root returns HTTP STATUS_CODE
+curl -so /dev/null -w '%{response_code}' https://$1 | grep $STATUS_CODE`
+
 func cloudFoundryDeploy(config cloudFoundryDeployOptions, telemetryData *telemetry.CustomData) {
 	// for command execution use Command
 	c := command.Command{}
@@ -87,6 +91,13 @@ func handleMTADeployment(config *cloudFoundryDeployOptions, command execRunner) 
 	return deployMta(config, mtarFilePath, command)
 }
 
+type deployConfig struct {
+	DeployCommand string
+	AppName string
+	ManifestFile string
+	SmokeTestScript []string
+}
+
 func handleCFNativeDeployment(config *cloudFoundryDeployOptions, command execRunner) error {
 
 	manifestFile := config.Manifest
@@ -102,19 +113,21 @@ func handleCFNativeDeployment(config *cloudFoundryDeployOptions, command execRun
 	}
 
 	var deployCommand string
+	var smokeTestScript []string
 
 	// deploy command will be provided by the prepare functions below
 
 	if deployType == "blue-green" {
-		deployCommand, err = prepareBlueGreenCfNativeDeploy(config)
+		deployCommand, smokeTestScript, err = prepareBlueGreenCfNativeDeploy(config)
 		if err != nil {
 			return errors.Wrapf(err, "Cannot prepare cf native deployment. DeployType '%s'", deployType)
 		}
 	} else {
-		deployCommand, err = prepareCfPushCfNativeDeploy(config)
+		deployCommand, smokeTestScript, err = prepareCfPushCfNativeDeploy(config)
 		if err != nil {
 			return errors.Wrapf(err, "Cannot prepare cf push native deployment. DeployType '%s'", deployType)
 		}
+
 	}
 
 	appName, err := getAppNameOrFail(config, manifestFile)
@@ -140,28 +153,40 @@ func handleCFNativeDeployment(config *cloudFoundryDeployOptions, command execRun
 
 	// TODO: some environment variables needs to be set
 
-	return deployCfNative(deployCommand, appName, manifestFile, config, command)
+	myDeployConfig := deployConfig {
+		DeployCommand: deployCommand,
+		AppName: appName,
+		ManifestFile: manifestFile,
+		SmokeTestScript: smokeTestScript,
+	}
+
+	log.Entry().Infof("DeployConfig: %v", myDeployConfig)
+
+	//return nil
+	return deployCfNative(myDeployConfig, config, command)
 }
 
-func deployCfNative(deployCommand string, appName string, manifestFile string, config *cloudFoundryDeployOptions, command execRunner) error {
+func deployCfNative(deployConfig deployConfig, config *cloudFoundryDeployOptions, command execRunner) error {
 
 	// the deployStatement is complex and has lot of options; using a list and findAll allows to put each option
 	// as a single list element; if a option is not set (= null or '') this removed before every element is joined
 	// via a single whitespace; results in a single line deploy statement
 	deployStatement := []string{
 		"cf",
-		deployCommand,
-		appName,
+		deployConfig.DeployCommand,
+		deployConfig.AppName,
 
 		//config.deployOptions,
 	}
 
-	if len(manifestFile) > 0 {
+	if len(deployConfig.ManifestFile) > 0 {
 		deployStatement = append(deployStatement, "-f")
-		deployStatement = append(deployStatement, manifestFile)
+		deployStatement = append(deployStatement, deployConfig.ManifestFile)
 	}
 
-	//			config.smokeTest,
+	if len(deployConfig.SmokeTestScript) > 0 {
+		deployStatement = append(deployStatement, deployConfig.SmokeTestScript...)
+	}
 	//			config.cfNativeDeployParameters
 
 	stopOldAppIfRunning := func(command execRunner) error {
@@ -198,12 +223,33 @@ func getAppNameOrFail(config *cloudFoundryDeployOptions, manifestFile string) (s
 	return "", fmt.Errorf("Cannot resolve app name")
 }
 
-func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) (string, error) {
-	return "blue-green-deploy", nil
+func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) (string, []string, error) {
+
+	if config.SmokeTestScript == "blueGreenCheckScript.sh" {
+		// what should we do if there is already a script with the given name? Should we really overwrite ...
+		err := fileUtils.FileWrite(config.SmokeTestScript, []byte(smokeTestScript), 0755)
+		if err != nil {
+			return "", []string{}, err
+		}
+		log.Entry().Debugf("smoke test script '%s' has been written.", config.SmokeTestScript)
+	}
+
+	if len(config.SmokeTestScript) > 0 {
+		err := os.Chmod(config.SmokeTestScript, 0755)
+		if err != nil {
+			return "", []string{}, err
+		}
+	}
+	pwd, err := os.Getwd()
+	if err != nil {
+		return "", []string{}, err
+	}
+
+	return "blue-green-deploy", []string {"--smoke-test", fmt.Sprintf("%s/%s", pwd, config.SmokeTestScript)}, nil
 }
 
-func prepareCfPushCfNativeDeploy(config *cloudFoundryDeployOptions) (string, error) {
-	return "push", nil
+func prepareCfPushCfNativeDeploy(config *cloudFoundryDeployOptions) (string, []string, error) {
+	return "push", []string{}, nil
 }
 
 func checkAndUpdateDeployTypeForNotSupportedManifest(config *cloudFoundryDeployOptions, manifestFile string) (string, error) {
