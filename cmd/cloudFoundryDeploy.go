@@ -92,9 +92,9 @@ func handleMTADeployment(config *cloudFoundryDeployOptions, command execRunner) 
 }
 
 type deployConfig struct {
-	DeployCommand string
-	AppName string
-	ManifestFile string
+	DeployCommand   string
+	AppName         string
+	ManifestFile    string
 	SmokeTestScript []string
 }
 
@@ -153,10 +153,10 @@ func handleCFNativeDeployment(config *cloudFoundryDeployOptions, command execRun
 
 	// TODO: some environment variables needs to be set
 
-	myDeployConfig := deployConfig {
-		DeployCommand: deployCommand,
-		AppName: appName,
-		ManifestFile: manifestFile,
+	myDeployConfig := deployConfig{
+		DeployCommand:   deployCommand,
+		AppName:         appName,
+		ManifestFile:    manifestFile,
 		SmokeTestScript: smokeTestScript,
 	}
 
@@ -188,9 +188,9 @@ func deployCfNative(deployConfig deployConfig, config *cloudFoundryDeployOptions
 		deployStatement = append(deployStatement, deployConfig.SmokeTestScript...)
 	}
 
-	if len(config.cfNativeDeployParameters) > 0 {
-		deployStatement = append(deployStatement, config.cfNativeDeployParameters...)
-	}
+	//	if len(config.CFNativeDeployParameters) > 0 {
+	//		deployStatement = append(deployStatement, config.cfNativeDeployParameters...)
+	//	}
 
 	stopOldAppIfRunning := func(command execRunner) error {
 
@@ -248,7 +248,7 @@ func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) (string, 
 		return "", []string{}, err
 	}
 
-	return "blue-green-deploy", []string {"--smoke-test", fmt.Sprintf("%s/%s", pwd, config.SmokeTestScript)}, nil
+	return "blue-green-deploy", []string{"--smoke-test", fmt.Sprintf("%s/%s", pwd, config.SmokeTestScript)}, nil
 }
 
 func prepareCfPushCfNativeDeploy(config *cloudFoundryDeployOptions) (string, []string, error) {
