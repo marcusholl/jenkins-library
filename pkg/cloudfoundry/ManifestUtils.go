@@ -8,6 +8,9 @@ import (
 
 var readFile = ioutil.ReadFile
 
+const defaultManifestFileName = "manifest.yml"
+const defaultManifestVariablesFileName = "manifest-variables.yml"
+
 // Application ...
 type Application struct {
 	Name string
