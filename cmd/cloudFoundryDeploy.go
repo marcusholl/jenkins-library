@@ -291,7 +291,24 @@ func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) (string, 
 		deployOptions = append(deployOptions, "--delete-old-apps")
 	}
 
+	handleLegacyCfManifest(config)
+
 	return "blue-green-deploy", deployOptions, []string{"--smoke-test", fmt.Sprintf("%s/%s", pwd, config.SmokeTestScript)}, nil
+}
+
+func handleLegacyCfManifest(config *cloudFoundryDeployOptions) error {
+	manifest, err := cloudfoundry.ReadManifest("manifest.yml")
+	if err != nil {
+		return err
+	}
+
+	changed, err := cloudfoundry.Transform(&manifest)
+	if err != nil {
+		return err
+	}
+
+	_ = changed
+	return nil
 }
 
 func prepareCfPushCfNativeDeploy(config *cloudFoundryDeployOptions) (string, []string, []string, error) {
