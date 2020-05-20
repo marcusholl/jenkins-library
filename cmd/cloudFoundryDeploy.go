@@ -205,13 +205,33 @@ func deployCfNative(deployConfig deployConfig, config *cloudFoundryDeployOptions
 		if config.KeepOldInstance && config.DeployType == "blue-green" {
 			oldAppName := deployConfig.AppName + "-old"
 			_ = oldAppName
+
+			var buff bytes.Buffer
+
+			oldOut := command.Stdout
+			_ = oldOut
+			command.Stdout(&buff)
+
+			defer func() {
+				command.Stdout(log.Writer())
+			}()
+
+			err := command.RunExecutable("cf", "stop", oldAppName)
+
+			if err != nil {
+
+				cfStopLog := buff.String()
+
+				if ! strings.Contains(cfStopLog, oldAppName + " not found") {
+					return fmt.Errorf("Could not stop application %s. Error: %s", oldAppName, cfStopLog)
+				} else {
+					log.Entry().Infof("Cannot stop application '%s': %s", oldAppName, cfStopLog)
+				}
+			} else {
+				log.Entry().Infof("Old application '%s' has been stopped.", oldAppName)
+			}
 		}
 
-		var buff bytes.Buffer
-		oldOut := command.Stdout
-		_ = oldOut
-		command.Stdout(&buff)
-		defer func() {/* TODO: set old out */ _ = oldOut }()
 		return nil
 	}
 
