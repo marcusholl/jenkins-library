@@ -235,7 +235,7 @@ func deployCfNative(deployConfig deployConfig, config *cloudFoundryDeployOptions
 		return nil
 	}
 
-	return _deploy(config, nil, deployStatement, stopOldAppIfRunning, command)
+	return cfDeploy(config, nil, deployStatement, stopOldAppIfRunning, command)
 }
 
 func getAppNameOrFail(config *cloudFoundryDeployOptions, manifestFile string) (string, error) {
@@ -377,7 +377,7 @@ func deployMta(config *cloudFoundryDeployOptions, mtarFilePath string, command e
 		}
 	}
 
-	return _deploy(config, cfAPIParams, cfDeployParams, nil, command)
+	return cfDeploy(config, cfAPIParams, cfDeployParams, nil, command)
 }
 
 // would make sense to have that method in some kind of helper instead having it here
@@ -391,7 +391,7 @@ func contains(collection []string, key string) bool {
 	return false
 }
 
-func _deploy(config *cloudFoundryDeployOptions, cfAPIParams, cfDeployParams []string, postDeployAction func(command execRunner) error, command execRunner) error {
+func cfDeploy(config *cloudFoundryDeployOptions, cfAPIParams, cfDeployParams []string, postDeployAction func(command execRunner) error, command execRunner) error {
 
 	const cfLogFile = "cf.log"
 	var err error
