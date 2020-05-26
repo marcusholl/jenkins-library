@@ -1,0 +1,94 @@
+package main
+
+import (
+    "fmt"
+    "io/ioutil"
+    "gopkg.in/yaml.v2"
+    "reflect"
+)
+
+func main() {
+
+	data, err := ioutil.ReadFile("manifest.yml")
+        if err != nil {
+		fmt.Printf("Error: %v", err)
+		return
+	}
+
+	m := make(map[string]interface{})
+	//m := make(map[interface{}]interface{})
+
+	err = yaml.Unmarshal(data, &m)
+        if err != nil {
+		fmt.Printf("Error: %v", err)
+		return
+	}
+
+
+	d, err := yaml.Marshal(&m)
+        if err != nil {
+		fmt.Printf("Error: %v", err)
+		return
+	}
+	ioutil.WriteFile("manifest.new.yml", d, 0644)
+	fmt.Printf("result: %v\n", m)
+
+	apps, err := toSlice(m["applications"])
+
+        if err != nil {
+		fmt.Printf("Error: %v", err)
+		return
+	}
+      
+	fmt.Printf("result[applications]: %v\n", apps[0])
+	app, err := toMap(apps[0])
+
+        if err != nil {
+		fmt.Printf("Error: %v", err)
+		return
+	}
+
+	fmt.Printf("name: %v\n",app["name"])
+	fmt.Printf("build packs: %v\n",app["buildPacks"])
+
+	buildPacks := app["buildPacks"]
+
+	bp, err := toSlice(buildPacks)
+
+        if err != nil {
+		fmt.Printf("Error: %v", err)
+		return
+	}
+	if len(bp) != 1 {
+		fmt.Printf("Invalid number of build packs")
+		return
+	}
+	fmt.Printf("Only build pack is: %v\n", bp[0])
+	app["buildPack"] = bp[0]
+	delete(app, "buildPacks")
+	
+	d, err = yaml.Marshal(&m)
+        if err != nil {
+		fmt.Printf("Error: %v", err)
+		return
+	}
+	ioutil.WriteFile("manifest.new.yml", d, 0644)
+}
+
+func toMap(i interface{}) (map[interface{}]interface{}, error) {
+
+	if m, ok := i.(map[interface{}]interface{}); ok {
+		return m, nil
+	}
+	return nil, fmt.Errorf("Failed to convert %v to map. Was %v", i, reflect.TypeOf(i))
+} 
+
+func toSlice(i interface{}) ([]interface{}, error) {
+
+	if s, ok := i.([]interface{}); ok {
+		return s, nil
+	} 
+	return nil, fmt.Errorf("Failed to convert %v to slice. Was %v", i, reflect.TypeOf(i))
+}
+
+

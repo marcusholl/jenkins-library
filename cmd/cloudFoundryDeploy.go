@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"bufio"
-	"fmt"
 	"bytes"
+	"fmt"
 	"github.com/SAP/jenkins-library/pkg/cloudfoundry"
 	"github.com/SAP/jenkins-library/pkg/command"
 	"github.com/SAP/jenkins-library/pkg/log"
@@ -222,7 +222,7 @@ func deployCfNative(deployConfig deployConfig, config *cloudFoundryDeployOptions
 
 				cfStopLog := buff.String()
 
-				if ! strings.Contains(cfStopLog, oldAppName + " not found") {
+				if !strings.Contains(cfStopLog, oldAppName+" not found") {
 					return fmt.Errorf("Could not stop application %s. Error: %s", oldAppName, cfStopLog)
 				} else {
 					log.Entry().Infof("Cannot stop application '%s': %s", oldAppName, cfStopLog)
@@ -247,12 +247,21 @@ func getAppNameOrFail(config *cloudFoundryDeployOptions, manifestFile string) (s
 			return "", fmt.Errorf("Blue-green plugin requires app name to be passed (see https://github.com/bluemixgaragelondon/cf-blue-green-deploy/issues/27)")
 		}
 		if fileExists(manifestFile) {
-			m, err := cloudfoundry.ReadManifest(manifestFile)
+
+			manifest, err := cloudfoundry.ReadManifest(manifestFile)
+
 			if err != nil {
 				return "", err
 			}
-			if len(m.Applications) > 0 && len(m.Applications[0].Name) != 0 {
-				return m.Applications[0].Name, nil
+
+			log.Entry().Info("Retrieving app name")
+			appName, err := manifest.GetAppName()
+			if err != nil {
+				return "", err
+			}
+
+			if len(appName) >= 0 {
+				return appName, nil
 			} else {
 				return "", fmt.Errorf("No appName available in manifest '%s'", manifestFile)
 			}
@@ -291,7 +300,11 @@ func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) (string, 
 		deployOptions = append(deployOptions, "--delete-old-apps")
 	}
 
-	handleLegacyCfManifest(config)
+	err = handleLegacyCfManifest(config)
+
+	if err != nil {
+		return "", []string{}, []string{}, err
+	}
 
 	return "blue-green-deploy", deployOptions, []string{"--smoke-test", fmt.Sprintf("%s/%s", pwd, config.SmokeTestScript)}, nil
 }
@@ -302,12 +315,19 @@ func handleLegacyCfManifest(config *cloudFoundryDeployOptions) error {
 		return err
 	}
 
-	changed, err := cloudfoundry.Transform(&manifest)
+	log.Entry().Infof("Transforming manifest file.")
+	changed, err := manifest.Transform()
 	if err != nil {
 		return err
 	}
 
 	_ = changed
+	if true {
+		log.Entry().Warning("The manifest file 'manifest.yaml' is not compatible with the Cloud Foundry blue-green deployment plugin. Re-writing inline. See this issue if you are interested in the background: https://github.com/cloudfoundry/cli/issues/1445")
+		//manifest.WriteManifest("manifest.yml")
+		} else {
+		log.Entry().Debug("Manifest file format for manifest file 'manifest.yaml' is up to date. No legacy handling performed")
+	}
 	return nil
 }
 
@@ -325,12 +345,24 @@ func checkAndUpdateDeployTypeForNotSupportedManifest(config *cloudFoundryDeployO
 
 	if config.DeployType == "blue-green" && manifestFileExists {
 
-		m, _ := cloudfoundry.ReadManifest(manifestFile)
+		m, err := cloudfoundry.ReadManifest(manifestFile)
 
-		if len(m.Applications) > 1 {
+		if err != nil {
+			return "", err
+		}
+
+		apps, err := m.GetApplications()
+		if len(apps) > 1 {
 			fmt.Errorf("Your manifest contains more than one application. For blue green deployments your manifest file may contain only one application")
 		}
-		if len(m.Applications) == 1 && m.NoRoute {
+
+		noRoute, err :=  m.GetApplicationProperty(0, "noRoute")
+
+		if err != nil {
+			return "", err
+		}
+
+		if len(apps) == 1 && len(noRoute) == 0 {
 
 			const deployTypeStandard = "standard"
 			log.Entry().Warningf("Blue green deployment is not possible for application without route. Using deployment type '%s' instead.", deployTypeStandard)
