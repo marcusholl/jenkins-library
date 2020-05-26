@@ -12,7 +12,7 @@ import (
 
 // Manifest ...
 type Manifest struct {
-	self []interface{}
+	self map[string]interface{}
 }
 
 var m Manifest
@@ -29,7 +29,8 @@ func ReadManifest(name string) (Manifest, error) {
 
 	var m Manifest
 	//manifest := make(map[interface{}]interface{})
-	var manifest []interface{}
+	//var manifest []interface{}
+	manifest := make(map[string]interface{})
 
 	content, err := readFile(name)
 	if err != nil {
@@ -71,19 +72,26 @@ func (m Manifest)GetApplicationProperty(index int, name string) (string, error) 
 
 	log.Entry().Debugf("Entering ManifestUtils.GetApplicationProperty\n")
 
-	s, err := ToSlice(m.self)
-	if err != nil {
-		return "", err
-	}
-	_m, err := ToMap(s[index])
+	apps:= m.self["applications"]
+
+	s, err := ToSlice(apps)
+
 	if err != nil {
 		return "", err
 	}
 
-	value := _m[name]
+	app := s[index]
 
-	if value != nil {
-		if val, ok := value.(string); ok {
+	_m, err := ToMap(app)
+
+	if err != nil {
+		return "", err
+	}
+
+	log.Entry().Debugf("Value: %v", _m[name])
+
+	if _m[name] != nil {
+		if val, ok := _m[name].(string); ok {
 			return val, nil
 		}
 	}
