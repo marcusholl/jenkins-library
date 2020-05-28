@@ -12,7 +12,7 @@ func TestXX(t *testing.T) {
 
 	document := make(map[string]interface{})
 	replacements := make(map[string]interface{})
-
+ 
 	err := yaml.Unmarshal([]byte(
 `applications:
 - name: ((unique-prefix))-catalog-service-odatav2-0.0.1
