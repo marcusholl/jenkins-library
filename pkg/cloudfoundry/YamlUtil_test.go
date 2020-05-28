@@ -42,8 +42,9 @@ func TestXX(t *testing.T) {
     single-var-with-string-constants: ((boolean-variable))-with-some-more-text
 `), &document)
 
-	assert.NoError(t, err)
 
 	Substitute(document, replacements)
+
+	assert.NoError(t, err)
 	assert.True(t, true, "Everything is fine")
 }
