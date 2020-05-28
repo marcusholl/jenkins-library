@@ -23,7 +23,7 @@ func traverse(node interface{}) error {
 	if m, ok := node.(map[string]interface{}); ok {
 
 		for key, value := range m {
-			log.Entry().Infof("traversing '%v' ...", key)	
+			log.Entry().Infof("traversing map entry '%v' ...", key)
 			if err := traverse(value); err != nil {
 				return err
 			}
@@ -31,7 +31,8 @@ func traverse(node interface{}) error {
 	}
 
 	if v, ok := node.([]interface{}); ok {
-		for _, e := range v {
+		for i, e := range v {
+			log.Entry().Infof("traversing slice entry '%v' ...", i)	
 			if err := traverse(e); err != nil {
 				return err
 			}
