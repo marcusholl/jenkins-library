@@ -1,38 +1,42 @@
 package cloudfoundry
 
 import (
+	"fmt"
 	"github.com/SAP/jenkins-library/pkg/log"
 )
 
 //Substitute ...
 func Substitute(document map[string]interface{}, replacements map[string]interface{}) error {
 	log.Entry().Infof("Inside SUBSTITUTE")
-	traverse(document)
-	return nil
+	return traverse(document)
 }
 
-func traverse(document map[string]interface{}) error {
+func traverse(node interface{}) error {
 
-	log.Entry().Infof("The document is: %v", document)
-	for key, value := range document {
-		log.Entry().Infof("traversing '%v': '%v' ...", key, value)
+	log.Entry().Infof("Current node is: %v", node)
 
-		if v, ok := value.(string); ok {
-			log.Entry().Infof("We have a string value: %s", v)
-			continue
-		}
-		if v, ok := value.([]interface{}); ok {
-			log.Entry().Infof("We have an interface slice: %v", v)
-			continue
-		}
-
-		if v, ok := value.(map[interface{}]interface{}); ok {
-			log.Entry().Infof("We have a map: %v", v)
-			continue
-		}
-
-		log.Entry().Infof("We have something else: %v:%v", key, value)
+	if s, ok := node.(string); ok {
+		log.Entry().Infof("We have a string value: '%s'", s)
+		return nil
 	}
 
-	return nil
+	if m, ok := node.(map[string]interface{}); ok {
+
+		for key, value := range m {
+			log.Entry().Infof("traversing '%v' ...", key)	
+			if err := traverse(value); err != nil {
+				return err
+			}
+		}
+	}
+
+	if v, ok := node.([]interface{}); ok {
+		for _, e := range v {
+			if err := traverse(e); err != nil {
+				return err
+			}
+		}
+	}
+
+	return fmt.Errorf("We received something which we can't handle: %v", node)
 }

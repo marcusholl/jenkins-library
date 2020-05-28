@@ -206,6 +206,11 @@ class YamlUtilsTest extends BasePiperTest {
         Object input = nullScript.readYaml file: manifestFileName
         Object variables = nullScript.readYaml file: variablesFileName
 
+        System.err<<"\n==============\n"
+        System.err<<input
+        System.err<<"\n==============\n"
+
+        
         // execute step
         ExecutionContext context = new ExecutionContext()
         Map<String, Object> manifestDataAfterReplacement = yamlUtils.substituteVariables(input, variables, context)
@@ -215,6 +220,11 @@ class YamlUtilsTest extends BasePiperTest {
 
         assertCorrectVariableResolution(manifestDataAfterReplacement)
 
+        System.err<<"\n==============\n"
+        System.err<<manifestDataAfterReplacement
+        System.err<<"\n==============\n"
+
+        
         assertDataTypeAndSubstitutionCorrectness(manifestDataAfterReplacement)
 
         // check that the step was marked as a success (even if it did do nothing).
@@ -225,6 +235,7 @@ class YamlUtilsTest extends BasePiperTest {
         // See datatypes_manifest.yml and datatypes_manifest-variables.yml.
         // Note: For debugging consider turning on YAML writing to a file in JenkinsWriteYamlRule to see the
         // actual outcome of replacing variables (for visual inspection).
+
 
         assertTrue(manifestDataAfterReplacement.get("applications").get(0).get("instances").equals(1))
         assertTrue(manifestDataAfterReplacement.get("applications").get(0).get("instances") instanceof Integer)
