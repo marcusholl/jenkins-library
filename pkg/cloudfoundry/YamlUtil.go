@@ -50,7 +50,7 @@ func handleString(value string, replacements map[string]interface{}) (interface{
 
 	trimmed := strings.TrimSpace(value)
 	re := regexp.MustCompile(`\(\(.*?\)\)`)
-	matches := re.FindAllSubmatch([]byte(trimmed), 1)
+	matches := re.FindAllSubmatch([]byte(trimmed), -1)
 	fullMatch := isFullMatch(trimmed, matches)
 	if fullMatch {
 		log.Entry().Infof("FullMatchFound: %v", value)
@@ -65,9 +65,10 @@ func handleString(value string, replacements map[string]interface{}) (interface{
 	log.Entry().Infof("Partial Match found: '%s'", value)
 	// we have to scan for multiple variables
 	// we return always a string
-	for _, match := range matches {
+	log.Entry().Infof("Matches.len: %v, %v", matches, len(matches))
+	for i, match := range matches {
 		parameterName := getParameterName(match[0])
-		log.Entry().Infof("Partial match found: %v", parameterName)
+		log.Entry().Infof("XPartial match found: (%d) %v, %v", i, parameterName, value)
 		parameterValue := getParameterValue(parameterName, replacements)
 		if parameterValue == nil {
 			return nil, fmt.Errorf("No value available for parameter '%s', replacements: %v", parameterName, replacements)
@@ -77,18 +78,20 @@ func handleString(value string, replacements map[string]interface{}) (interface{
 		switch notUsed := parameterValue.(type) {
 		case string:
 			conversion = "%s"
-			_ = notUsed
+			_ = notUsed // we dont need that type, but can't say that above ...
 		case bool:
 			conversion = "%t"
+		case float64:
+			conversion = "%g" // exponent as need, only required digits
 		case int:
-			conversion = "d"
+			conversion = "%d"
 		default:
 			fmt.Errorf("Unsupported datatype found during travseral of yaml file: '%v', type: '%v'", parameterValue, reflect.TypeOf(parameterValue))
 		}
 		valueAsString := fmt.Sprintf(conversion, parameterValue)
 		log.Entry().Infof("Value as String: %v: '%v'", parameterName, valueAsString)
 		value = strings.Replace(value, "((" + parameterName + "))", valueAsString, -1)
-		log.Entry().Infof("PartialMatchFound: '%v', replaced with : '%s'", parameterName, valueAsString)
+		log.Entry().Infof("PartialMatchFound (%d): '%v', replaced with : '%s'", i, parameterName, valueAsString)
 	} 
 
 	return value, nil
