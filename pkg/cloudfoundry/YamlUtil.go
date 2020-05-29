@@ -26,8 +26,7 @@ func traverse(node interface{}) (interface{}, error) {
 
 	switch t := node.(type) {
 	case string:
-		log.Entry().Infof("We have a string value: '%v'", t)
-		return t, nil
+		return handleString(t)
 	case bool:
 		log.Entry().Infof("We have a boolean value: '%v'", t)
 		return t, nil
@@ -41,6 +40,11 @@ func traverse(node interface{}) (interface{}, error) {
 	default:
 		return nil, fmt.Errorf("Unkown type received: '%v' (%v)", reflect.TypeOf(node), node)
 	}
+}
+
+func handleString(t string) (interface{}, error) {
+	log.Entry().Infof("We have a string value: '%v'", t)
+	return t, nil
 }
 
 func handleSlice(t []interface{}) ([]interface{}, error) {
