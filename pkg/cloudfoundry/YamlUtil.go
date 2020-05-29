@@ -2,6 +2,8 @@ package cloudfoundry
 
 import (
 	"fmt"
+	"strings"
+	"regexp"
 	"reflect"
 	"github.com/SAP/jenkins-library/pkg/log"
 )
@@ -9,8 +11,9 @@ import (
 //Substitute ...
 func Substitute(document map[string]interface{}, replacements map[string]interface{}) error {
 	log.Entry().Infof("Inside SUBSTITUTE")
+	log.Entry().Infof("Replacements: %v", replacements)
 	
-	t, err := traverse(document, nil)
+	t, err := traverse(document, replacements)
 	if err != nil {
 		log.Entry().Warningf("Error: %v", err.Error())
 	}
@@ -42,10 +45,53 @@ func traverse(node interface{}, replacements map[string]interface{}) (interface{
 	}
 }
 
-func handleString(t string, replacements map[string]interface{}) (interface{}, error) {
-	log.Entry().Infof("We have a string value: '%v'", t)
-	return t, nil
+func handleString(value string, replacements map[string]interface{}) (interface{}, error) {
+	log.Entry().Infof("We have a string value: '%v'", value)
+
+	trimmed := strings.TrimSpace(value)
+	re := regexp.MustCompile(`\(\(.*\)\)`)
+	matches := re.FindAllSubmatch([]byte(trimmed), 1)
+	fullMatch := isFullMatch(trimmed, matches)
+	if fullMatch {
+		parameterName := getParameterName(matches[0][0])
+		parameterValue := getParameterValue(parameterName, replacements)
+		log.Entry().Infof("FullMatchFound: '%s', replacing with '%v'", parameterName, parameterValue)
+		return parameterValue, nil
+	}
+	// we have to scan for multiple variables
+	// we return always a string
+	for _, match := range matches {
+		parameterName := getParameterName(match[0])
+		parameterValue := getParameterValue(parameterName, replacements)
+		if parameterValue == nil {
+			return nil, fmt.Errorf("No value available for parameters '%s', replacements: %v", parameterName, replacements)
+		}
+		if v, ok := parameterValue.(string); ok {
+			value = strings.Replace(value, "((" + parameterName + "))", v, -1)
+			log.Entry().Infof("PartialMatchFound: '%v', replaced with : '%s'", parameterName, value)
+		} else {
+			fmt.Printf("Complex value found for parameter '%s'. Only string values are supported", parameterName)
+		}
+	} 
+
+	return value, nil
 }
+
+func getParameterName(b []byte) string {
+	return strings.Replace(strings.Replace(string(b), "((", "", 1), "))", "", 1)
+}
+
+func getParameterValue(name string, replacements map[string]interface{}) interface{} {
+	if name == "integer-variable" {
+		return 422
+	}
+
+	return replacements[name]	
+}
+
+func isFullMatch(value string, matches [][][]byte) bool {
+	return strings.HasPrefix(value, "((") && strings.HasSuffix(value, "))") && len(matches) == 1 && len(matches[0]) == 1
+ }
 
 func handleSlice(t []interface{}, replacements map[string]interface{}) ([]interface{}, error) {
 	log.Entry().Info("traversing slice ...")

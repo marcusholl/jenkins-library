@@ -14,6 +14,26 @@ func TestXX(t *testing.T) {
 	document := make(map[string]interface{})
 	replacements := make(map[string]interface{})
  
+yaml.Unmarshal([]byte(
+`unique-prefix: uniquePrefix # A unique prefix. E.g. your D/I/C-User
+xsuaa-instance-name: uniquePrefix-catalog-service-odatav2-xsuaa
+hana-instance-name: uniquePrefix-catalog-service-odatav2-hana
+integer-variable: 1
+boolean-variable: Yes
+float-variable: 0.25
+json-variable: >
+  [
+    {"name":"token-destination",
+     "url":"https://www.google.com",
+     "forwardAuthToken": true}
+  ]
+object-variable:
+  hello: "world"
+  this:  "is an object with"
+  one: 1
+  float: 25.0
+  bool: Yes`), &replacements)
+
 	err := yaml.Unmarshal([]byte(
 `applications:
 - name: ((unique-prefix))-catalog-service-odatav2-0.0.1
@@ -42,8 +62,10 @@ func TestXX(t *testing.T) {
     single-var-with-string-constants: ((boolean-variable))-with-some-more-text
   `), &document)
 
+		fmt.Printf("Replacements: %v\n", replacements)
+
 	fmt.Printf("Document: %v\n", document)
-	Substitute(document, replacements)
+	err = Substitute(document, replacements)
 
 	assert.NoError(t, err)
 	assert.True(t, true, "Everything is fine")
