@@ -10,7 +10,7 @@ import (
 func Substitute(document map[string]interface{}, replacements map[string]interface{}) error {
 	log.Entry().Infof("Inside SUBSTITUTE")
 	
-	t, err := traverse(document, "", false)
+	t, err := traverse(document, false)
 	if err != nil {
 		log.Entry().Warningf("Error: %v", err.Error())
 	}
@@ -20,9 +20,9 @@ func Substitute(document map[string]interface{}, replacements map[string]interfa
 	return err
 }
 
-func traverse(node interface{}, key string, nestedCall bool) (interface{}, error) {
+func traverse(node interface{}, nestedCall bool) (interface{}, error) {
 
-	log.Entry().Infof("Current node is: %v, key: %s, type: %v", node, key, reflect.TypeOf(node))
+	log.Entry().Infof("Current node is: %v, type: %v", node, reflect.TypeOf(node))
 
 	if s, ok := node.(string); ok {
 		log.Entry().Infof("We have a string value: '%v'", s)
@@ -46,7 +46,7 @@ func traverse(node interface{}, key string, nestedCall bool) (interface{}, error
 		for key, value := range m {
 			
 			log.Entry().Infof("traversing map entry '%v' ...", key)
-			if val, err := traverse(value, key, true); err == nil {
+			if val, err := traverse(value, true); err == nil {
 				tNode[key] = val
 			} else {
 				return nil, err
@@ -63,7 +63,7 @@ func traverse(node interface{}, key string, nestedCall bool) (interface{}, error
 		tNode := make([]interface{}, 0)
 		for i, e := range v {
 			log.Entry().Infof("traversing slice entry '%v' ...", i)
-			if val, err := traverse(e, "", true); err == nil {
+			if val, err := traverse(e, true); err == nil {
 				tNode = append(tNode, val)
 
 			} else {
