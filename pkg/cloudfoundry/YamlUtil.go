@@ -49,44 +49,62 @@ func handleString(value string, replacements map[string]interface{}) (interface{
 	log.Entry().Infof("We have a string value: '%v'", value)
 
 	trimmed := strings.TrimSpace(value)
-	re := regexp.MustCompile(`\(\(.*\)\)`)
+	re := regexp.MustCompile(`\(\(.*?\)\)`)
 	matches := re.FindAllSubmatch([]byte(trimmed), 1)
 	fullMatch := isFullMatch(trimmed, matches)
 	if fullMatch {
+		log.Entry().Infof("FullMatchFound: %v", value)
 		parameterName := getParameterName(matches[0][0])
-		parameterValue := getParameterValue(parameterName, replacements)
-		log.Entry().Infof("FullMatchFound: '%s', replacing with '%v'", parameterName, parameterValue)
-		return parameterValue, nil
-	}
-	// we have to scan for multiple variables
-	// we return always a string
-	for _, match := range matches {
-		parameterName := getParameterName(match[0])
 		parameterValue := getParameterValue(parameterName, replacements)
 		if parameterValue == nil {
 			return nil, fmt.Errorf("No value available for parameters '%s', replacements: %v", parameterName, replacements)
 		}
-		if v, ok := parameterValue.(string); ok {
-			value = strings.Replace(value, "((" + parameterName + "))", v, -1)
-			log.Entry().Infof("PartialMatchFound: '%v', replaced with : '%s'", parameterName, value)
-		} else {
-			fmt.Printf("Complex value found for parameter '%s'. Only string values are supported", parameterName)
+		log.Entry().Infof("FullMatchFound: '%s', replacing with '%v'", parameterName, parameterValue)
+		return parameterValue, nil
+	}
+	log.Entry().Infof("Partial Match found: '%s'", value)
+	// we have to scan for multiple variables
+	// we return always a string
+	for _, match := range matches {
+		parameterName := getParameterName(match[0])
+		log.Entry().Infof("Partial match found: %v", parameterName)
+		parameterValue := getParameterValue(parameterName, replacements)
+		if parameterValue == nil {
+			return nil, fmt.Errorf("No value available for parameter '%s', replacements: %v", parameterName, replacements)
 		}
+
+		var conversion string 
+		switch notUsed := parameterValue.(type) {
+		case string:
+			conversion = "%s"
+			_ = notUsed
+		case bool:
+			conversion = "%t"
+		case int:
+			conversion = "d"
+		default:
+			fmt.Errorf("Unsupported datatype found during travseral of yaml file: '%v', type: '%v'", parameterValue, reflect.TypeOf(parameterValue))
+		}
+		valueAsString := fmt.Sprintf(conversion, parameterValue)
+		log.Entry().Infof("Value as String: %v: '%v'", parameterName, valueAsString)
+		value = strings.Replace(value, "((" + parameterName + "))", valueAsString, -1)
+		log.Entry().Infof("PartialMatchFound: '%v', replaced with : '%s'", parameterName, valueAsString)
 	} 
 
 	return value, nil
 }
 
 func getParameterName(b []byte) string {
+	pName := string(b)
+	log.Entry().Infof("ParameterName is: '%s'", pName)
 	return strings.Replace(strings.Replace(string(b), "((", "", 1), "))", "", 1)
 }
 
 func getParameterValue(name string, replacements map[string]interface{}) interface{} {
-	if name == "integer-variable" {
-		return 422
-	}
 
-	return replacements[name]	
+	r := replacements[name]
+	log.Entry().Infof("Value '%v' resolved for parameter '%s'", r, name)
+	return r
 }
 
 func isFullMatch(value string, matches [][][]byte) bool {
