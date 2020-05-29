@@ -34,14 +34,10 @@ func traverse(node interface{}) (interface{}, error) {
 	case int:
 		log.Entry().Infof("We have an int value: '%v'", t)
 		return t, nil
-
-	}
-
-	if m, ok := node.(map[string]interface{}); ok {
-
+	case map[string]interface{}:
 		log.Entry().Info("Traversing map ...")
 		tNode := make(map[string]interface{})
-		for key, value := range m {
+		for key, value := range t {
 			
 			log.Entry().Infof("traversing map entry '%v' ...", key)
 			if val, err := traverse(value); err == nil {
@@ -49,17 +45,14 @@ func traverse(node interface{}) (interface{}, error) {
 			} else {
 				return nil, err
 			}
-			
 			log.Entry().Infof("... map entry '%v' traversed", key)
 		}
 		log.Entry().Infof("map fully traversed: %v", tNode)
 		return tNode, nil
-	}
-
-	if v, ok := node.([]interface{}); ok {
+	case []interface{}:
 		log.Entry().Info("traversing slice ...")
 		tNode := make([]interface{}, 0)
-		for i, e := range v {
+		for i, e := range t {
 			log.Entry().Infof("traversing slice entry '%v' ...", i)
 			if val, err := traverse(e); err == nil {
 				tNode = append(tNode, val)
@@ -71,7 +64,7 @@ func traverse(node interface{}) (interface{}, error) {
 		}
 		log.Entry().Infof("slice fully traversed.")
 		return tNode, nil
+	default:
+		return nil, fmt.Errorf("Unkown type received: '%v' (%v)", reflect.TypeOf(node), node)
 	}
-
-	return nil, fmt.Errorf("Unkown type received: '%v' (%v)", reflect.TypeOf(node), node)
 }
