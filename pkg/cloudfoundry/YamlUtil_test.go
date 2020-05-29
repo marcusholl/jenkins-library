@@ -23,8 +23,6 @@ func TestXX(t *testing.T) {
   buildpacks:
     - java_buildpack
   path: ./srv/target/srv-backend-0.0.1-SNAPSHOT.jar
-`), &document)
-_ = ` 
   routes:
   - route: ((unique-prefix))-catalog-service-odatav2-001.cfapps.eu10.hana.ondemand.com
 
@@ -42,8 +40,7 @@ _ = `
     object-variable: ((object-variable))
     string-variable: ((boolean-variable))-((float-variable))-((integer-variable))-((json-variable))
     single-var-with-string-constants: ((boolean-variable))-with-some-more-text
-`
-
+  `), &document)
 
 	fmt.Printf("Document: %v\n", document)
 	Substitute(document, replacements)

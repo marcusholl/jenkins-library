@@ -9,91 +9,71 @@ import (
 //Substitute ...
 func Substitute(document map[string]interface{}, replacements map[string]interface{}) error {
 	log.Entry().Infof("Inside SUBSTITUTE")
-	//var transformed interface{}
-	transformed := make(map[string]interface{})
-
 	
-	transformed["test22"] = "debug"
-	
-
-	log.Entry().Infof("TTTT: %v", transformed)
-	err := traverse(document, transformed , "", false)
+	t, err := traverse(document, "", false)
 	if err != nil {
 		log.Entry().Warningf("Error: %v", err.Error())
 	}
 
-	log.Entry().Infof("transformed: %v", transformed)
+	log.Entry().Infof("transformed: %v", t)
 
 	return err
 }
 
-func traverse(node interface{}, transformedNode interface{}, key string, nestedCall bool) error {
+func traverse(node interface{}, key string, nestedCall bool) (interface{}, error) {
 
 	log.Entry().Infof("Current node is: %v, key: %s, type: %v", node, key, reflect.TypeOf(node))
 
-	var replaced interface{}
-
 	if s, ok := node.(string); ok {
-		log.Entry().Infof("We have a string value: '%s'", s)
-		replaced = s
-		return nil
+		log.Entry().Infof("We have a string value: '%v'", s)
+		return s, nil
+	}
+
+	if b, ok := node.(bool); ok {
+		log.Entry().Infof("We have a boolean value: '%v'", b)
+		return b, nil
+	}
+
+	if i, ok := node.(int); ok {
+		log.Entry().Infof("We have an int value: '%v'", i)
+		return i, nil
 	}
 
 	if m, ok := node.(map[string]interface{}); ok {
 
-		t := make(map[string]interface{})
-
-		if ! nestedCall {
-			if outermodeNode, ok := transformedNode.(map[string]interface{}); ok {
-				t = outermodeNode
-			}
-		}
-
 		log.Entry().Info("Traversing map ...")
+		tNode := make(map[string]interface{})
 		for key, value := range m {
 			
 			log.Entry().Infof("traversing map entry '%v' ...", key)
-			if err := traverse(value, t, key, true); err != nil {
-				return err
+			if val, err := traverse(value, key, true); err == nil {
+				tNode[key] = val
+			} else {
+				return nil, err
 			}
+			
 			log.Entry().Infof("... map entry '%v' traversed", key)
 		}
-		log.Entry().Info("map fully traversed")
-		replaced = t
+		log.Entry().Infof("map fully traversed: %v", tNode)
+		return tNode, nil
 	}
 
 	if v, ok := node.([]interface{}); ok {
 		log.Entry().Info("traversing slice ...")
-		t := make([]interface{}, 0)
+		tNode := make([]interface{}, 0)
 		for i, e := range v {
-			log.Entry().Infof("traversing slice entry '%v' ...", i)	
-			if err := traverse(e, t, "", true); err != nil {
-				log.Entry().Warningf("XERROR: %v", err.Error())
-				return err
+			log.Entry().Infof("traversing slice entry '%v' ...", i)
+			if val, err := traverse(e, "", true); err == nil {
+				tNode = append(tNode, val)
+
+			} else {
+				return nil, err
 			}
 			log.Entry().Infof("... slice entry '%v' traversed", i)
 		}
 		log.Entry().Infof("slice fully traversed.")
-		replaced = t
+		return tNode, nil
 	}
 
-	if !nestedCall {
-		if d, ok := transformedNode.(map[string]interface{}); ok {
-
-			if len(key) == 0 {
-				return fmt.Errorf("Empty key detected. Cannot insert %v into map %v", replaced, d)
-			}
-			log.Entry().Infof("inserted to map: %v, key %s", replaced, key)
-			d[key] = replaced
-		}
-
-		if d, ok := transformedNode.([]interface{}); ok {
-			log.Entry().Infof("appended to slice %v", replaced)
-			d = append(d, replaced)
-		}
-	}
-
-	return nil
-	//log.Entry().Warningf("We received something which we can't handle: %v, %v", node, reflect.TypeOf(node))
-	//return fmt.Errorf("We received something which we can't handle: %v, %v", node, reflect.TypeOf(node))
+	return nil, fmt.Errorf("Unkown type received: '%v' (%v)", reflect.TypeOf(node), node)
 }
