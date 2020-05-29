@@ -24,19 +24,17 @@ func traverse(node interface{}) (interface{}, error) {
 
 	log.Entry().Infof("Current node is: %v, type: %v", node, reflect.TypeOf(node))
 
-	if s, ok := node.(string); ok {
-		log.Entry().Infof("We have a string value: '%v'", s)
-		return s, nil
-	}
+	switch t := node.(type) {
+	case string:
+		log.Entry().Infof("We have a string value: '%v'", t)
+		return t, nil
+	case bool:
+		log.Entry().Infof("We have a boolean value: '%v'", t)
+		return t, nil
+	case int:
+		log.Entry().Infof("We have an int value: '%v'", t)
+		return t, nil
 
-	if b, ok := node.(bool); ok {
-		log.Entry().Infof("We have a boolean value: '%v'", b)
-		return b, nil
-	}
-
-	if i, ok := node.(int); ok {
-		log.Entry().Infof("We have an int value: '%v'", i)
-		return i, nil
 	}
 
 	if m, ok := node.(map[string]interface{}); ok {
