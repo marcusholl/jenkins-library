@@ -10,7 +10,7 @@ import (
 func Substitute(document map[string]interface{}, replacements map[string]interface{}) error {
 	log.Entry().Infof("Inside SUBSTITUTE")
 	
-	t, err := traverse(document)
+	t, err := traverse(document, nil)
 	if err != nil {
 		log.Entry().Warningf("Error: %v", err.Error())
 	}
@@ -20,13 +20,13 @@ func Substitute(document map[string]interface{}, replacements map[string]interfa
 	return err
 }
 
-func traverse(node interface{}) (interface{}, error) {
+func traverse(node interface{}, replacements map[string]interface{}) (interface{}, error) {
 
 	log.Entry().Infof("Current node is: %v, type: %v", node, reflect.TypeOf(node))
 
 	switch t := node.(type) {
 	case string:
-		return handleString(t)
+		return handleString(t, replacements)
 	case bool:
 		log.Entry().Infof("We have a boolean value: '%v'", t)
 		return t, nil
@@ -34,25 +34,25 @@ func traverse(node interface{}) (interface{}, error) {
 		log.Entry().Infof("We have an int value: '%v'", t)
 		return t, nil
 	case map[string]interface{}:
-		return handleMap(t)
+		return handleMap(t, replacements)
 	case []interface{}:
-		return handleSlice(t)
+		return handleSlice(t, replacements)
 	default:
 		return nil, fmt.Errorf("Unkown type received: '%v' (%v)", reflect.TypeOf(node), node)
 	}
 }
 
-func handleString(t string) (interface{}, error) {
+func handleString(t string, replacements map[string]interface{}) (interface{}, error) {
 	log.Entry().Infof("We have a string value: '%v'", t)
 	return t, nil
 }
 
-func handleSlice(t []interface{}) ([]interface{}, error) {
+func handleSlice(t []interface{}, replacements map[string]interface{}) ([]interface{}, error) {
 	log.Entry().Info("traversing slice ...")
 	tNode := make([]interface{}, 0)
 	for i, e := range t {
 		log.Entry().Infof("traversing slice entry '%v' ...", i)
-		if val, err := traverse(e); err == nil {
+		if val, err := traverse(e, replacements); err == nil {
 			tNode = append(tNode, val)
 
 		} else {
@@ -64,13 +64,13 @@ func handleSlice(t []interface{}) ([]interface{}, error) {
 	return tNode, nil
 }
 
-func handleMap(t map[string]interface{}) (map[string]interface{}, error) {
+func handleMap(t map[string]interface{}, replacements map[string]interface{}) (map[string]interface{}, error) {
 	log.Entry().Info("Traversing map ...")
 	tNode := make(map[string]interface{})
 	for key, value := range t {
 		
 		log.Entry().Infof("traversing map entry '%v' ...", key)
-		if val, err := traverse(value); err == nil {
+		if val, err := traverse(value, replacements); err == nil {
 			tNode[key] = val
 		} else {
 			return nil, err
