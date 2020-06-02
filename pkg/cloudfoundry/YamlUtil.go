@@ -10,17 +10,7 @@ import (
 
 //Substitute ...
 func Substitute(document map[string]interface{}, replacements map[string]interface{}) (interface{}, error) {
-	log.Entry().Infof("Inside SUBSTITUTE")
-	log.Entry().Infof("Replacements: %v", replacements)
-	
-	t, err := traverse(document, replacements)
-	if err != nil {
-		log.Entry().Warningf("Error: %v", err.Error())
-	}
-
-	log.Entry().Infof("transformed: %v", t)
-
-	return t, err
+	return traverse(document, replacements)
 }
 
 func traverse(node interface{}, replacements map[string]interface{}) (interface{}, error) {

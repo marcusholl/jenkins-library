@@ -5,8 +5,6 @@ import (
 	"github.com/ghodss/yaml"
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"fmt"
-	"os"
 	"strings"
 
 )
@@ -63,23 +61,17 @@ object-variable:
     single-var-with-string-constants: ((boolean-variable))-with-some-more-text
   `), &document)
 
-	fmt.Printf("Replacements: %v\n", replacements)
-
-	fmt.Printf("Document: %v\n", document)
 	replaced, err := Substitute(document, replacements)
 
-	fmt.Printf("Replaced: %v", replaced)
 	assert.NoError(t, err)
 
 		//
 		// assertDataTypeAndSubstitutionCorrectness start
 
 	if m, ok := replaced.(map[string]interface{}); ok {
-		fmt.Printf("XXX: %v\n", m["applications"])
 	
 		if apps, ok := m["applications"].([]interface{}); ok {
 			app := apps[0]
-			fmt.Printf("XXXapp: %v\n", app)
 			if appAsMap, ok := app.(map[string]interface{}); ok {
 
 				instances := appAsMap["instances"]
@@ -195,14 +187,10 @@ object-variable:
 
 	data, err := yaml.Marshal(&replaced)
 	
-	out, err := os.Create("out.yml")
-	assert.NoError(t, err)
 
 
 	t.Logf("Data: %v", string(data))
-	t.Logf("File out.yml written.")
 
-	_, err = out.Write(data)
 	assert.NoError(t, err)
 
 	assert.True(t, true, "Everything is fine")
