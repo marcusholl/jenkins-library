@@ -61,7 +61,7 @@ object-variable:
     single-var-with-string-constants: ((boolean-variable))-with-some-more-text
   `), &document)
 
-	replaced, err := Substitute(document, replacements)
+	replaced, err := traverse(document, replacements)
 
 	assert.NoError(t, err)
 

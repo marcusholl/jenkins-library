@@ -8,11 +8,6 @@ import (
 	"github.com/SAP/jenkins-library/pkg/log"
 )
 
-//Substitute ...
-func Substitute(document map[string]interface{}, replacements map[string]interface{}) (interface{}, error) {
-	return traverse(document, replacements)
-}
-
 func traverse(node interface{}, replacements map[string]interface{}) (interface{}, error) {
 
 	log.Entry().Infof("Current node is: %v, type: %v", node, reflect.TypeOf(node))
