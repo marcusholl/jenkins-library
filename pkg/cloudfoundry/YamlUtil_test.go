@@ -1,20 +1,218 @@
 package cloudfoundry
 
-
 import (
+	"fmt"
 	"github.com/ghodss/yaml"
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"os"
 	"strings"
-
+	"testing"
+	"time"
 )
+
+type fileInfoMock struct {
+	name string
+	data []byte
+}
+
+func (fInfo fileInfoMock) Name() string       { return "" }
+func (fInfo fileInfoMock) Size() int64        { return int64(0) }
+func (fInfo fileInfoMock) Mode() os.FileMode  { return 0444 }
+func (fInfo fileInfoMock) ModTime() time.Time { return time.Time{} }
+func (fInfo fileInfoMock) IsDir() bool        { return false }
+func (fInfo fileInfoMock) Sys() interface{}   { return nil }
+
+func TestWriteFileOnUpate(t *testing.T) {
+
+	writeFileCalled := false
+
+	oldStat := _stat
+	oldReadFile := _readFile
+	oldWriteFile := _writeFile
+	oldTraverse := _traverse
+
+	defer func() {
+
+		_stat = oldStat
+		_readFile = oldReadFile
+		_writeFile = oldWriteFile
+		_traverse = oldTraverse
+	}()
+
+	_stat = func(name string) (os.FileInfo, error) {
+		return fileInfoMock{}, nil
+	}
+
+	_readFile = func(name string) ([]byte, error) {
+		if name == "manifest.yml" || name == "replacements.yml" {
+			return []byte{}, nil
+		}
+		return []byte{}, fmt.Errorf("open %s: no such file or directory", name)
+	}
+
+	_writeFile = func(name string, data []byte, mode os.FileMode) error {
+		writeFileCalled = true
+		return nil
+	}
+
+	_traverse = func(interface{}, map[string]interface{}) (interface{}, bool, error) {
+		return nil, true, nil
+	}
+
+	updated, err := Substitute("manifest.yml", "replacements.yml")
+
+	if assert.NoError(t, err) {
+		assert.True(t, updated)
+		assert.True(t, writeFileCalled)
+	}
+}
+
+func TestDontWriteFileOnNoUpate(t *testing.T) {
+
+	writeFileCalled := false
+
+	oldStat := _stat
+	oldReadFile := _readFile
+	oldWriteFile := _writeFile
+	oldTraverse := _traverse
+
+	defer func() {
+
+		_stat = oldStat
+		_readFile = oldReadFile
+		_writeFile = oldWriteFile
+		_traverse = oldTraverse
+	}()
+
+	_stat = func(name string) (os.FileInfo, error) {
+		return fileInfoMock{}, nil
+	}
+
+	_readFile = func(name string) ([]byte, error) {
+		if name == "manifest.yml" || name == "replacements.yml" {
+			return []byte{}, nil
+		}
+		return []byte{}, fmt.Errorf("open %s: no such file or directory", name)
+	}
+
+	_writeFile = func(name string, data []byte, mode os.FileMode) error {
+		writeFileCalled = true
+		return nil
+	}
+
+	_traverse = func(interface{}, map[string]interface{}) (interface{}, bool, error) {
+		return nil, false, nil
+	}
+
+	updated, err := Substitute("manifest.yml", "replacements.yml")
+
+	if assert.NoError(t, err) {
+		assert.False(t, updated)
+		assert.False(t, writeFileCalled)
+	}
+}
+
+func TestManifestFileDoesNotExist(t *testing.T) {
+
+	writeFileCalled := false
+	traverseCalled := false
+
+	oldStat := _stat
+	oldReadFile := _readFile
+	oldWriteFile := _writeFile
+	oldTraverse := _traverse
+
+	defer func() {
+
+		_stat = oldStat
+		_readFile = oldReadFile
+		_writeFile = oldWriteFile
+		_traverse = oldTraverse
+	}()
+
+	_stat = func(name string) (os.FileInfo, error) {
+		return fileInfoMock{}, nil
+	}
+
+	_readFile = func(name string) ([]byte, error) {
+		if name == "manifest.yml" || name == "replacements.yml" {
+			return []byte{}, nil
+		}
+		return []byte{}, fmt.Errorf("open %s: no such file or directory", name)
+	}
+
+	_writeFile = func(name string, data []byte, mode os.FileMode) error {
+		writeFileCalled = true
+		return nil
+	}
+
+	_traverse = func(interface{}, map[string]interface{}) (interface{}, bool, error) {
+		traverseCalled = true
+		return nil, false, nil
+	}
+
+	_, err := Substitute("manifestDoesNotExist.yml", "replacements.yml")
+
+	if assert.EqualError(t, err, "open manifestDoesNotExist.yml: no such file or directory") {
+		assert.False(t, writeFileCalled)
+		assert.False(t, traverseCalled)
+	}
+}
+
+func TestReplacementsFileDoesNotExist(t *testing.T) {
+
+	writeFileCalled := false
+	traverseCalled := false
+
+	oldStat := _stat
+	oldReadFile := _readFile
+	oldWriteFile := _writeFile
+	oldTraverse := _traverse
+
+	defer func() {
+
+		_stat = oldStat
+		_readFile = oldReadFile
+		_writeFile = oldWriteFile
+		_traverse = oldTraverse
+	}()
+
+	_stat = func(name string) (os.FileInfo, error) {
+		return fileInfoMock{}, nil
+	}
+
+	_readFile = func(name string) ([]byte, error) {
+		if name == "manifest.yml" || name == "replacements.yml" {
+			return []byte{}, nil
+		}
+		return []byte{}, fmt.Errorf("open %s: no such file or directory", name)
+	}
+
+	_writeFile = func(name string, data []byte, mode os.FileMode) error {
+		writeFileCalled = true
+		return nil
+	}
+
+	_traverse = func(interface{}, map[string]interface{}) (interface{}, bool, error) {
+		traverseCalled = true
+		return nil, false, nil
+	}
+
+	_, err := Substitute("manifest.yml", "replacementsDoesNotExist.yml")
+
+	if assert.EqualError(t, err, "open replacementsDoesNotExist.yml: no such file or directory") {
+		assert.False(t, writeFileCalled)
+		assert.False(t, traverseCalled)
+	}
+}
+
 func TestXX(t *testing.T) {
 
 	document := make(map[string]interface{})
 	replacements := make(map[string]interface{})
- 
-yaml.Unmarshal([]byte(
-`unique-prefix: uniquePrefix # A unique prefix. E.g. your D/I/C-User
+
+	yaml.Unmarshal([]byte(
+		`unique-prefix: uniquePrefix # A unique prefix. E.g. your D/I/C-User
 xsuaa-instance-name: uniquePrefix-catalog-service-odatav2-xsuaa
 hana-instance-name: uniquePrefix-catalog-service-odatav2-hana
 integer-variable: 1
@@ -34,7 +232,7 @@ object-variable:
   bool: Yes`), &replacements)
 
 	err := yaml.Unmarshal([]byte(
-`applications:
+		`applications:
 - name: ((unique-prefix))-catalog-service-odatav2-0.0.1
   memory: 1024M
   disk_quota: 512M
@@ -65,22 +263,20 @@ object-variable:
 
 	assert.NoError(t, err)
 	assert.True(t, updated)
-		//
-		// assertDataTypeAndSubstitutionCorrectness start
+	//
+	// assertDataTypeAndSubstitutionCorrectness start
 
 	if m, ok := replaced.(map[string]interface{}); ok {
-	
+
 		if apps, ok := m["applications"].([]interface{}); ok {
 			app := apps[0]
 			if appAsMap, ok := app.(map[string]interface{}); ok {
 
 				instances := appAsMap["instances"]
 
-
 				if one, ok := instances.(float64); ok {
-					assert.Equal(t, 1, int(one))	
+					assert.Equal(t, 1, int(one))
 				}
-
 
 				if services, ok := appAsMap["services"]; ok {
 					if servicesAsSlice, ok := services.([]interface{}); ok {
@@ -95,7 +291,6 @@ object-variable:
 				} else {
 					assert.True(t, false)
 				}
-
 
 				if env, ok := appAsMap["env"]; ok {
 
@@ -138,17 +333,15 @@ object-variable:
 							assert.True(t, false)
 						}
 
-
 					} else {
 						assert.True(t, false)
 					}
 				}
-			}	
+			}
 		}
 
 		//assertDataTypeAndSubstitutionCorrectness END
 		//
-
 
 		//
 		// assertCorrectVariableResolution START
@@ -182,12 +375,9 @@ object-variable:
 		//
 		// assertCorrectVariableResolution END
 
-
 	}
 
 	data, err := yaml.Marshal(&replaced)
-	
-
 
 	t.Logf("Data: %v", string(data))
 

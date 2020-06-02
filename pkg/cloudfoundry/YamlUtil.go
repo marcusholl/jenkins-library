@@ -2,29 +2,30 @@ package cloudfoundry
 
 import (
 	"fmt"
-	"strings"
-	"regexp"
-	"reflect"
 	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/ghodss/yaml"
 	"io/ioutil"
 	"os"
+	"reflect"
+	"regexp"
+	"strings"
 )
 
 var _stat = os.Stat
 var _writeFile = ioutil.WriteFile
+var _traverse = traverse
 
 // Substitute ...
 func Substitute(ymlFile, replacements string) (bool, error) {
 
 	bIn, err := _readFile(ymlFile)
 
-	if err !=  nil {
+	if err != nil {
 		return false, err
 	}
 
 	bReplacements, err := _readFile(replacements)
-	if err !=  nil {
+	if err != nil {
 		return false, err
 	}
 
@@ -34,7 +35,7 @@ func Substitute(ymlFile, replacements string) (bool, error) {
 	yaml.Unmarshal(bIn, &mIn)
 	yaml.Unmarshal(bReplacements, &mReplacements)
 
-	out, updated, err := traverse(mIn, mReplacements)
+	out, updated, err := _traverse(mIn, mReplacements)
 
 	if err != nil {
 		return false, err
@@ -104,7 +105,7 @@ func handleString(value string, replacements map[string]interface{}) (interface{
 			return nil, false, fmt.Errorf("No value available for parameter '%s', replacements: %v", parameterName, replacements)
 		}
 
-		var conversion string 
+		var conversion string
 		switch t := parameterValue.(type) {
 		case string:
 			conversion = "%s"
@@ -119,10 +120,10 @@ func handleString(value string, replacements map[string]interface{}) (interface{
 		}
 		valueAsString := fmt.Sprintf(conversion, parameterValue)
 		log.Entry().Infof("Value as String: %v: '%v'", parameterName, valueAsString)
-		value = strings.Replace(value, "((" + parameterName + "))", valueAsString, -1)
+		value = strings.Replace(value, "(("+parameterName+"))", valueAsString, -1)
 		updated = true
 		log.Entry().Infof("PartialMatchFound (%d): '%v', replaced with : '%s'", i, parameterName, valueAsString)
-	} 
+	}
 
 	return value, updated, nil
 }
@@ -142,12 +143,12 @@ func getParameterValue(name string, replacements map[string]interface{}) interfa
 
 func isFullMatch(value string, matches [][][]byte) bool {
 	return strings.HasPrefix(value, "((") && strings.HasSuffix(value, "))") && len(matches) == 1 && len(matches[0]) == 1
- }
+}
 
 func handleSlice(t []interface{}, replacements map[string]interface{}) ([]interface{}, bool, error) {
 	tNode := make([]interface{}, 0)
 	updated := false
-	for _	, e := range t {
+	for _, e := range t {
 		if val, _updated, err := traverse(e, replacements); err == nil {
 			updated = updated || _updated
 			tNode = append(tNode, val)
