@@ -156,6 +156,41 @@ object-variable:
 
 		//assertDataTypeAndSubstitutionCorrectness END
 		//
+
+
+		//
+		// assertCorrectVariableResolution START
+
+		if m, ok := replaced.(map[string]interface{}); ok {
+			if apps, ok := m["applications"].([]interface{}); ok {
+				app := apps[0]
+				if appAsMap, ok := app.(map[string]interface{}); ok {
+
+					assert.Equal(t, "uniquePrefix-catalog-service-odatav2-0.0.1", appAsMap["name"])
+
+					if env, ok := appAsMap["env"]; ok {
+
+						if envAsMap, ok := env.(map[string]interface{}); ok {
+							assert.Equal(t, "uniquePrefix-catalog-service-odatav2-xsuaa", envAsMap["xsuaa-instance-name"])
+							assert.Equal(t, "uniquePrefix-catalog-service-odatav2-hana", envAsMap["db_service_instance_name"])
+						} else {
+							assert.True(t, false)
+						}
+						if servicesAsSlice, ok := appAsMap["services"].([]interface{}); ok {
+							assert.Equal(t, "uniquePrefix-catalog-service-odatav2-xsuaa", servicesAsSlice[0])
+							assert.Equal(t, "uniquePrefix-catalog-service-odatav2-hana", servicesAsSlice[1])
+						} else {
+							assert.True(t, false)
+						}
+					}
+				}
+			}
+		}
+
+		//
+		// assertCorrectVariableResolution END
+
+
 	}
 
 	data, err := yaml.Marshal(&replaced)
