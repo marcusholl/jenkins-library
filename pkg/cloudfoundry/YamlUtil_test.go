@@ -6,10 +6,11 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"fmt"
+	"os"
+	"strings"
 
 )
 func TestXX(t *testing.T) {
-
 
 	document := make(map[string]interface{})
 	replacements := make(map[string]interface{})
@@ -62,11 +63,112 @@ object-variable:
     single-var-with-string-constants: ((boolean-variable))-with-some-more-text
   `), &document)
 
-		fmt.Printf("Replacements: %v\n", replacements)
+	fmt.Printf("Replacements: %v\n", replacements)
 
 	fmt.Printf("Document: %v\n", document)
-	err = Substitute(document, replacements)
+	replaced, err := Substitute(document, replacements)
 
+	fmt.Printf("Replaced: %v", replaced)
 	assert.NoError(t, err)
+
+		//
+		// assertDataTypeAndSubstitutionCorrectness start
+
+	if m, ok := replaced.(map[string]interface{}); ok {
+		fmt.Printf("XXX: %v\n", m["applications"])
+	
+		if apps, ok := m["applications"].([]interface{}); ok {
+			app := apps[0]
+			fmt.Printf("XXXapp: %v\n", app)
+			if appAsMap, ok := app.(map[string]interface{}); ok {
+
+				instances := appAsMap["instances"]
+
+
+				if one, ok := instances.(float64); ok {
+					assert.Equal(t, 1, int(one))	
+				}
+
+
+				if services, ok := appAsMap["services"]; ok {
+					if servicesAsSlice, ok := services.([]interface{}); ok {
+						if _, ok := servicesAsSlice[0].(string); ok {
+							assert.True(t, true)
+						} else {
+							assert.True(t, false)
+						}
+					} else {
+						assert.True(t, false)
+					}
+				} else {
+					assert.True(t, false)
+				}
+
+
+				if env, ok := appAsMap["env"]; ok {
+
+					if envAsMap, ok := env.(map[string]interface{}); ok {
+
+						if _, ok := envAsMap["floatVariable"].(float64); ok {
+
+							assert.True(t, true)
+						} else {
+							assert.True(t, false)
+						}
+
+						if asBoolean, ok := envAsMap["booleanVariable"].(bool); ok {
+							assert.True(t, asBoolean)
+						} else {
+							assert.True(t, false)
+						}
+
+						if _, ok := envAsMap["json-variable"].(string); ok {
+							assert.True(t, true)
+						} else {
+							assert.True(t, false)
+						}
+
+						if _, ok := envAsMap["object-variable"].(map[string]interface{}); ok {
+							assert.True(t, true)
+						} else {
+							assert.True(t, false)
+						}
+
+						if s, ok := envAsMap["string-variable"].(string); ok {
+							assert.True(t, strings.HasPrefix(s, "true-0.25-1-"))
+						} else {
+							assert.True(t, false)
+						}
+
+						if s, ok := envAsMap["single-var-with-string-constants"].(string); ok {
+							assert.Equal(t, s, "true-with-some-more-text")
+						} else {
+							assert.True(t, false)
+						}
+
+
+					} else {
+						assert.True(t, false)
+					}
+				}
+			}	
+		}
+
+		//assertDataTypeAndSubstitutionCorrectness END
+		//
+	}
+
+	data, err := yaml.Marshal(&replaced)
+	
+	out, err := os.Create("out.yml")
+	assert.NoError(t, err)
+
+
+	t.Logf("Data: %v", string(data))
+	t.Logf("File out.yml written.")
+
+	_, err = out.Write(data)
+	assert.NoError(t, err)
+
 	assert.True(t, true, "Everything is fine")
 }

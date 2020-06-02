@@ -9,7 +9,7 @@ import (
 )
 
 //Substitute ...
-func Substitute(document map[string]interface{}, replacements map[string]interface{}) error {
+func Substitute(document map[string]interface{}, replacements map[string]interface{}) (interface{}, error) {
 	log.Entry().Infof("Inside SUBSTITUTE")
 	log.Entry().Infof("Replacements: %v", replacements)
 	
@@ -20,7 +20,7 @@ func Substitute(document map[string]interface{}, replacements map[string]interfa
 
 	log.Entry().Infof("transformed: %v", t)
 
-	return err
+	return t, err
 }
 
 func traverse(node interface{}, replacements map[string]interface{}) (interface{}, error) {
@@ -75,18 +75,17 @@ func handleString(value string, replacements map[string]interface{}) (interface{
 		}
 
 		var conversion string 
-		switch notUsed := parameterValue.(type) {
+		switch t := parameterValue.(type) {
 		case string:
 			conversion = "%s"
-			_ = notUsed // we dont need that type, but can't say that above ...
 		case bool:
 			conversion = "%t"
-		case float64:
-			conversion = "%g" // exponent as need, only required digits
 		case int:
 			conversion = "%d"
+		case float64:
+			conversion = "%g" // exponent as need, only required digits
 		default:
-			fmt.Errorf("Unsupported datatype found during travseral of yaml file: '%v', type: '%v'", parameterValue, reflect.TypeOf(parameterValue))
+			return nil, fmt.Errorf("Unsupported datatype found during travseral of yaml file: '%v', type: '%v'", parameterValue, reflect.TypeOf(t))
 		}
 		valueAsString := fmt.Sprintf(conversion, parameterValue)
 		log.Entry().Infof("Value as String: %v: '%v'", parameterName, valueAsString)
