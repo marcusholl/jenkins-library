@@ -61,10 +61,10 @@ object-variable:
     single-var-with-string-constants: ((boolean-variable))-with-some-more-text
   `), &document)
 
-	replaced, err := traverse(document, replacements)
+	replaced, updated, err := traverse(document, replacements)
 
 	assert.NoError(t, err)
-
+	assert.True(t, updated)
 		//
 		// assertDataTypeAndSubstitutionCorrectness start
 
