@@ -6,7 +6,59 @@ import (
 	"regexp"
 	"reflect"
 	"github.com/SAP/jenkins-library/pkg/log"
+	"github.com/ghodss/yaml"
+	"io/ioutil"
+	"os"
 )
+
+var _stat = os.Stat
+var _writeFile = ioutil.WriteFile
+
+// Substitute ...
+func Substitute(ymlFile, replacements string) (bool, error) {
+
+	bIn, err := _readFile(ymlFile)
+
+	if err !=  nil {
+		return false, err
+	}
+
+	bReplacements, err := _readFile(replacements)
+	if err !=  nil {
+		return false, err
+	}
+
+	mIn := make(map[string]interface{})
+	mReplacements := make(map[string]interface{})
+
+	yaml.Unmarshal(bIn, &mIn)
+	yaml.Unmarshal(bReplacements, &mReplacements)
+
+	out, updated, err := traverse(mIn, mReplacements)
+
+	if err != nil {
+		return false, err
+	}
+
+	if updated {
+		bOut, err := yaml.Marshal(&out)
+		if err != nil {
+			return false, err
+		}
+
+		fInfo, err := _stat(ymlFile)
+		if err != nil {
+			return false, err
+		}
+
+		err = _writeFile(ymlFile, bOut, fInfo.Mode())
+		if err != nil {
+			return false, err
+		}
+	}
+
+	return updated, nil
+}
 
 func traverse(node interface{}, replacements map[string]interface{}) (interface{}, bool, error) {
 	switch t := node.(type) {
