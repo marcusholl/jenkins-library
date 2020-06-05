@@ -152,9 +152,18 @@ func handleCFNativeDeployment(config *cloudFoundryDeployOptions, command execRun
 	       echo "[${STEP_NAME}] - smokeTestScript=${config.smokeTestScript}"
 	*/
 
-	log.Entry().Infof("AppName: '%s'", appName)
+	pwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
 
-	// TODO: some environment variables needs to be set
+	additionalEnvironment := []string{
+		"CF_HOME=" + pwd,        // REVISIT: is it OK to set CF_HOME to the current working dir
+		"CF_PLUGIN_HOME=" + pwd, // REVISIT: is it OK to set CF_PLUGIN to the current working dir
+		"STATUS_CODE=" + config.SmokeTestStatusCode,
+	}
+
+	log.Entry().Infof("AppName: '%s'", appName)
 
 	myDeployConfig := deployConfig{
 		DeployCommand:   deployCommand,
@@ -167,10 +176,10 @@ func handleCFNativeDeployment(config *cloudFoundryDeployOptions, command execRun
 	log.Entry().Infof("DeployConfig: %v", myDeployConfig)
 
 	//return nil
-	return deployCfNative(myDeployConfig, config, command)
+	return deployCfNative(myDeployConfig, config, additionalEnvironment, command)
 }
 
-func deployCfNative(deployConfig deployConfig, config *cloudFoundryDeployOptions, command execRunner) error {
+func deployCfNative(deployConfig deployConfig, config *cloudFoundryDeployOptions, additionalEnvironment []string, command execRunner) error {
 
 	// the deployStatement is complex and has lot of options; using a list and findAll allows to put each option
 	// as a single list element; if a option is not set (= null or '') this removed before every element is joined
@@ -234,7 +243,7 @@ func deployCfNative(deployConfig deployConfig, config *cloudFoundryDeployOptions
 		return nil
 	}
 
-	return cfDeploy(config, nil, deployStatement, stopOldAppIfRunning, command)
+	return cfDeploy(config, nil, deployStatement, additionalEnvironment, stopOldAppIfRunning, command)
 }
 
 func getAppNameOrFail(config *cloudFoundryDeployOptions, manifestFile string) (string, error) {
@@ -540,7 +549,7 @@ func deployMta(config *cloudFoundryDeployOptions, mtarFilePath string, command e
 		}
 	}
 
-	return cfDeploy(config, cfAPIParams, cfDeployParams, nil, command)
+	return cfDeploy(config, cfAPIParams, cfDeployParams, nil, nil, command)
 }
 
 // would make sense to have that method in some kind of helper instead having it here
@@ -554,14 +563,26 @@ func contains(collection []string, key string) bool {
 	return false
 }
 
-func cfDeploy(config *cloudFoundryDeployOptions, cfAPIParams, cfDeployParams []string, postDeployAction func(command execRunner) error, command execRunner) error {
+func cfDeploy(
+	config *cloudFoundryDeployOptions,
+	cfAPIParams, cfDeployParams []string,
+	additionalEnvironment []string,
+	postDeployAction func(command execRunner) error,
+	command execRunner) error {
 
 	const cfLogFile = "cf.log"
 	var err error
 	var loginPerformed bool
 
+	if additionalEnvironment == nil {
+		additionalEnvironment = []string{}
+	}
+	additionalEnvironment = append(additionalEnvironment, "CF_TRACE="+cfLogFile)
+
+	log.Entry().Infof("Using additional environment variables: %s", additionalEnvironment)
+
 	// TODO set HOME to config.DockerWorkspace
-	command.SetEnv([]string{"CF_TRACE=" + cfLogFile})
+	command.SetEnv(additionalEnvironment)
 
 	if cfAPIParams != nil {
 		err = command.RunExecutable("cf", cfAPIParams...)
