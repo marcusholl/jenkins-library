@@ -7,6 +7,7 @@ require (
 	github.com/Jeffail/gabs/v2 v2.5.1
 	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible
+	github.com/MichaelTJones/walk v0.0.0-20161122175330-4748e29d5718 // indirect
 	github.com/Microsoft/hcsshim v0.8.9 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535 // indirect
 	github.com/bmatcuk/doublestar v1.3.1
@@ -27,6 +28,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/huandu/xstrings v1.3.1 // indirect
 	github.com/magiconair/properties v1.8.1
+	github.com/mgutz/str v1.2.0 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/motemen/go-nuts v0.0.0-20200601065735-3df31f16cb2f
@@ -44,5 +46,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980 // indirect
 	google.golang.org/genproto v0.0.0-20200602104108-2bb8d6132df6 // indirect
+	gopkg.in/godo.v2 v2.0.9
 	gopkg.in/ini.v1 v1.57.0
+	gopkg.in/yaml.v2 v2.3.0
 )
