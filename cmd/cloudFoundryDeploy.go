@@ -20,6 +20,7 @@ var _glob = glob.Glob // func(patterns []string) ([]*glob.FileAsset, []*glob.Reg
 var _cfLogin = cloudfoundry.Login
 var _cfLogout = cloudfoundry.Logout
 var _fileExists = piperutils.FileExists
+var _getManifest = getManifest
 var fileUtils = piperutils.Files{}
 
 const smokeTestScript = `#!/usr/bin/env bash
@@ -247,6 +248,10 @@ func deployCfNative(deployConfig deployConfig, config *cloudFoundryDeployOptions
 	return cfDeploy(config, nil, deployStatement, additionalEnvironment, stopOldAppIfRunning, command)
 }
 
+func getManifest(name string) (cloudfoundry.Manifest, error) {
+	return cloudfoundry.ReadManifest(name)
+}
+
 func getAppNameOrFail(config *cloudFoundryDeployOptions, manifestFile string) (string, error) {
 
 	if len(config.AppName) > 0 {
@@ -257,7 +262,7 @@ func getAppNameOrFail(config *cloudFoundryDeployOptions, manifestFile string) (s
 		return "", fmt.Errorf("Blue-green plugin requires app name to be passed (see https://github.com/bluemixgaragelondon/cf-blue-green-deploy/issues/27)")
 	}
 	if fileExists(manifestFile) {
-		m, err := cloudfoundry.ReadManifest(manifestFile)
+		m, err := _getManifest(manifestFile)
 		if err != nil {
 			return "", err
 		}
