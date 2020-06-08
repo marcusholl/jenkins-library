@@ -15,7 +15,17 @@ const propBuildpacks = "buildpacks"
 const propBuildpack = "buildpack"
 
 // Manifest ...
-type Manifest struct {
+type Manifest interface {
+	GetAppName(index int) (string, error)
+	ApplicationHasProperty(index int, name string) (bool, error)
+	GetApplicationProperty(index int, name string) (interface{}, error)
+	Transform() error
+	HasModified() bool
+	GetApplications() ([]interface{}, error)
+	WriteManifest() error
+}
+
+type manifest struct {
 	self     map[string]interface{}
 	modified bool
 	name     string
@@ -28,7 +38,7 @@ func ReadManifest(name string) (Manifest, error) {
 
 	log.Entry().Infof("Reading manifest file  '%s'", name)
 
-	m := Manifest{self: make(map[string]interface{}), name: name, modified: false}
+	m := &manifest{self: make(map[string]interface{}), name: name, modified: false}
 
 	content, err := _readFile(name)
 	if err != nil {
@@ -47,7 +57,7 @@ func ReadManifest(name string) (Manifest, error) {
 }
 
 // WriteManifest ...
-func (m *Manifest) WriteManifest() error {
+func (m *manifest) WriteManifest() error {
 
 	d, err := yaml.Marshal(&m.self)
 	if err != nil {
@@ -66,17 +76,17 @@ func (m *Manifest) WriteManifest() error {
 }
 
 // GetName ...
-func (m Manifest) GetName() string {
+func (m manifest) GetName() string {
 	return m.name
 }
 
 // GetApplications ...
-func (m Manifest) GetApplications() ([]interface{}, error) {
+func (m manifest) GetApplications() ([]interface{}, error) {
 	return toSlice(m.self)
 }
 
 // ApplicationHasProperty Checks if the application denoted by 'index' has the property 'name'
-func (m Manifest) ApplicationHasProperty(index int, name string) (bool, error) {
+func (m manifest) ApplicationHasProperty(index int, name string) (bool, error) {
 
 	sliced, err := toSlice(m.self[propApplications])
 
@@ -100,7 +110,7 @@ func (m Manifest) ApplicationHasProperty(index int, name string) (bool, error) {
 }
 
 // GetApplicationProperty ...
-func (m Manifest) GetApplicationProperty(index int, name string) (interface{}, error) {
+func (m manifest) GetApplicationProperty(index int, name string) (interface{}, error) {
 
 	sliced, err := toSlice(m.self[propApplications])
 
@@ -126,7 +136,7 @@ func (m Manifest) GetApplicationProperty(index int, name string) (interface{}, e
 }
 
 // GetAppName Gets the name of the app at 'index'
-func (m Manifest) GetAppName(index int) (string, error) {
+func (m manifest) GetAppName(index int) (string, error) {
 
 	appName, err := m.GetApplicationProperty(index, "name")
 
@@ -144,7 +154,7 @@ func (m Manifest) GetAppName(index int) (string, error) {
 // Transform For each app in the manifest the first entry in the build packs list
 // gets moved to the top level under the key 'buildpack'. The 'buildpacks' list is
 // deleted.
-func (m *Manifest) Transform() error {
+func (m *manifest) Transform() error {
 
 	sliced, err := toSlice(m.self[propApplications])
 	if err != nil {
@@ -167,7 +177,7 @@ func (m *Manifest) Transform() error {
 	return nil
 }
 
-func transformApp(app map[string]interface{}, m *Manifest) error {
+func transformApp(app map[string]interface{}, m *manifest) error {
 
 	appName := "n/a"
 
@@ -204,7 +214,7 @@ func transformApp(app map[string]interface{}, m *Manifest) error {
 }
 
 // HasModified ...
-func (m Manifest) HasModified() bool {
+func (m manifest) HasModified() bool {
 	return m.modified
 }
 func toMap(i interface{}) (map[string]interface{}, error) {
