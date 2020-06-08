@@ -19,6 +19,7 @@ import (
 var _glob = glob.Glob // func(patterns []string) ([]*glob.FileAsset, []*glob.RegexpInfo, error)
 var _cfLogin = cloudfoundry.Login
 var _cfLogout = cloudfoundry.Logout
+var _fileExists = piperutils.FileExists
 var fileUtils = piperutils.Files{}
 
 const smokeTestScript = `#!/usr/bin/env bash
@@ -436,7 +437,7 @@ func getVarFileOptions(varFiles []string) ([]string, error) {
 	varFilesResult := []string{}
 
 	for _, varFile := range varFiles {
-		fExists, err := piperutils.FileExists(varFile)
+		fExists, err := _fileExists(varFile)
 		if err != nil {
 			return []string{}, err
 		}
