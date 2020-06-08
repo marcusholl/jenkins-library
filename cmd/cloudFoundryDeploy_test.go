@@ -111,6 +111,29 @@ func TestCfDeployment(t *testing.T) {
 	})
 }
 
+func TestCfNativeDeploy(t *testing.T) {
+
+}
+
+func TestManifestVariables(t *testing.T) {
+	varOpts, err := getVarOptions([]string{"a=b", "c=d"})
+	if assert.NoError(t, err) {
+		assert.Equal(t, []string {"--var", "a=b", "--var", "c=d"}, varOpts)
+	}
+}
+
+func TestManifestVariablesEmpty(t *testing.T) {
+	varOpts, err := getVarOptions([]string{})
+	if assert.NoError(t, err) {
+		assert.Equal(t, []string {}, varOpts)
+	}
+}
+
+func TestManifestVariablesWithoutEqualSign(t *testing.T) {
+	_, err := getVarOptions([]string{"ab"})
+	assert.EqualError(t, err, "Invalid parameter provided (expected format <key>=<val>: 'ab'")
+}
+
 func TestMtarLookup(t *testing.T) {
 	t.Run("One MTAR", func(t *testing.T) {
 

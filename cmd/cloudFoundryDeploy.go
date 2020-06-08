@@ -420,7 +420,7 @@ func getVarOptions(vars []string) ([]string, error) {
 
 	varsMap, err := toParameterMap(vars)
 	if err != nil {
-		return []string{}, nil
+		return []string{}, err
 	}
 
 	varsResult := []string{}
