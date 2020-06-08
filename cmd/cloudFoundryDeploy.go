@@ -251,40 +251,41 @@ func getAppNameOrFail(config *cloudFoundryDeployOptions, manifestFile string) (s
 
 	if len(config.AppName) > 0 {
 		return config.AppName, nil
-	} else {
-		if config.DeployType == "blue-green" {
-			return "", fmt.Errorf("Blue-green plugin requires app name to be passed (see https://github.com/bluemixgaragelondon/cf-blue-green-deploy/issues/27)")
+	}
+
+	if config.DeployType == "blue-green" {
+		return "", fmt.Errorf("Blue-green plugin requires app name to be passed (see https://github.com/bluemixgaragelondon/cf-blue-green-deploy/issues/27)")
+	}
+	if fileExists(manifestFile) {
+		m, err := cloudfoundry.ReadManifest(manifestFile)
+		if err != nil {
+			return "", err
 		}
-		if fileExists(manifestFile) {
-			m, err := cloudfoundry.ReadManifest(manifestFile)
+		apps, err := m.GetApplications()
+		if err != nil {
+			return "", err
+		}
+		if len(apps) > 0 {
+			namePropertyExists, err := m.ApplicationHasProperty(0, "name")
 			if err != nil {
 				return "", err
 			}
-			apps, err := m.GetApplications()
-			if err != nil {
-				return "", err
-			}
-			if len(apps) > 0 {
-				namePropertyExists, err := m.ApplicationHasProperty(0, "name")
+			if namePropertyExists {
+				appName, err := m.GetApplicationProperty(0, "name")
 				if err != nil {
 					return "", err
 				}
-				if namePropertyExists {
-					appName, err := m.GetApplicationProperty(0, "name")
-					if err != nil {
-						return "", err
-					}
-					if name, ok := appName.(string); ok {
-						return name, nil
-					}
+				if name, ok := appName.(string); ok {
+					return name, nil
 				}
-			} else {
-				return "", fmt.Errorf("No appName available in manifest '%s'", manifestFile)
 			}
 		} else {
-			return "", fmt.Errorf("Manifest file '%s' not found", manifestFile)
+			return "", fmt.Errorf("No appName available in manifest '%s'", manifestFile)
 		}
+	} else {
+		return "", fmt.Errorf("Manifest file '%s' not found", manifestFile)
 	}
+
 	return "", fmt.Errorf("Cannot resolve app name")
 }
 
