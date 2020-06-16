@@ -21,7 +21,9 @@ var _cfLogin = cloudfoundry.Login
 var _cfLogout = cloudfoundry.Logout
 var _fileExists = piperutils.FileExists
 var _getManifest = getManifest
+var _getWd = os.Getwd
 var fileUtils = piperutils.Files{}
+
 
 const smokeTestScript = `#!/usr/bin/env bash
 # this is simply testing if the application root returns HTTP STATUS_CODE
@@ -154,7 +156,7 @@ func handleCFNativeDeployment(config *cloudFoundryDeployOptions, command execRun
 	       echo "[${STEP_NAME}] - smokeTestScript=${config.smokeTestScript}"
 	*/
 
-	pwd, err := os.Getwd()
+	pwd, err := _getWd()
 	if err != nil {
 		return err
 	}
@@ -316,7 +318,7 @@ func handleSmokeTestScript(smokeTestScript string) ([]string, error) {
 		}
 	}
 
-	pwd, err := os.Getwd()
+	pwd, err := _getWd()
 	if err != nil {
 		return []string{}, err
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/godo.v2/glob"
 	"testing"
-	"strings"
+	"os"
 )
 
 type manifestMock struct {
@@ -40,7 +40,6 @@ func (m manifestMock)WriteManifest() error {
 	return nil
 }
 
-
 func TestCfDeployment(t *testing.T) {
 
 	var loginOpts cloudfoundry.LoginOptions
@@ -50,6 +49,7 @@ func TestCfDeployment(t *testing.T) {
 		loginOpts = cloudfoundry.LoginOptions{}
 		logoutCalled = false
 		mtarFileRetrieved = false
+		_getWd = os.Getwd
 	}
 
 	_glob = func(patterns []string) ([]*glob.FileAsset, []*glob.RegexpInfo, error) {
@@ -85,6 +85,10 @@ func TestCfDeployment(t *testing.T) {
 	})
 
 	t.Run("deploytool cf native", func(t *testing.T) {
+
+		_getWd = func() (string, error) {
+			return "/home/me", nil
+		}
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "manifest.yml", nil
@@ -133,10 +137,10 @@ func TestCfDeployment(t *testing.T) {
 		}
 
 		t.Run("check environment variables", func(t *testing.T) {
-			assert.Contains(t, strings.Join(s.Env, ","), ",STATUS_CODE=200,")
+			assert.Contains(t, s.Env, "CF_HOME=/home/me") // REVISIT: cross check if that variable should point to the user home dir
+			assert.Contains(t, s.Env, "CF_PLUGIN_HOME=/home/me") // REVISIT: cross check if that variable should point to the user home dir
+			assert.Contains(t, s.Env, "STATUS_CODE=200")
 		})
-
-
 	})
 
 	t.Run("deploytool mtaDeployPlugin", func(t *testing.T) {
