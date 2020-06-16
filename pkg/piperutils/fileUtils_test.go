@@ -10,7 +10,7 @@ import (
 
 func TestFileExists(t *testing.T) {
 	t.Parallel()
-	runInTempDir(t, "testing dir returns false", "dir", func(t *testing.T) {
+	runInTempDir(t, "testing dir returns false", "dir0", func(t *testing.T) {
 		err := os.Mkdir("test", 0777)
 		if err != nil {
 			t.Fatal("failed to create test dir in temporary dir")
@@ -19,7 +19,7 @@ func TestFileExists(t *testing.T) {
 		assert.NoError(t, err)
 		assert.False(t, result)
 	})
-	runInTempDir(t, "testing file returns true", "dir", func(t *testing.T) {
+	runInTempDir(t, "testing file returns true", "dir1", func(t *testing.T) {
 		file, err := ioutil.TempFile("", "testFile")
 		assert.NoError(t, err)
 		result, err := FileExists(file.Name())
