@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/godo.v2/glob"
 	"testing"
+	"strings"
 )
 
 type manifestMock struct {
@@ -100,6 +101,7 @@ func TestCfDeployment(t *testing.T) {
 			Username:    "me",
 			Password:    "******",
 			APIEndpoint: "https://examples.sap.com/cf",
+			SmokeTestStatusCode: "200",
 		}
 
 		defer cleanup()
@@ -129,6 +131,12 @@ func TestCfDeployment(t *testing.T) {
 
 			assert.True(t, logoutCalled)
 		}
+
+		t.Run("check environment variables", func(t *testing.T) {
+			assert.Contains(t, strings.Join(s.Env, ","), ",STATUS_CODE=200,")
+		})
+
+
 	})
 
 	t.Run("deploytool mtaDeployPlugin", func(t *testing.T) {
