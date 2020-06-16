@@ -9,6 +9,37 @@ import (
 	"testing"
 )
 
+type manifestMock struct {
+	name string
+}
+
+func (m manifestMock)GetAppName(index int) (string, error) {
+	return m.name, nil
+}
+func (m manifestMock)ApplicationHasProperty(index int, name string) (bool, error) {
+	return index == 0 && name == "name", nil
+}
+func (m manifestMock)GetApplicationProperty(index int, name string) (interface{}, error) {
+
+	if index == 0 && name == "name" {
+		return "testAppName", nil
+	}
+	return nil, nil
+}
+func (m manifestMock)Transform() error {
+	return nil
+}
+func (m manifestMock)HasModified() bool {
+	return false
+}
+func (m manifestMock)GetApplications() ([]interface{}, error) {
+	return make([]interface{}, 1), nil
+}
+func (m manifestMock)WriteManifest() error {
+	return nil
+}
+
+
 func TestCfDeployment(t *testing.T) {
 
 	var loginOpts cloudfoundry.LoginOptions
@@ -49,6 +80,54 @@ func TestCfDeployment(t *testing.T) {
 			assert.Empty(t, s.Calls)                                // --> in case of an invalid deploy tool there must be no cf api calls
 			assert.Equal(t, loginOpts, cloudfoundry.LoginOptions{}) // no login options: login has not been called
 			assert.False(t, logoutCalled)
+		}
+	})
+
+	t.Run("deploytool cf native", func(t *testing.T) {
+
+		_fileExists = func(name string) (bool, error) {
+			return name == "manifest.yml", nil
+		}
+
+		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
+			return manifestMock{name: "manifest.yml"}, nil
+		}
+
+		config := cloudFoundryDeployOptions{
+			DeployTool:  "cf_native",
+			Org:         "myOrg",
+			Space:       "mySpace",
+			Username:    "me",
+			Password:    "******",
+			APIEndpoint: "https://examples.sap.com/cf",
+		}
+
+		defer cleanup()
+
+		s := mock.ExecMockRunner{}
+
+		err := runCloudFoundryDeploy(&config, nil, &s)
+
+		if assert.NoError(t, err) {
+
+			t.Run("check cf api calls", func(t *testing.T) {
+
+				assert.Equal(t, loginOpts,
+					cloudfoundry.LoginOptions{
+						CfAPIEndpoint: "https://examples.sap.com/cf",
+						CfOrg:         "myOrg",
+						CfSpace:       "mySpace",
+						Username:      "me",
+						Password:      "******",
+					})
+
+				assert.Equal(t, []mock.ExecCall{
+					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+					mock.ExecCall{Exec: "cf", Params: []string{"push", "testAppName", "-f", "manifest.yml"}},
+				}, s.Calls)
+			})
+
+			assert.True(t, logoutCalled)
 		}
 	})
 

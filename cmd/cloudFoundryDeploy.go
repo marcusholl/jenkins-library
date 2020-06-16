@@ -261,7 +261,11 @@ func getAppNameOrFail(config *cloudFoundryDeployOptions, manifestFile string) (s
 	if config.DeployType == "blue-green" {
 		return "", fmt.Errorf("Blue-green plugin requires app name to be passed (see https://github.com/bluemixgaragelondon/cf-blue-green-deploy/issues/27)")
 	}
-	if fileExists(manifestFile) {
+	fileExists, err := _fileExists(manifestFile)
+	if err != nil {
+		return "", err
+	}
+	if fileExists {
 		m, err := _getManifest(manifestFile)
 		if err != nil {
 			return "", err
