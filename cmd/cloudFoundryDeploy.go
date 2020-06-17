@@ -482,10 +482,14 @@ func quoteAndBashEscape(s string) string {
 
 func checkAndUpdateDeployTypeForNotSupportedManifest(config *cloudFoundryDeployOptions, manifestFile string) (string, error) {
 
-	manifestFileExists, err := piperutils.FileExists(manifestFile)
+	var manifestFileExists bool
+	var err error
 
-	if err != nil {
-		return "", err
+	if len(manifestFile) > 0 {
+		manifestFileExists, err = _fileExists(manifestFile)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	if config.DeployType == "blue-green" && manifestFileExists {
