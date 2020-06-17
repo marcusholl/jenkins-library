@@ -147,7 +147,7 @@ func TestCfDeployment(t *testing.T) {
 		})
 	})
 
-	t.Run("deploy cf native with docker image", func(t *testing.T) {
+	t.Run("deploy cf native with docker image and docker username", func(t *testing.T) {
 
 		config := cloudFoundryDeployOptions{
 			DeployTool:        "cf_native",
@@ -157,6 +157,7 @@ func TestCfDeployment(t *testing.T) {
 			Password:          "******",
 			APIEndpoint:       "https://examples.sap.com/cf",
 			DeployDockerImage: "repo/image:tag",
+			DockerUsername:    "me",
 			AppName:           "testAppName",
 		}
 
@@ -179,7 +180,13 @@ func TestCfDeployment(t *testing.T) {
 
 			assert.Equal(t, []mock.ExecCall{
 				mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
-				mock.ExecCall{Exec: "cf", Params: []string{"push", "testAppName", "--docker-image", "repo/image:tag"}},
+				mock.ExecCall{Exec: "cf", Params: []string{"push",
+					"testAppName",
+					"--docker-image",
+					"repo/image:tag",
+					"--docker-username",
+					"me",
+				}},
 			}, s.Calls)
 
 			assert.True(t, logoutCalled)
