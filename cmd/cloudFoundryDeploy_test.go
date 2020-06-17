@@ -13,6 +13,7 @@ import (
 type manifestMock struct {
 	name string
 }
+
 func (m manifestMock) GetAppName(index int) (string, error) {
 	return m.name, nil
 }
