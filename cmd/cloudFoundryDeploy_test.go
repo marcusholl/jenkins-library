@@ -146,6 +146,45 @@ func TestCfDeployment(t *testing.T) {
 		})
 	})
 
+	t.Run("deploy cf native with docker image", func(t *testing.T) {
+
+		config := cloudFoundryDeployOptions{
+			DeployTool:        "cf_native",
+			Org:               "myOrg",
+			Space:             "mySpace",
+			Username:          "me",
+			Password:          "******",
+			APIEndpoint:       "https://examples.sap.com/cf",
+			DeployDockerImage: "repo/image:tag",
+			AppName:           "testAppName",
+		}
+
+		defer cleanup()
+
+		s := mock.ExecMockRunner{}
+
+		err := runCloudFoundryDeploy(&config, nil, &s)
+
+		if assert.NoError(t, err) {
+
+			assert.Equal(t, loginOpts,
+				cloudfoundry.LoginOptions{
+					CfAPIEndpoint: "https://examples.sap.com/cf",
+					CfOrg:         "myOrg",
+					CfSpace:       "mySpace",
+					Username:      "me",
+					Password:      "******",
+				})
+
+			assert.Equal(t, []mock.ExecCall{
+				mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+				mock.ExecCall{Exec: "cf", Params: []string{"push", "testAppName", "--docker-image", "repo/image:tag"}},
+			}, s.Calls)
+
+			assert.True(t, logoutCalled)
+		}
+	})
+
 	t.Run("deploytool mtaDeployPlugin", func(t *testing.T) {
 
 		config := cloudFoundryDeployOptions{
