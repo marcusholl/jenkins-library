@@ -6,37 +6,37 @@ import (
 	"github.com/SAP/jenkins-library/pkg/piperutils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/godo.v2/glob"
-	"testing"
 	"os"
+	"testing"
 )
 
 type manifestMock struct {
 	name string
 }
 
-func (m manifestMock)GetAppName(index int) (string, error) {
+func (m manifestMock) GetAppName(index int) (string, error) {
 	return m.name, nil
 }
-func (m manifestMock)ApplicationHasProperty(index int, name string) (bool, error) {
+func (m manifestMock) ApplicationHasProperty(index int, name string) (bool, error) {
 	return index == 0 && name == "name", nil
 }
-func (m manifestMock)GetApplicationProperty(index int, name string) (interface{}, error) {
+func (m manifestMock) GetApplicationProperty(index int, name string) (interface{}, error) {
 
 	if index == 0 && name == "name" {
 		return "testAppName", nil
 	}
 	return nil, nil
 }
-func (m manifestMock)Transform() error {
+func (m manifestMock) Transform() error {
 	return nil
 }
-func (m manifestMock)HasModified() bool {
+func (m manifestMock) HasModified() bool {
 	return false
 }
-func (m manifestMock)GetApplications() ([]interface{}, error) {
+func (m manifestMock) GetApplications() ([]interface{}, error) {
 	return make([]interface{}, 1), nil
 }
-func (m manifestMock)WriteManifest() error {
+func (m manifestMock) WriteManifest() error {
 	return nil
 }
 
@@ -99,12 +99,12 @@ func TestCfDeployment(t *testing.T) {
 		}
 
 		config := cloudFoundryDeployOptions{
-			DeployTool:  "cf_native",
-			Org:         "myOrg",
-			Space:       "mySpace",
-			Username:    "me",
-			Password:    "******",
-			APIEndpoint: "https://examples.sap.com/cf",
+			DeployTool:          "cf_native",
+			Org:                 "myOrg",
+			Space:               "mySpace",
+			Username:            "me",
+			Password:            "******",
+			APIEndpoint:         "https://examples.sap.com/cf",
 			SmokeTestStatusCode: "200",
 		}
 
@@ -137,7 +137,7 @@ func TestCfDeployment(t *testing.T) {
 		}
 
 		t.Run("check environment variables", func(t *testing.T) {
-			assert.Contains(t, s.Env, "CF_HOME=/home/me") // REVISIT: cross check if that variable should point to the user home dir
+			assert.Contains(t, s.Env, "CF_HOME=/home/me")        // REVISIT: cross check if that variable should point to the user home dir
 			assert.Contains(t, s.Env, "CF_PLUGIN_HOME=/home/me") // REVISIT: cross check if that variable should point to the user home dir
 			assert.Contains(t, s.Env, "STATUS_CODE=200")
 		})
