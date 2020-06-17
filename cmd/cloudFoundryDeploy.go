@@ -201,6 +201,14 @@ func deployCfNative(deployConfig deployConfig, config *cloudFoundryDeployOptions
 		deployStatement = append(deployStatement, deployConfig.ManifestFile)
 	}
 
+	if len(config.DeployDockerImage) > 0 && config.DeployType != "blue-green" {
+		deployStatement = append(deployStatement, "--docker-image", config.DeployDockerImage)
+	}
+
+	if len(config.DockerUsername) > 0 && config.DeployType != "blue-green" {
+		deployStatement = append(deployStatement, "--docker-username", config.DockerUsername)
+	}
+
 	if len(deployConfig.SmokeTestScript) > 0 {
 		deployStatement = append(deployStatement, deployConfig.SmokeTestScript...)
 	}
