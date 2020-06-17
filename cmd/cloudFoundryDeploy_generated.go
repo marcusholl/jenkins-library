@@ -14,6 +14,7 @@ import (
 )
 
 type cloudFoundryDeployOptions struct {
+	DeployDockerImage        string   `json:"deployDockerImage,omitempty"`
 	APIEndpoint              string   `json:"apiEndpoint,omitempty"`
 	APIParameters            string   `json:"apiParameters,omitempty"`
 	Org                      string   `json:"org,omitempty"`
@@ -82,6 +83,7 @@ func CloudFoundryDeployCommand() *cobra.Command {
 			telemetry.Initialize(GeneralConfig.NoTelemetry, STEP_NAME)
 			cloudFoundryDeploy(stepConfig, &telemetryData)
 			telemetryData.ErrorCode = "0"
+			log.Entry().Info("SUCCESS")
 		},
 	}
 
@@ -90,6 +92,7 @@ func CloudFoundryDeployCommand() *cobra.Command {
 }
 
 func addCloudFoundryDeployFlags(cmd *cobra.Command, stepConfig *cloudFoundryDeployOptions) {
+	cmd.Flags().StringVar(&stepConfig.DeployDockerImage, "deployDockerImage", os.Getenv("PIPER_deployDockerImage"), "Docker image deployments are supported (via manifest file in general)[https://docs.cloudfoundry.org/devguide/deploy-apps/manifest-attributes.html#docker]. If no manifest is used, this parameter defines the image to be deployed. The specified name of the image is passed to the `--docker-image` parameter of the cf CLI and must adhere it's naming pattern (e.g. REPO/IMAGE:TAG). See (cf CLI documentation)[https://docs.cloudfoundry.org/devguide/deploy-apps/push-docker.html] for details. Note: The used Docker registry must be visible for the targeted Cloud Foundry instance.")
 	cmd.Flags().StringVar(&stepConfig.APIEndpoint, "apiEndpoint", os.Getenv("PIPER_apiEndpoint"), "Cloud Foundry API endpoint")
 	cmd.Flags().StringVar(&stepConfig.APIParameters, "apiParameters", os.Getenv("PIPER_apiParameters"), "Addition command line options for cf api command. No escaping/quoting is performed. Not recommanded for productive environments.")
 	cmd.Flags().StringVar(&stepConfig.Org, "org", os.Getenv("PIPER_org"), "Cloud Foundry target organization.")
@@ -103,11 +106,11 @@ func addCloudFoundryDeployFlags(cmd *cobra.Command, stepConfig *cloudFoundryDepl
 	cmd.Flags().StringVar(&stepConfig.MtarPath, "mtarPath", os.Getenv("PIPER_mtarPath"), "Defines the path to *.mtar for deployment with the mtaDeployPlugin")
 	cmd.Flags().StringVar(&stepConfig.Manifest, "manifest", os.Getenv("PIPER_manifest"), "Defines the manifest to be used for deployment to Cloud Foundry.")
 	cmd.Flags().StringVar(&stepConfig.AppName, "appName", os.Getenv("PIPER_appName"), "Defines the name of the application to be deployed to the Cloud Foundry space")
-	cmd.Flags().StringVar(&stepConfig.SmokeTestScript, "smokeTestScript", "blueGreenCheckScript.sh", "Allows to specify a script which performs a check during blue-green deployment. The script gets the FQDN as parameter and returns `exit code 0` in case check returned `smokeTestStatusCode`. More details can be found [here](https://github.com/bluemixgaragelondon/cf-blue-green-deploy#how-to-use). Currently this option is only considered for deployTool `cf_native`.")
-	cmd.Flags().StringVar(&stepConfig.SmokeTestStatusCode, "smokeTestStatusCode", "200", "Expected status code returned by the check.")
+	cmd.Flags().StringVar(&stepConfig.SmokeTestScript, "smokeTestScript", `blueGreenCheckScript.sh`, "Allows to specify a script which performs a check during blue-green deployment. The script gets the FQDN as parameter and returns `exit code 0` in case check returned `smokeTestStatusCode`. More details can be found [here](https://github.com/bluemixgaragelondon/cf-blue-green-deploy#how-to-use). Currently this option is only considered for deployTool `cf_native`.")
+	cmd.Flags().StringVar(&stepConfig.SmokeTestStatusCode, "smokeTestStatusCode", `200`, "Expected status code returned by the check.")
 	cmd.Flags().StringVar(&stepConfig.CfNativeDeployParameters, "cfNativeDeployParameters", os.Getenv("PIPER_cfNativeDeployParameters"), "Additional parameters passed to cf native deployment command")
 	cmd.Flags().BoolVar(&stepConfig.KeepOldInstance, "keepOldInstance", false, "In case of a `blue-green` deployment the old instance will be deleted by default. If this option is set to true the old instance will remain stopped in the Cloud Foundry space.")
-	cmd.Flags().StringSliceVar(&stepConfig.ManifestVariablesFiles, "manifestVariablesFiles", []string{"manifest-variables.yml"}, "path(s) of the Yaml file(s) containing the variable values to use as a replacement in the manifest file. The order of the files is relevant in case there are conflicting variable names and values within variable files. In such a case, the values of the last file win.")
+	cmd.Flags().StringSliceVar(&stepConfig.ManifestVariablesFiles, "manifestVariablesFiles", []string{`manifest-variables.yml`}, "path(s) of the Yaml file(s) containing the variable values to use as a replacement in the manifest file. The order of the files is relevant in case there are conflicting variable names and values within variable files. In such a case, the values of the last file win.")
 	cmd.Flags().StringSliceVar(&stepConfig.ManifestVariables, "manifestVariables", []string{}, "Defines a list of variables as key-value Map objects used for variable substitution within the file given by manifest. Defaults to an empty list, if not specified otherwise. This can be used to set variables like it is provided by 'cf push --var key=value'. The order of the maps of variables given in the list is relevant in case there are conflicting variable names and value between maps contained within the list. In case of conflicts, the last specified map in the list will win. Though each map entry in the list can contain more than one key-value pair for variable substitution, it is recommended to stick to one entry per map, and rather declare more maps within the list. The reason is that if a map in the list contains more than one key-value entry, and the entries are conflicting, the conflict resolution behavior is undefined (since map entries have no sequence). Note: variables defined via 'manifestVariables' always win over conflicting variables defined via any file given by 'manifestVariablesFiles' - no matter what is declared before. This is the same behavior as can be observed when using 'cf push --var' in combination with 'cf push --vars-file'.")
 
 	cmd.MarkFlagRequired("apiEndpoint")
@@ -129,6 +132,14 @@ func cloudFoundryDeployMetadata() config.StepData {
 		Spec: config.StepSpec{
 			Inputs: config.StepInputs{
 				Parameters: []config.StepParameters{
+					{
+						Name:        "deployDockerImage",
+						ResourceRef: []config.ResourceReference{},
+						Scope:       []string{"PARAMETERS", "STAGES", "STEPS"},
+						Type:        "string",
+						Mandatory:   false,
+						Aliases:     []config.Alias{},
+					},
 					{
 						Name:        "apiEndpoint",
 						ResourceRef: []config.ResourceReference{},
