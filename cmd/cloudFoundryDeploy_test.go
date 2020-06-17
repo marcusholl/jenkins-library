@@ -13,7 +13,6 @@ import (
 type manifestMock struct {
 	name string
 }
-
 func (m manifestMock) GetAppName(index int) (string, error) {
 	return m.name, nil
 }
@@ -27,14 +26,17 @@ func (m manifestMock) GetApplicationProperty(index int, name string) (interface{
 	}
 	return nil, nil
 }
+func (m manifestMock) GetFileName() string {
+	return "manifest.yml"
+}
 func (m manifestMock) Transform() error {
 	return nil
 }
-func (m manifestMock) HasModified() bool {
+func (m manifestMock) IsModified() bool {
 	return false
 }
-func (m manifestMock) GetApplications() ([]interface{}, error) {
-	return make([]interface{}, 1), nil
+func (m manifestMock) GetApplications() ([]map[string]interface{}, error) {
+	return make([]map[string]interface{}, 1), nil
 }
 func (m manifestMock) WriteManifest() error {
 	return nil

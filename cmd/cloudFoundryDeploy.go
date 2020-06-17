@@ -396,7 +396,7 @@ func handleLegacyCfManifest(manifestFile string) error {
 	if err != nil {
 		return err
 	}
-	if manifest.HasModified() {
+	if manifest.IsModified() {
 
 		err = manifest.WriteManifest()
 
