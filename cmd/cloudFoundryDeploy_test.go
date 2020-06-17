@@ -108,6 +108,7 @@ func TestCfDeployment(t *testing.T) {
 			Password:            "******",
 			APIEndpoint:         "https://examples.sap.com/cf",
 			SmokeTestStatusCode: "200",
+			Manifest:            "manifest.yml", // the default, will be provided in the free wild from the metadata, but here we have to set it.
 		}
 
 		defer cleanup()
