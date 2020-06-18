@@ -193,6 +193,62 @@ func TestCfDeployment(t *testing.T) {
 		}
 	})
 
+	t.Run("deploy_cf_native with manifest and docker credentials", func(t *testing.T) {
+
+		// Docker image can be done via manifest.yml.
+		// if a private Docker registry is used, --docker-username and DOCKER_PASSWORD
+		// must be set; this is checked by this test
+
+		config := cloudFoundryDeployOptions{
+			DeployTool:        "cf_native",
+			Org:               "myOrg",
+			Space:             "mySpace",
+			Username:          "me",
+			Password:          "******",
+			APIEndpoint:       "https://examples.sap.com/cf",
+			DeployDockerImage: "repo/image:tag",
+			DockerUsername:    "test_cf_docker",
+			DockerPassword:    "********",
+			AppName:           "testAppName",
+		}
+
+		defer cleanup()
+
+		s := mock.ExecMockRunner{}
+
+		err := runCloudFoundryDeploy(&config, nil, &s)
+
+		if assert.NoError(t, err) {
+			t.Run("check shell calls", func(t *testing.T) {
+				assert.Equal(t, loginOpts,
+					cloudfoundry.LoginOptions{
+						CfAPIEndpoint: "https://examples.sap.com/cf",
+						CfOrg:         "myOrg",
+						CfSpace:       "mySpace",
+						Username:      "me",
+						Password:      "******",
+					})
+
+				assert.Equal(t, []mock.ExecCall{
+					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+					mock.ExecCall{Exec: "cf", Params: []string{"push",
+						"testAppName",
+						"--docker-image",
+						"repo/image:tag",
+						"--docker-username",
+						"test_cf_docker",
+					}},
+				}, s.Calls)
+
+				assert.True(t, logoutCalled)
+			})
+
+			t.Run("check environment variables", func(t *testing.T) {
+				assert.Contains(t, s.Env, "CF_DOCKER_PASSWORD=********")
+			})
+		}
+	})
+
 	t.Run("deploytool mtaDeployPlugin", func(t *testing.T) {
 
 		config := cloudFoundryDeployOptions{

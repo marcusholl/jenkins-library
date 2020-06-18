@@ -162,6 +162,10 @@ func handleCFNativeDeployment(config *cloudFoundryDeployOptions, command execRun
 		"STATUS_CODE=" + config.SmokeTestStatusCode,
 	}
 
+	if len(config.DockerPassword) > 0 {
+		additionalEnvironment = append(additionalEnvironment, "CF_DOCKER_PASSWORD="+config.DockerPassword)
+	}
+
 	log.Entry().Infof("AppName: '%s'", appName)
 
 	myDeployConfig := deployConfig{
