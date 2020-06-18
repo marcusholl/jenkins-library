@@ -342,7 +342,7 @@ func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) (string, 
 
 	var deployOptions = []string{}
 
-	if config.KeepOldInstance {
+	if ! config.KeepOldInstance {
 		deployOptions = append(deployOptions, "--delete-old-apps")
 	}
 
