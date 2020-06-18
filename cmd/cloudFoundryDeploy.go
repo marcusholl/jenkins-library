@@ -532,7 +532,7 @@ func deployMta(config *cloudFoundryDeployOptions, mtarFilePath string, command e
 		deployParams = append(deployParams, strings.Split(config.MtaDeployParameters, " ")...)
 	}
 
-	if config.DeployType == "bg-deploy" {
+	if config.DeployType == "bg-deploy" || config.DeployType == "blue-green" {
 
 		deployCommand = "bg-deploy"
 
