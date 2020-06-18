@@ -734,14 +734,14 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("deploytool mtaDeployPlugin blue green", func(t *testing.T) {
 		config := cloudFoundryDeployOptions{
-			DeployTool:  "mtaDeployPlugin",
-			DeployType:  "blue-green",
-			Org:         "myOrg",
-			Space:       "mySpace",
-			Username:    "me",
-			Password:    "******",
-			APIEndpoint: "https://examples.sap.com/cf",
-			MtarPath:     "target/test.mtar",
+			DeployTool:          "mtaDeployPlugin",
+			DeployType:          "blue-green",
+			Org:                 "myOrg",
+			Space:               "mySpace",
+			Username:            "me",
+			Password:            "******",
+			APIEndpoint:         "https://examples.sap.com/cf",
+			MtarPath:            "target/test.mtar",
 			MtaDeployParameters: "-f", // normally provided as default
 		}
 
@@ -767,7 +767,7 @@ func TestCfDeployment(t *testing.T) {
 						Password:      "******",
 					})
 
-					assert.Equal(t, []mock.ExecCall{
+				assert.Equal(t, []mock.ExecCall{
 					mock.ExecCall{Exec: "cf", Params: []string{"api", "https://examples.sap.com/cf"}},
 					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
 					mock.ExecCall{Exec: "cf", Params: []string{
@@ -790,19 +790,19 @@ func TestCfDeployment(t *testing.T) {
 
 	// TODO: add test for influx reporting (influx reporting is missing at the moment)
 
-	t.Run("cf push with variables from file and as list", func(t * testing.T) {
+	t.Run("cf push with variables from file and as list", func(t *testing.T) {
 
 		config := cloudFoundryDeployOptions{
-			DeployTool:  "cf_native",
-			Org:         "myOrg",
-			Space:       "mySpace",
-			Username:    "me",
-			Password:    "******",
-			APIEndpoint: "https://examples.sap.com/cf",
-			Manifest:    "test-manifest.yml",
-			ManifestVariablesFiles: []string {"vars.yaml"},
-			ManifestVariables: []string {"appName=testApplicationFromVarsList"},
-			AppName:      "testAppName",
+			DeployTool:             "cf_native",
+			Org:                    "myOrg",
+			Space:                  "mySpace",
+			Username:               "me",
+			Password:               "******",
+			APIEndpoint:            "https://examples.sap.com/cf",
+			Manifest:               "test-manifest.yml",
+			ManifestVariablesFiles: []string{"vars.yaml"},
+			ManifestVariables:      []string{"appName=testApplicationFromVarsList"},
+			AppName:                "testAppName",
 		}
 
 		_fileExists = func(name string) (bool, error) {
@@ -829,7 +829,6 @@ func TestCfDeployment(t *testing.T) {
 
 		if assert.NoError(t, err) {
 
-
 			t.Run("check shell calls", func(t *testing.T) {
 				assert.Equal(t, loginOpts,
 					cloudfoundry.LoginOptions{
@@ -840,7 +839,6 @@ func TestCfDeployment(t *testing.T) {
 						Password:      "******",
 					})
 
-				
 				// Revisit: we don't verify a log message in case of a non existing vars file
 
 				assert.Equal(t, []mock.ExecCall{
@@ -855,7 +853,6 @@ func TestCfDeployment(t *testing.T) {
 						"-f",
 						"test-manifest.yml",
 					}},
-
 				}, s.Calls)
 
 				assert.True(t, logoutCalled)
@@ -863,18 +860,18 @@ func TestCfDeployment(t *testing.T) {
 		}
 	})
 
-	t.Run("cf push with variables from file which does not exist", func(t * testing.T) {
+	t.Run("cf push with variables from file which does not exist", func(t *testing.T) {
 
 		config := cloudFoundryDeployOptions{
-			DeployTool:  "cf_native",
-			Org:         "myOrg",
-			Space:       "mySpace",
-			Username:    "me",
-			Password:    "******",
-			APIEndpoint: "https://examples.sap.com/cf",
-			Manifest:    "test-manifest.yml",
-			ManifestVariablesFiles: []string {"vars.yaml", "vars-does-not-exist.yaml"},
-			AppName:      "testAppName",
+			DeployTool:             "cf_native",
+			Org:                    "myOrg",
+			Space:                  "mySpace",
+			Username:               "me",
+			Password:               "******",
+			APIEndpoint:            "https://examples.sap.com/cf",
+			Manifest:               "test-manifest.yml",
+			ManifestVariablesFiles: []string{"vars.yaml", "vars-does-not-exist.yaml"},
+			AppName:                "testAppName",
 		}
 
 		_fileExists = func(name string) (bool, error) {
@@ -901,7 +898,6 @@ func TestCfDeployment(t *testing.T) {
 
 		if assert.NoError(t, err) {
 
-
 			t.Run("check shell calls", func(t *testing.T) {
 				assert.Equal(t, loginOpts,
 					cloudfoundry.LoginOptions{
@@ -912,7 +908,6 @@ func TestCfDeployment(t *testing.T) {
 						Password:      "******",
 					})
 
-				
 				// Revisit: we don't verify a log message in case of a non existing vars file
 
 				assert.Equal(t, []mock.ExecCall{
@@ -925,7 +920,6 @@ func TestCfDeployment(t *testing.T) {
 						"-f",
 						"test-manifest.yml",
 					}},
-
 				}, s.Calls)
 
 				assert.True(t, logoutCalled)
@@ -933,16 +927,15 @@ func TestCfDeployment(t *testing.T) {
 		}
 	})
 
-
 	t.Run("deploytool mtaDeployPlugin", func(t *testing.T) {
 
 		config := cloudFoundryDeployOptions{
-			DeployTool:  "mtaDeployPlugin",
-			Org:         "myOrg",
-			Space:       "mySpace",
-			Username:    "me",
-			Password:    "******",
-			APIEndpoint: "https://examples.sap.com/cf",
+			DeployTool:          "mtaDeployPlugin",
+			Org:                 "myOrg",
+			Space:               "mySpace",
+			Username:            "me",
+			Password:            "******",
+			APIEndpoint:         "https://examples.sap.com/cf",
 			MtaDeployParameters: "-f",
 		}
 
