@@ -22,6 +22,15 @@ spec:
         - STAGES
         - STEPS
         mandatory: false
+      - name: dockerPassword
+        type: string
+        description: "dockerPassword"
+	secret: true
+        scope:
+        - PARAMETERS
+        - STAGES
+        - STEPS
+        mandatory: false
       - name: apiEndpoint
         type: string
         description: "Cloud Foundry API endpoint"
