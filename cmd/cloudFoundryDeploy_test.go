@@ -570,7 +570,7 @@ func TestCfDeployment(t *testing.T) {
 					manifestFileName: "test-manifest.yml",
 					apps: []map[string]interface{}{
 						map[string]interface{}{
-							"name": "app1",
+							"name":     "app1",
 							"no-route": true,
 						},
 					},
@@ -584,7 +584,7 @@ func TestCfDeployment(t *testing.T) {
 
 		err := runCloudFoundryDeploy(&config, nil, &s)
 
-		if assert.NoError(t, err){
+		if assert.NoError(t, err) {
 
 			t.Run("check shell calls", func(t *testing.T) {
 				assert.Equal(t, loginOpts,
