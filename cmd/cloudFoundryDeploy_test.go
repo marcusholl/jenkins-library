@@ -794,7 +794,7 @@ func TestCfDeployment(t *testing.T) {
 
 	// TODO: add test for influx reporting (influx reporting is missing at the moment)
 
-	t.Run("cf push with variable substitution from file", func(t * testing.T) {
+	t.Run("cf push with variables from file and as list", func(t * testing.T) {
 
 		config := cloudFoundryDeployOptions{
 			DeployTool:  "cf_native",
@@ -805,6 +805,7 @@ func TestCfDeployment(t *testing.T) {
 			APIEndpoint: "https://examples.sap.com/cf",
 			Manifest:    "test-manifest.yml",
 			ManifestVariablesFiles: []string {"vars.yaml"},
+			ManifestVariables: []string {"appName=testApplicationFromVarsList"},
 			AppName:      "testAppName",
 		}
 
@@ -851,6 +852,8 @@ func TestCfDeployment(t *testing.T) {
 					mock.ExecCall{Exec: "cf", Params: []string{
 						"push",
 						"testAppName",
+						"--var",
+						"appName=testApplicationFromVarsList",
 						"--vars-file",
 						"vars.yaml",
 						"-f",
