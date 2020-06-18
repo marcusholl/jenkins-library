@@ -323,14 +323,14 @@ func handleSmokeTestScript(smokeTestScript string) ([]string, error) {
 		if err != nil {
 			return []string{}, err
 		}
-	}
+		pwd, err := _getWd()
+		if err != nil {
+			return []string{}, err
+		}
 
-	pwd, err := _getWd()
-	if err != nil {
-		return []string{}, err
+		return []string{"--smoke-test", fmt.Sprintf("%s/%s", pwd, smokeTestScript)}, nil
 	}
-
-	return []string{"--smoke-test", fmt.Sprintf("%s/%s", pwd, smokeTestScript)}, nil
+	return []string{}, nil
 }
 
 func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) (string, []string, []string, error) {
