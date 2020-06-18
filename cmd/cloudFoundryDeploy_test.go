@@ -244,6 +244,79 @@ func TestCfDeployment(t *testing.T) {
 			})
 
 			t.Run("check environment variables", func(t *testing.T) {
+				//REVISIT: in the corresponding groovy test we checked for "${'********'}"
+				// I don't understand why, but we should discuss ...
+				assert.Contains(t, s.Env, "CF_DOCKER_PASSWORD=********")
+			})
+		}
+	})
+
+	t.Run("deploy cf native blue green with manifest and docker credentials", func(t *testing.T) {
+
+		// Blue Green Deploy cf cli plugin does not support --docker-username and --docker-image parameters
+		// docker username and docker image have to be set in the manifest file
+		// if a private docker repository is used the CF_DOCKER_PASSWORD env variable must be set
+
+		config := cloudFoundryDeployOptions{
+			DeployTool:        "cf_native",
+			DeployType:        "blue-green",
+			Org:               "myOrg",
+			Space:             "mySpace",
+			Username:          "me",
+			Password:          "******",
+			APIEndpoint:       "https://examples.sap.com/cf",
+			DockerUsername:    "test_cf_docker",
+			DockerPassword:    "********",
+			AppName:           "testAppName",
+			Manifest:          "manifest.yml",
+		}
+
+		_fileExists = func(name string) (bool, error) {
+			return name == "manifest.yml", nil
+		}
+
+		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
+			return manifestMock{name: "manifest.yml"}, nil
+		}
+
+		defer cleanup()
+
+		s := mock.ExecMockRunner{}
+
+		err := runCloudFoundryDeploy(&config, nil, &s)
+
+		if assert.NoError(t, err) {
+
+			t.Run("check shell calls", func(t *testing.T) {
+				assert.Equal(t, loginOpts,
+					cloudfoundry.LoginOptions{
+						CfAPIEndpoint: "https://examples.sap.com/cf",
+						CfOrg:         "myOrg",
+						CfSpace:       "mySpace",
+						Username:      "me",
+						Password:      "******",
+					})
+
+				assert.Equal(t, []mock.ExecCall{
+					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+
+					//cf blue-green-deploy testAppName --delete-old-apps -f 'manifest.yml'
+
+					mock.ExecCall{Exec: "cf", Params: []string{
+						"blue-green-deploy",
+						"testAppName",
+						"--delete-old-apps",
+						"-f",
+						"manifest.yml",
+					}},
+				}, s.Calls)
+
+				assert.True(t, logoutCalled)
+			})
+
+			t.Run("check environment variables", func(t *testing.T) {
+				//REVISIT: in the corresponding groovy test we checked for "${'********'}"
+				// I don't understand why, but we should discuss ...
 				assert.Contains(t, s.Env, "CF_DOCKER_PASSWORD=********")
 			})
 		}
