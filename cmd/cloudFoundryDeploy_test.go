@@ -430,6 +430,62 @@ func TestCfDeployment(t *testing.T) {
 		}
 	})
 
+	// tests from groovy checking for keep old instances are already contained above. Search for '--delete-old-apps'
+
+	t.Run("deploy cf native blue green keep old instance", func(t *testing.T) {
+
+		config := cloudFoundryDeployOptions{
+			DeployTool:      "cf_native",
+			DeployType:      "blue-green",
+			Org:             "myOrg",
+			Space:           "mySpace",
+			Username:        "me",
+			Password:        "******",
+			APIEndpoint:     "https://examples.sap.com/cf",
+			Manifest:        "test-manifest.yml",
+			AppName:         "myTestApp",
+			KeepOldInstance: true,
+		}
+
+		defer cleanup()
+
+		s := mock.ExecMockRunner{}
+
+		err := runCloudFoundryDeploy(&config, nil, &s)
+
+		if assert.NoError(t, err) {
+
+			t.Run("check shell calls", func(t *testing.T) {
+				assert.Equal(t, loginOpts,
+					cloudfoundry.LoginOptions{
+						CfAPIEndpoint: "https://examples.sap.com/cf",
+						CfOrg:         "myOrg",
+						CfSpace:       "mySpace",
+						Username:      "me",
+						Password:      "******",
+					})
+
+				assert.Equal(t, []mock.ExecCall{
+					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+					mock.ExecCall{Exec: "cf", Params: []string{
+						"blue-green-deploy",
+						"myTestApp",
+						"-f",
+						"test-manifest.yml",
+					}},
+					mock.ExecCall{Exec: "cf", Params: []string{
+						"stop",
+						"myTestApp-old",
+						// MIGRATE FFROM GROOVY: in contrast to groovy there is not redirect of everything &> to a file since we
+						// read the stream directly now.
+					}},
+				}, s.Calls)
+
+				assert.True(t, logoutCalled)
+			})
+		}
+	})
+
 	t.Run("deploytool mtaDeployPlugin", func(t *testing.T) {
 
 		config := cloudFoundryDeployOptions{
