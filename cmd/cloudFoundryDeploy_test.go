@@ -670,9 +670,9 @@ func TestCfDeployment(t *testing.T) {
 						"test-manifest.yml",
 					}},
 
-				//
-				// There is no cf stop
-				//
+					//
+					// There is no cf stop
+					//
 
 				}, s.Calls)
 
@@ -684,14 +684,14 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("testCfNativeWithoutAppNameBlueGreen", func(t *testing.T) {
 		config := cloudFoundryDeployOptions{
-			DeployTool:      "cf_native",
-			DeployType:      "blue-green",
-			Org:             "myOrg",
-			Space:           "mySpace",
-			Username:        "me",
-			Password:        "******",
-			APIEndpoint:     "https://examples.sap.com/cf",
-			Manifest:        "test-manifest.yml",
+			DeployTool:  "cf_native",
+			DeployType:  "blue-green",
+			Org:         "myOrg",
+			Space:       "mySpace",
+			Username:    "me",
+			Password:    "******",
+			APIEndpoint: "https://examples.sap.com/cf",
+			Manifest:    "test-manifest.yml",
 		}
 
 		_fileExists = func(name string) (bool, error) {
@@ -703,7 +703,7 @@ func TestCfDeployment(t *testing.T) {
 					manifestFileName: "test-manifest.yml",
 					apps: []map[string]interface{}{
 						map[string]interface{}{
-							"there-is":     "no-app-name",
+							"there-is": "no-app-name",
 						},
 					},
 				},
@@ -729,6 +729,8 @@ func TestCfDeployment(t *testing.T) {
 			})
 		}
 	})
+
+	// TODO add test for testCfNativeFailureInShellCall
 
 	t.Run("deploytool mtaDeployPlugin", func(t *testing.T) {
 
