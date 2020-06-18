@@ -613,6 +613,80 @@ func TestCfDeployment(t *testing.T) {
 
 	// TODO testCfNativeBlueGreenKeepOldInstanceShouldThrowErrorOnStopError
 
+	t.Run("cf native deploy standard should not stop instance", func(t *testing.T) {
+		config := cloudFoundryDeployOptions{
+			DeployTool:      "cf_native",
+			DeployType:      "standard",
+			Org:             "myOrg",
+			Space:           "mySpace",
+			Username:        "me",
+			Password:        "******",
+			APIEndpoint:     "https://examples.sap.com/cf",
+			Manifest:        "test-manifest.yml",
+			AppName:         "myTestApp",
+			KeepOldInstance: true,
+		}
+
+		_fileExists = func(name string) (bool, error) {
+			return name == "test-manifest.yml", nil
+		}
+
+		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
+			return manifestMock{
+					manifestFileName: "test-manifest.yml",
+					apps: []map[string]interface{}{
+						map[string]interface{}{
+							"name":     "app1",
+							"no-route": true,
+						},
+					},
+				},
+				nil
+		}
+
+		defer cleanup()
+
+		s := mock.ExecMockRunner{}
+
+		err := runCloudFoundryDeploy(&config, nil, &s)
+
+		if assert.NoError(t, err) {
+
+			t.Run("check shell calls", func(t *testing.T) {
+				assert.Equal(t, loginOpts,
+					cloudfoundry.LoginOptions{
+						CfAPIEndpoint: "https://examples.sap.com/cf",
+						CfOrg:         "myOrg",
+						CfSpace:       "mySpace",
+						Username:      "me",
+						Password:      "******",
+					})
+
+				assert.Equal(t, []mock.ExecCall{
+					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+					mock.ExecCall{Exec: "cf", Params: []string{
+						"push",
+						"myTestApp",
+						"-f",
+						"test-manifest.yml",
+					}},
+
+				//
+				// There is no cf stop
+				//
+
+				}, s.Calls)
+
+				assert.True(t, logoutCalled)
+			})
+
+		}
+	})
+
+	t.Run("testCfNativeWithoutAppNameBlueGreen", func(t *testing.T) {
+
+	})
+
 	t.Run("deploytool mtaDeployPlugin", func(t *testing.T) {
 
 		config := cloudFoundryDeployOptions{
