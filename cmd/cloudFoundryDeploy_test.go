@@ -11,11 +11,12 @@ import (
 )
 
 type manifestMock struct {
-	name string
+	manifestFileName string
+	appName string
 }
 
 func (m manifestMock) GetAppName(index int) (string, error) {
-	return m.name, nil
+	return m.appName, nil
 }
 func (m manifestMock) ApplicationHasProperty(index int, name string) (bool, error) {
 	return index == 0 && name == "name", nil
@@ -23,12 +24,12 @@ func (m manifestMock) ApplicationHasProperty(index int, name string) (bool, erro
 func (m manifestMock) GetApplicationProperty(index int, name string) (interface{}, error) {
 
 	if index == 0 && name == "name" {
-		return "testAppName", nil
+		return m.appName, nil
 	}
 	return nil, nil
 }
 func (m manifestMock) GetFileName() string {
-	return "manifest.yml"
+	return m.manifestFileName
 }
 func (m manifestMock) Transform() error {
 	return nil
@@ -98,7 +99,7 @@ func TestCfDeployment(t *testing.T) {
 		}
 
 		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
-			return manifestMock{name: "manifest.yml"}, nil
+			return manifestMock{manifestFileName: "manifest.yml", appName: "testAppName"}, nil
 		}
 
 		config := cloudFoundryDeployOptions{
@@ -276,7 +277,7 @@ func TestCfDeployment(t *testing.T) {
 		}
 
 		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
-			return manifestMock{name: "manifest.yml"}, nil
+			return manifestMock{manifestFileName: "manifest.yml"}, nil
 		}
 
 		defer cleanup()
@@ -319,6 +320,36 @@ func TestCfDeployment(t *testing.T) {
 				// I don't understand why, but we should discuss ...
 				assert.Contains(t, s.Env, "CF_DOCKER_PASSWORD=********")
 			})
+		}
+	})
+
+	t.Run("deploy cf native app name from manifest", func(t *testing.T) {
+
+		config := cloudFoundryDeployOptions{
+			DeployTool:        "cf_native",
+			Org:               "myOrg",
+			Space:             "mySpace",
+			Username:          "me",
+			Password:          "******",
+			APIEndpoint:       "https://examples.sap.com/cf",
+			Manifest:          "test-manifest.yml",
+		}
+
+		_fileExists = func(name string) (bool, error) {
+			return name == "test-manifest.yml", nil
+		}
+
+		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
+			return manifestMock{manifestFileName: "test-manifest.yml"}, nil
+		}
+
+		defer cleanup()
+
+		s := mock.ExecMockRunner{}
+
+		err := runCloudFoundryDeploy(&config, nil, &s)
+
+		if assert.NoError(t, err) {
 		}
 	})
 
