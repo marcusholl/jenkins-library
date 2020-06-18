@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/SAP/jenkins-library/pkg/cloudfoundry"
 	"github.com/SAP/jenkins-library/pkg/mock"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
@@ -12,21 +13,25 @@ import (
 
 type manifestMock struct {
 	manifestFileName string
-	appName          string
+	apps             []map[string]interface{}
 }
 
 func (m manifestMock) GetAppName(index int) (string, error) {
-	return m.appName, nil
+	val, err := m.GetApplicationProperty(index, "name")
+	if err != nil {
+		return "", err
+	}
+	if v, ok := val.(string); ok {
+		return v, nil
+	}
+	return "", fmt.Errorf("Cannot resolve application name")
 }
 func (m manifestMock) ApplicationHasProperty(index int, name string) (bool, error) {
-	return index == 0 && name == "name", nil
+	_, exists := m.apps[index][name]
+	return exists, nil
 }
 func (m manifestMock) GetApplicationProperty(index int, name string) (interface{}, error) {
-
-	if index == 0 && name == "name" {
-		return m.appName, nil
-	}
-	return nil, nil
+	return m.apps[index][name], nil
 }
 func (m manifestMock) GetFileName() string {
 	return m.manifestFileName
@@ -38,7 +43,7 @@ func (m manifestMock) IsModified() bool {
 	return false
 }
 func (m manifestMock) GetApplications() ([]map[string]interface{}, error) {
-	return make([]map[string]interface{}, 1), nil
+	return m.apps, nil
 }
 func (m manifestMock) WriteManifest() error {
 	return nil
@@ -99,7 +104,10 @@ func TestCfDeployment(t *testing.T) {
 		}
 
 		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
-			return manifestMock{manifestFileName: "manifest.yml", appName: "testAppName"}, nil
+			return manifestMock{
+					manifestFileName: "manifest.yml",
+					apps:             []map[string]interface{}{map[string]interface{}{"name": "testAppName"}}},
+				nil
 		}
 
 		config := cloudFoundryDeployOptions{
@@ -282,7 +290,10 @@ func TestCfDeployment(t *testing.T) {
 		}
 
 		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
-			return manifestMock{manifestFileName: "manifest.yml"}, nil
+			return manifestMock{
+					manifestFileName: "manifest.yml",
+					apps:             []map[string]interface{}{map[string]interface{}{"name": "testAppName"}}},
+				nil
 		}
 
 		defer cleanup()
@@ -346,11 +357,12 @@ func TestCfDeployment(t *testing.T) {
 
 		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
 			return manifestMock{
-				manifestFileName: "test-manifest.yml",
-				// app name is not asserted since it does not appear in the cf calls
-				// but it is checked that an app name is present, hence we need it here.
-				appName: "dummyApp",
-			}, nil
+					manifestFileName: "test-manifest.yml",
+					// app name is not asserted since it does not appear in the cf calls
+					// but it is checked that an app name is present, hence we need it here.
+
+					apps: []map[string]interface{}{map[string]interface{}{"name": "dummyApp"}}},
+				nil
 		}
 
 		defer cleanup()
@@ -403,11 +415,11 @@ func TestCfDeployment(t *testing.T) {
 
 		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
 			return manifestMock{
-				manifestFileName: "test-manifest.yml",
-				// Here we don't provide an application name from the mock. To make that
-				// more explicit we provide the empty string default explicitly.
-				appName: "",
-			}, nil
+					manifestFileName: "test-manifest.yml",
+					// Here we don't provide an application name from the mock. To make that
+					// more explicit we provide the empty string default explicitly.
+					apps: []map[string]interface{}{map[string]interface{}{"name": ""}}},
+				nil
 		}
 
 		defer cleanup()
