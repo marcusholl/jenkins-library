@@ -79,7 +79,7 @@ func handleMTADeployment(config *cloudFoundryDeployOptions, command execRunner) 
 
 	} else {
 
-		exists, err := fileUtils.FileExists(mtarFilePath)
+		exists, err := _fileExists(mtarFilePath)
 
 		if err != nil {
 			return err
@@ -350,7 +350,7 @@ func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) (string, 
 	}
 
 	if len(config.Manifest) > 0 {
-		manifestFileExists, err := piperutils.FileExists(config.Manifest)
+		manifestFileExists, err := _fileExists(config.Manifest)
 		if err != nil {
 			return "", []string{}, []string{}, err
 		}
@@ -697,7 +697,7 @@ func findMtar() (string, error) {
 
 func handleCfCliLog(logFile string) error {
 
-	fExists, err := fileUtils.FileExists(logFile)
+	fExists, err := _fileExists(logFile)
 
 	if err != nil {
 		return err
