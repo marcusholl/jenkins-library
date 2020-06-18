@@ -543,7 +543,6 @@ func TestCfDeployment(t *testing.T) {
 				// no logout
 				assert.False(t, logoutCalled)
 			})
-
 		}
 	})
 
@@ -684,7 +683,51 @@ func TestCfDeployment(t *testing.T) {
 	})
 
 	t.Run("testCfNativeWithoutAppNameBlueGreen", func(t *testing.T) {
+		config := cloudFoundryDeployOptions{
+			DeployTool:      "cf_native",
+			DeployType:      "blue-green",
+			Org:             "myOrg",
+			Space:           "mySpace",
+			Username:        "me",
+			Password:        "******",
+			APIEndpoint:     "https://examples.sap.com/cf",
+			Manifest:        "test-manifest.yml",
+		}
 
+		_fileExists = func(name string) (bool, error) {
+			return name == "test-manifest.yml", nil
+		}
+
+		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
+			return manifestMock{
+					manifestFileName: "test-manifest.yml",
+					apps: []map[string]interface{}{
+						map[string]interface{}{
+							"there-is":     "no-app-name",
+						},
+					},
+				},
+				nil
+		}
+
+		defer cleanup()
+
+		s := mock.ExecMockRunner{}
+
+		err := runCloudFoundryDeploy(&config, nil, &s)
+
+		if assert.EqualError(t, err, "Blue-green plugin requires app name to be passed (see https://github.com/bluemixgaragelondon/cf-blue-green-deploy/issues/27)") {
+
+			t.Run("check shell calls", func(t *testing.T) {
+
+				// no login in this case
+				assert.Equal(t, cloudfoundry.LoginOptions{}, loginOpts)
+				// no calls to the cf client in this case
+				assert.Empty(t, s.Calls)
+				// no logout
+				assert.False(t, logoutCalled)
+			})
+		}
 	})
 
 	t.Run("deploytool mtaDeployPlugin", func(t *testing.T) {
