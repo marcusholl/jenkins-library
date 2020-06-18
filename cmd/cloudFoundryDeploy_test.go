@@ -792,6 +792,8 @@ func TestCfDeployment(t *testing.T) {
 		}
 	})
 
+	// TODO: add test for influx reporting (influx reporting is missing at the moment)
+
 	t.Run("deploytool mtaDeployPlugin", func(t *testing.T) {
 
 		config := cloudFoundryDeployOptions{
