@@ -732,6 +732,66 @@ func TestCfDeployment(t *testing.T) {
 
 	// TODO add test for testCfNativeFailureInShellCall
 
+	t.Run("deploytool mtaDeployPlugin blue green", func(t *testing.T) {
+		config := cloudFoundryDeployOptions{
+			DeployTool:  "mtaDeployPlugin",
+			DeployType:  "blue-green",
+			Org:         "myOrg",
+			Space:       "mySpace",
+			Username:    "me",
+			Password:    "******",
+			APIEndpoint: "https://examples.sap.com/cf",
+			MtarPath:     "target/test.mtar",
+			MtaDeployParameters: "-f", // normally provided as default
+		}
+
+		_fileExists = func(name string) (bool, error) {
+			return name == "target/test.mtar", nil
+		}
+
+		defer cleanup()
+
+		s := mock.ExecMockRunner{}
+
+		err := runCloudFoundryDeploy(&config, nil, &s)
+
+		if assert.NoError(t, err) {
+
+			t.Run("check shell calls", func(t *testing.T) {
+				assert.Equal(t, loginOpts,
+					cloudfoundry.LoginOptions{
+						CfAPIEndpoint: "https://examples.sap.com/cf",
+						CfOrg:         "myOrg",
+						CfSpace:       "mySpace",
+						Username:      "me",
+						Password:      "******",
+					})
+
+
+					t.Logf("xxxxxxxxxx CALLS: %v", s.Calls)
+
+					//'cf bg-deploy', '-f', '--no-confirm']
+				assert.Equal(t, []mock.ExecCall{
+					mock.ExecCall{Exec: "cf", Params: []string{"api", "https://examples.sap.com/cf"}},
+					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+					mock.ExecCall{Exec: "cf", Params: []string{
+						"bg-deploy",
+						"target/test.mtar",
+						"-f",
+						"--no-confirm",
+					}},
+
+					//
+					// There is no cf stop
+					//
+
+				}, s.Calls)
+
+				assert.True(t, logoutCalled)
+			})
+		}
+	})
+
 	t.Run("deploytool mtaDeployPlugin", func(t *testing.T) {
 
 		config := cloudFoundryDeployOptions{
