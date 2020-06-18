@@ -132,9 +132,14 @@ func TestCfDeployment(t *testing.T) {
 						Password:      "******",
 					})
 
+				// REVISIT: we have more the less the same test below (deploy cf native app name from manifest)
+				// that other test has been transfered from groovy. But here we have some more checks for the
+				// environment variables. --> check if we really need both tests and try to find out why there
+				// was no need for asserting the environment variables on groovy.
+
 				assert.Equal(t, []mock.ExecCall{
 					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
-					mock.ExecCall{Exec: "cf", Params: []string{"push", "testAppName", "-f", "manifest.yml"}},
+					mock.ExecCall{Exec: "cf", Params: []string{"push", "-f", "manifest.yml"}},
 				}, s.Calls)
 			})
 
@@ -340,7 +345,12 @@ func TestCfDeployment(t *testing.T) {
 		}
 
 		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
-			return manifestMock{manifestFileName: "test-manifest.yml"}, nil
+			return manifestMock{
+				manifestFileName: "test-manifest.yml",
+				// app name is not asserted since it does not appear in the cf calls
+				// but it is checked that an app name is present, hence we need it here.
+				appName: "dummyApp",
+			}, nil
 		}
 
 		defer cleanup()
@@ -350,6 +360,28 @@ func TestCfDeployment(t *testing.T) {
 		err := runCloudFoundryDeploy(&config, nil, &s)
 
 		if assert.NoError(t, err) {
+
+			t.Run("check shell calls", func(t *testing.T) {
+				assert.Equal(t, loginOpts,
+					cloudfoundry.LoginOptions{
+						CfAPIEndpoint: "https://examples.sap.com/cf",
+						CfOrg:         "myOrg",
+						CfSpace:       "mySpace",
+						Username:      "me",
+						Password:      "******",
+					})
+
+				assert.Equal(t, []mock.ExecCall{
+					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+					mock.ExecCall{Exec: "cf", Params: []string{
+						"push",
+						"-f",
+						"test-manifest.yml",
+					}},
+				}, s.Calls)
+
+				assert.True(t, logoutCalled)
+			})
 		}
 	})
 
