@@ -767,11 +767,7 @@ func TestCfDeployment(t *testing.T) {
 						Password:      "******",
 					})
 
-
-					t.Logf("xxxxxxxxxx CALLS: %v", s.Calls)
-
-					//'cf bg-deploy', '-f', '--no-confirm']
-				assert.Equal(t, []mock.ExecCall{
+					assert.Equal(t, []mock.ExecCall{
 					mock.ExecCall{Exec: "cf", Params: []string{"api", "https://examples.sap.com/cf"}},
 					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
 					mock.ExecCall{Exec: "cf", Params: []string{
