@@ -16,6 +16,7 @@ import (
 type cloudFoundryDeployOptions struct {
 	DeployDockerImage        string   `json:"deployDockerImage,omitempty"`
 	DockerUsername           string   `json:"dockerUsername,omitempty"`
+	DockerPassword           string   `json:"dockerPassword,omitempty"`
 	APIEndpoint              string   `json:"apiEndpoint,omitempty"`
 	APIParameters            string   `json:"apiParameters,omitempty"`
 	Org                      string   `json:"org,omitempty"`
@@ -62,6 +63,7 @@ func CloudFoundryDeployCommand() *cobra.Command {
 			if err != nil {
 				return err
 			}
+			log.RegisterSecret(stepConfig.DockerPassword)
 			log.RegisterSecret(stepConfig.Username)
 			log.RegisterSecret(stepConfig.Password)
 
@@ -95,6 +97,7 @@ func CloudFoundryDeployCommand() *cobra.Command {
 func addCloudFoundryDeployFlags(cmd *cobra.Command, stepConfig *cloudFoundryDeployOptions) {
 	cmd.Flags().StringVar(&stepConfig.DeployDockerImage, "deployDockerImage", os.Getenv("PIPER_deployDockerImage"), "Docker image deployments are supported (via manifest file in general)[https://docs.cloudfoundry.org/devguide/deploy-apps/manifest-attributes.html#docker]. If no manifest is used, this parameter defines the image to be deployed. The specified name of the image is passed to the `--docker-image` parameter of the cf CLI and must adhere it's naming pattern (e.g. REPO/IMAGE:TAG). See (cf CLI documentation)[https://docs.cloudfoundry.org/devguide/deploy-apps/push-docker.html] for details. Note: The used Docker registry must be visible for the targeted Cloud Foundry instance.")
 	cmd.Flags().StringVar(&stepConfig.DockerUsername, "dockerUsername", os.Getenv("PIPER_dockerUsername"), "dockerUserName")
+	cmd.Flags().StringVar(&stepConfig.DockerPassword, "dockerPassword", os.Getenv("PIPER_dockerPassword"), "dockerPassword")
 	cmd.Flags().StringVar(&stepConfig.APIEndpoint, "apiEndpoint", os.Getenv("PIPER_apiEndpoint"), "Cloud Foundry API endpoint")
 	cmd.Flags().StringVar(&stepConfig.APIParameters, "apiParameters", os.Getenv("PIPER_apiParameters"), "Addition command line options for cf api command. No escaping/quoting is performed. Not recommanded for productive environments.")
 	cmd.Flags().StringVar(&stepConfig.Org, "org", os.Getenv("PIPER_org"), "Cloud Foundry target organization.")
@@ -144,6 +147,14 @@ func cloudFoundryDeployMetadata() config.StepData {
 					},
 					{
 						Name:        "dockerUsername",
+						ResourceRef: []config.ResourceReference{},
+						Scope:       []string{"PARAMETERS", "STAGES", "STEPS"},
+						Type:        "string",
+						Mandatory:   false,
+						Aliases:     []config.Alias{},
+					},
+					{
+						Name:        "dockerPassword",
 						ResourceRef: []config.ResourceReference{},
 						Scope:       []string{"PARAMETERS", "STAGES", "STEPS"},
 						Type:        "string",

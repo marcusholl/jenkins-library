@@ -25,7 +25,7 @@ spec:
       - name: dockerPassword
         type: string
         description: "dockerPassword"
-	secret: true
+        secret: true
         scope:
         - PARAMETERS
         - STAGES
