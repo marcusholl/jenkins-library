@@ -395,7 +395,7 @@ func toParameterMap(parameters []string) (map[string]string, error) {
 }
 
 func handleLegacyCfManifest(manifestFile string) error {
-	manifest, err := cloudfoundry.ReadManifest(manifestFile)
+	manifest, err := _getManifest(manifestFile)
 	if err != nil {
 		return err
 	}
@@ -494,7 +494,7 @@ func checkAndUpdateDeployTypeForNotSupportedManifest(config *cloudFoundryDeployO
 
 	if config.DeployType == "blue-green" && manifestFileExists {
 
-		m, _ := cloudfoundry.ReadManifest(manifestFile)
+		m, _ := _getManifest(manifestFile)
 
 		apps, err := m.GetApplications()
 
