@@ -794,6 +794,76 @@ func TestCfDeployment(t *testing.T) {
 
 	// TODO: add test for influx reporting (influx reporting is missing at the moment)
 
+	t.Run("cf push with variable substitution from file", func(t * testing.T) {
+
+		config := cloudFoundryDeployOptions{
+			DeployTool:  "cf_native",
+			Org:         "myOrg",
+			Space:       "mySpace",
+			Username:    "me",
+			Password:    "******",
+			APIEndpoint: "https://examples.sap.com/cf",
+			Manifest:    "test-manifest.yml",
+			ManifestVariablesFiles: []string {"vars.yaml"},
+			AppName:      "testAppName",
+		}
+
+		_fileExists = func(name string) (bool, error) {
+			return name == "test-manifest.yml" || name == "vars.yaml", nil
+		}
+
+		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
+			return manifestMock{
+					manifestFileName: "test-manifest.yml",
+					apps: []map[string]interface{}{
+						map[string]interface{}{
+							"name": "myApp",
+						},
+					},
+				},
+				nil
+		}
+
+		defer cleanup()
+
+		s := mock.ExecMockRunner{}
+
+		err := runCloudFoundryDeploy(&config, nil, &s)
+
+		if assert.NoError(t, err) {
+
+
+			t.Run("check shell calls", func(t *testing.T) {
+				assert.Equal(t, loginOpts,
+					cloudfoundry.LoginOptions{
+						CfAPIEndpoint: "https://examples.sap.com/cf",
+						CfOrg:         "myOrg",
+						CfSpace:       "mySpace",
+						Username:      "me",
+						Password:      "******",
+					})
+
+				
+				// Revisit: we don't verify a log message in case of a non existing vars file
+
+				assert.Equal(t, []mock.ExecCall{
+					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+					mock.ExecCall{Exec: "cf", Params: []string{
+						"push",
+						"testAppName",
+						"--vars-file",
+						"vars.yaml",
+						"-f",
+						"test-manifest.yml",
+					}},
+
+				}, s.Calls)
+
+				assert.True(t, logoutCalled)
+			})
+		}
+	})
+
 	t.Run("deploytool mtaDeployPlugin", func(t *testing.T) {
 
 		config := cloudFoundryDeployOptions{
