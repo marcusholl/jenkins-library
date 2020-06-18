@@ -741,6 +741,7 @@ func TestCfDeployment(t *testing.T) {
 			Username:    "me",
 			Password:    "******",
 			APIEndpoint: "https://examples.sap.com/cf",
+			MtaDeployParameters: "-f",
 		}
 
 		t.Run("mta config file from project sources", func(t *testing.T) {
@@ -756,7 +757,7 @@ func TestCfDeployment(t *testing.T) {
 					assert.Equal(t, s.Calls, []mock.ExecCall{
 						mock.ExecCall{Exec: "cf", Params: []string{"api", "https://examples.sap.com/cf"}},
 						mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
-						mock.ExecCall{Exec: "cf", Params: []string{"deploy", "x.mtar"}},
+						mock.ExecCall{Exec: "cf", Params: []string{"deploy", "x.mtar", "-f"}},
 					})
 
 					t.Run("check cf login", func(t *testing.T) {
