@@ -611,6 +611,8 @@ func TestCfDeployment(t *testing.T) {
 		}
 	})
 
+	// TODO testCfNativeBlueGreenKeepOldInstanceShouldThrowErrorOnStopError
+
 	t.Run("deploytool mtaDeployPlugin", func(t *testing.T) {
 
 		config := cloudFoundryDeployOptions{
