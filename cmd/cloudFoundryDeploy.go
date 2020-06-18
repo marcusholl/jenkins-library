@@ -505,7 +505,7 @@ func checkAndUpdateDeployTypeForNotSupportedManifest(config *cloudFoundryDeployO
 			return "", err
 		}
 		if len(apps) > 1 {
-			fmt.Errorf("Your manifest contains more than one application. For blue green deployments your manifest file may contain only one application")
+			return "", fmt.Errorf("Your manifest contains more than one application. For blue green deployments your manifest file may contain only one application")
 		}
 
 		hasNoRouteProperty, err := m.ApplicationHasProperty(0, "no-route")
