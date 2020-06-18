@@ -136,7 +136,7 @@ func handleCFNativeDeployment(config *cloudFoundryDeployOptions, command execRun
 		// Basically we try to retrieve the app name from the manifest here since it is not provided from the config
 		// Later on we don't use the app name retrieved here since we can use it from the manifest.
 		// Here we simply fail early when the app name is not provided and also not contained in the manifest.
-		_ , err := getAppNameOrFail(config, manifestFile)
+		_, err := getAppNameOrFail(config, manifestFile)
 		if err != nil {
 			return err
 		}
@@ -294,12 +294,15 @@ func getAppNameOrFail(config *cloudFoundryDeployOptions, manifestFile string) (s
 					return "", err
 				}
 				if name, ok := appName.(string); ok {
-					return name, nil
+					if len(name) > 0 {
+						return name, nil
+					}
 				}
 			}
-		} else {
-			return "", fmt.Errorf("No appName available in manifest '%s'", manifestFile)
 		}
+
+		return "", fmt.Errorf("No appName available in manifest '%s'", manifestFile)
+
 	} else {
 		return "", fmt.Errorf("Manifest file '%s' not found", manifestFile)
 	}
@@ -342,7 +345,7 @@ func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) (string, 
 
 	var deployOptions = []string{}
 
-	if ! config.KeepOldInstance {
+	if !config.KeepOldInstance {
 		deployOptions = append(deployOptions, "--delete-old-apps")
 	}
 
