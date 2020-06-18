@@ -12,7 +12,7 @@ import (
 
 type manifestMock struct {
 	manifestFileName string
-	appName string
+	appName          string
 }
 
 func (m manifestMock) GetAppName(index int) (string, error) {
@@ -264,17 +264,17 @@ func TestCfDeployment(t *testing.T) {
 		// if a private docker repository is used the CF_DOCKER_PASSWORD env variable must be set
 
 		config := cloudFoundryDeployOptions{
-			DeployTool:        "cf_native",
-			DeployType:        "blue-green",
-			Org:               "myOrg",
-			Space:             "mySpace",
-			Username:          "me",
-			Password:          "******",
-			APIEndpoint:       "https://examples.sap.com/cf",
-			DockerUsername:    "test_cf_docker",
-			DockerPassword:    "********",
-			AppName:           "testAppName",
-			Manifest:          "manifest.yml",
+			DeployTool:     "cf_native",
+			DeployType:     "blue-green",
+			Org:            "myOrg",
+			Space:          "mySpace",
+			Username:       "me",
+			Password:       "******",
+			APIEndpoint:    "https://examples.sap.com/cf",
+			DockerUsername: "test_cf_docker",
+			DockerPassword: "********",
+			AppName:        "testAppName",
+			Manifest:       "manifest.yml",
 		}
 
 		_fileExists = func(name string) (bool, error) {
@@ -331,13 +331,13 @@ func TestCfDeployment(t *testing.T) {
 	t.Run("deploy cf native app name from manifest", func(t *testing.T) {
 
 		config := cloudFoundryDeployOptions{
-			DeployTool:        "cf_native",
-			Org:               "myOrg",
-			Space:             "mySpace",
-			Username:          "me",
-			Password:          "******",
-			APIEndpoint:       "https://examples.sap.com/cf",
-			Manifest:          "test-manifest.yml",
+			DeployTool:  "cf_native",
+			Org:         "myOrg",
+			Space:       "mySpace",
+			Username:    "me",
+			Password:    "******",
+			APIEndpoint: "https://examples.sap.com/cf",
+			Manifest:    "test-manifest.yml",
 		}
 
 		_fileExists = func(name string) (bool, error) {
@@ -381,6 +381,51 @@ func TestCfDeployment(t *testing.T) {
 				}, s.Calls)
 
 				assert.True(t, logoutCalled)
+			})
+		}
+	})
+
+	t.Run("deploy cf native without app name", func(t *testing.T) {
+
+		config := cloudFoundryDeployOptions{
+			DeployTool:  "cf_native",
+			Org:         "myOrg",
+			Space:       "mySpace",
+			Username:    "me",
+			Password:    "******",
+			APIEndpoint: "https://examples.sap.com/cf",
+			Manifest:    "test-manifest.yml",
+		}
+
+		_fileExists = func(name string) (bool, error) {
+			return name == "test-manifest.yml", nil
+		}
+
+		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
+			return manifestMock{
+				manifestFileName: "test-manifest.yml",
+				// Here we don't provide an application name from the mock. To make that
+				// more explicit we provide the empty string default explicitly.
+				appName: "",
+			}, nil
+		}
+
+		defer cleanup()
+
+		s := mock.ExecMockRunner{}
+
+		err := runCloudFoundryDeploy(&config, nil, &s)
+
+		if assert.EqualError(t, err, "No appName available in manifest 'test-manifest.yml'") {
+
+			t.Run("check shell calls", func(t *testing.T) {
+
+				// no login in this case
+				assert.Equal(t, cloudfoundry.LoginOptions{}, loginOpts)
+				// no calls to the cf client in this case
+				assert.Empty(t, s.Calls)
+				// no logout
+				assert.False(t, logoutCalled)
 			})
 		}
 	})
