@@ -132,17 +132,16 @@ func handleCFNativeDeployment(config *cloudFoundryDeployOptions, command execRun
 
 	}
 
-	appName, err := getAppNameOrFail(config, manifestFile)
-
-	if err != nil {
-		return err
+	if len(config.AppName) == 0 {
+		// Basically we try to retrieve the app name from the manifest here since it is not provided from the config
+		// Later on we don't use the app name retrieved here since we can use it from the manifest.
+		// Here we simply fail early when the app name is not provided and also not contained in the manifest.
+		_ , err := getAppNameOrFail(config, manifestFile)
+		if err != nil {
+			return err
+		}
 	}
 
-	// somehow the WithField statements does not trigger the fields to be contained in the log
-	log.Entry().WithField("appName", appName).WithField("deployType", deployType).WithField("manifest", config.Manifest).Errorf("CF native deployment")
-	//.withField("appName", config.App)
-
-	//.withField("") //[${STEP_NAME}] CF native deployment (${config.deployType}) with:"
 	/*
 	   	echo "[${STEP_NAME}] - cfManifestVariables=${config.cloudFoundry.manifestVariables ?: 'none specified'}"
 	       echo "[${STEP_NAME}] - cfManifestVariablesFiles=${config.cloudFoundry.manifestVariablesFiles ?: 'none specified'}"
@@ -166,12 +165,10 @@ func handleCFNativeDeployment(config *cloudFoundryDeployOptions, command execRun
 		additionalEnvironment = append(additionalEnvironment, "CF_DOCKER_PASSWORD="+config.DockerPassword)
 	}
 
-	log.Entry().Infof("AppName: '%s'", appName)
-
 	myDeployConfig := deployConfig{
 		DeployCommand:   deployCommand,
 		DeployOptions:   deployOptions,
-		AppName:         appName,
+		AppName:         config.AppName,
 		ManifestFile:    manifestFile,
 		SmokeTestScript: smokeTestScript,
 	}
@@ -189,7 +186,10 @@ func deployCfNative(deployConfig deployConfig, config *cloudFoundryDeployOptions
 	// via a single whitespace; results in a single line deploy statement
 	deployStatement := []string{
 		deployConfig.DeployCommand,
-		deployConfig.AppName,
+	}
+
+	if len(deployConfig.AppName) > 0 {
+		deployStatement = append(deployStatement, deployConfig.AppName)
 	}
 
 	if len(deployConfig.DeployOptions) > 0 {
