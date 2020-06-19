@@ -546,7 +546,7 @@ func TestCfDeployment(t *testing.T) {
 		}
 	})
 
-	t.Run("cf native deploy with no route", func(t *testing.T) {
+	t.Run("cf native deploy blue green with no route", func(t *testing.T) {
 
 		config := cloudFoundryDeployOptions{
 			DeployTool:  "cf_native",
