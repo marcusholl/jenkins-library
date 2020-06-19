@@ -5,10 +5,12 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/SAP/jenkins-library/pkg/config"
 	"github.com/SAP/jenkins-library/pkg/log"
+	"github.com/SAP/jenkins-library/pkg/piperenv"
 	"github.com/SAP/jenkins-library/pkg/telemetry"
 	"github.com/spf13/cobra"
 )
@@ -38,6 +40,55 @@ type cloudFoundryDeployOptions struct {
 	ManifestVariables        []string `json:"manifestVariables,omitempty"`
 }
 
+type cloudFoundryDeployInflux struct {
+	cf_deploy_data struct {
+		fields struct {
+			artifactURL     string
+			deployTime      string
+			jobTrigger      string
+			artifactVersion string
+			deployUser      string
+			deployResult    string
+			cfAPIEndpoint   string
+			cfOrg           string
+			cfSpace         string
+		}
+		tags struct {
+		}
+	}
+}
+
+func (i *cloudFoundryDeployInflux) persist(path, resourceName string) {
+	measurementContent := []struct {
+		measurement string
+		valType     string
+		name        string
+		value       string
+	}{
+		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "artifactUrl", value: i.cf_deploy_data.fields.artifactURL},
+		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "deployTime", value: i.cf_deploy_data.fields.deployTime},
+		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "jobTrigger", value: i.cf_deploy_data.fields.jobTrigger},
+		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "artifactVersion", value: i.cf_deploy_data.fields.artifactVersion},
+		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "deployUser", value: i.cf_deploy_data.fields.deployUser},
+		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "deployResult", value: i.cf_deploy_data.fields.deployResult},
+		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "cfApiEndpoint", value: i.cf_deploy_data.fields.cfAPIEndpoint},
+		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "cfOrg", value: i.cf_deploy_data.fields.cfOrg},
+		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "cfSpace", value: i.cf_deploy_data.fields.cfSpace},
+	}
+
+	errCount := 0
+	for _, metric := range measurementContent {
+		err := piperenv.SetResourceParameter(path, resourceName, filepath.Join(metric.measurement, fmt.Sprintf("%vs", metric.valType), metric.name), metric.value)
+		if err != nil {
+			log.Entry().WithError(err).Error("Error persisting influx environment.")
+			errCount++
+		}
+	}
+	if errCount > 0 {
+		log.Entry().Fatal("failed to persist Influx environment")
+	}
+}
+
 // CloudFoundryDeployCommand Deploys an application to cloud foundry
 func CloudFoundryDeployCommand() *cobra.Command {
 	const STEP_NAME = "cloudFoundryDeploy"
@@ -45,6 +96,7 @@ func CloudFoundryDeployCommand() *cobra.Command {
 	metadata := cloudFoundryDeployMetadata()
 	var stepConfig cloudFoundryDeployOptions
 	var startTime time.Time
+	var influx cloudFoundryDeployInflux
 
 	var createCloudFoundryDeployCmd = &cobra.Command{
 		Use:   STEP_NAME,
@@ -78,13 +130,14 @@ func CloudFoundryDeployCommand() *cobra.Command {
 			telemetryData := telemetry.CustomData{}
 			telemetryData.ErrorCode = "1"
 			handler := func() {
+				influx.persist(GeneralConfig.EnvRootPath, "influx")
 				telemetryData.Duration = fmt.Sprintf("%v", time.Since(startTime).Milliseconds())
 				telemetry.Send(&telemetryData)
 			}
 			log.DeferExitHandler(handler)
 			defer handler()
 			telemetry.Initialize(GeneralConfig.NoTelemetry, STEP_NAME)
-			cloudFoundryDeploy(stepConfig, &telemetryData)
+			cloudFoundryDeploy(stepConfig, &telemetryData, &influx)
 			telemetryData.ErrorCode = "0"
 			log.Entry().Info("SUCCESS")
 		},
