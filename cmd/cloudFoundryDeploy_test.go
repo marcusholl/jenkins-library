@@ -112,6 +112,8 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("deploytool cf native", func(t *testing.T) {
 
+		defer cleanup()
+
 		_getWd = func() (string, error) {
 			return "/home/me", nil
 		}
@@ -128,7 +130,6 @@ func TestCfDeployment(t *testing.T) {
 		}
 
 		config.DeployTool = "cf_native"
-		defer cleanup()
 
 		s := mock.ExecMockRunner{}
 
@@ -170,14 +171,14 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("deploy cf native with docker image and docker username", func(t *testing.T) {
 
+		defer cleanup()
+
 		config.DeployTool = "cf_native"
 		config.DeployDockerImage = "repo/image:tag"
 		config.DockerUsername = "me"
 		config.AppName = "testAppName"
 
 		config.Manifest = ""
-
-		defer cleanup()
 
 		s := mock.ExecMockRunner{}
 
@@ -211,6 +212,8 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("deploy_cf_native with manifest and docker credentials", func(t *testing.T) {
 
+		defer cleanup()
+
 		// Docker image can be done via manifest.yml.
 		// if a private Docker registry is used, --docker-username and DOCKER_PASSWORD
 		// must be set; this is checked by this test
@@ -222,8 +225,6 @@ func TestCfDeployment(t *testing.T) {
 		config.AppName = "testAppName"
 
 		config.Manifest = ""
-
-		defer cleanup()
 
 		s := mock.ExecMockRunner{}
 
@@ -264,6 +265,8 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("deploy cf native blue green with manifest and docker credentials", func(t *testing.T) {
 
+		defer cleanup()
+
 		// Blue Green Deploy cf cli plugin does not support --docker-username and --docker-image parameters
 		// docker username and docker image have to be set in the manifest file
 		// if a private docker repository is used the CF_DOCKER_PASSWORD env variable must be set
@@ -284,8 +287,6 @@ func TestCfDeployment(t *testing.T) {
 					apps:             []map[string]interface{}{map[string]interface{}{"name": "testAppName"}}},
 				nil
 		}
-
-		defer cleanup()
 
 		s := mock.ExecMockRunner{}
 
@@ -330,6 +331,8 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("deploy cf native app name from manifest", func(t *testing.T) {
 
+		defer cleanup()
+
 		config.DeployTool = "cf_native"
 		config.Manifest = "test-manifest.yml"
 
@@ -346,8 +349,6 @@ func TestCfDeployment(t *testing.T) {
 					apps: []map[string]interface{}{map[string]interface{}{"name": "dummyApp"}}},
 				nil
 		}
-
-		defer cleanup()
 
 		s := mock.ExecMockRunner{}
 
@@ -381,6 +382,8 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("deploy cf native without app name", func(t *testing.T) {
 
+		defer cleanup()
+
 		config.DeployTool = "cf_native"
 		config.Manifest = "test-manifest.yml"
 
@@ -396,8 +399,6 @@ func TestCfDeployment(t *testing.T) {
 					apps: []map[string]interface{}{map[string]interface{}{"name": ""}}},
 				nil
 		}
-
-		defer cleanup()
 
 		s := mock.ExecMockRunner{}
 
@@ -421,13 +422,13 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("deploy cf native blue green keep old instance", func(t *testing.T) {
 
+		defer cleanup()
+
 		config.DeployTool = "cf_native"
 		config.DeployType = "blue-green"
 		config.Manifest = "test-manifest.yml"
 		config.AppName = "myTestApp"
 		config.KeepOldInstance = true
-
-		defer cleanup()
 
 		s := mock.ExecMockRunner{}
 
@@ -468,6 +469,8 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("cf deploy blue green multiple applications", func(t *testing.T) {
 
+		defer cleanup()
+
 		config.DeployTool = "cf_native"
 		config.DeployType = "blue-green"
 		config.Manifest = "test-manifest.yml"
@@ -488,8 +491,6 @@ func TestCfDeployment(t *testing.T) {
 				nil
 		}
 
-		defer cleanup()
-
 		s := mock.ExecMockRunner{}
 
 		err := runCloudFoundryDeploy(&config, nil, &s)
@@ -508,6 +509,8 @@ func TestCfDeployment(t *testing.T) {
 	})
 
 	t.Run("cf native deploy blue green with no route", func(t *testing.T) {
+
+		defer cleanup()
 
 		config.DeployTool = "cf_native"
 		config.DeployType = "blue-green"
@@ -530,8 +533,6 @@ func TestCfDeployment(t *testing.T) {
 				},
 				nil
 		}
-
-		defer cleanup()
 
 		s := mock.ExecMockRunner{}
 
@@ -566,6 +567,8 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("cf native deployment failure", func(t *testing.T) {
 
+		defer cleanup()
+
 		config.DeployTool = "cf_native"
 		config.DeployType = "blue-green"
 		config.Manifest = "test-manifest.yml"
@@ -588,8 +591,6 @@ func TestCfDeployment(t *testing.T) {
 				nil
 		}
 
-		defer cleanup()
-
 		s := mock.ExecMockRunner{}
 
 		s.ShouldFailOnCommand = map[string]error{"cf.*": fmt.Errorf("cf deploy failed")}
@@ -605,6 +606,8 @@ func TestCfDeployment(t *testing.T) {
 	})
 
 	t.Run("cf native deployment failure when logging in", func(t *testing.T) {
+
+		defer cleanup()
 
 		config.DeployTool = "cf_native"
 		config.DeployType = "blue-green"
@@ -640,8 +643,6 @@ func TestCfDeployment(t *testing.T) {
 				nil
 		}
 
-		defer cleanup()
-
 		s := mock.ExecMockRunner{}
 
 		err := runCloudFoundryDeploy(&config, nil, &s)
@@ -660,6 +661,9 @@ func TestCfDeployment(t *testing.T) {
 	// TODO testCfNativeBlueGreenKeepOldInstanceShouldThrowErrorOnStopError
 
 	t.Run("cf native deploy standard should not stop instance", func(t *testing.T) {
+
+		defer cleanup()
+
 		config.DeployTool = "cf_native"
 		config.DeployType = "standard"
 		config.Manifest = "test-manifest.yml"
@@ -682,8 +686,6 @@ func TestCfDeployment(t *testing.T) {
 				},
 				nil
 		}
-
-		defer cleanup()
 
 		s := mock.ExecMockRunner{}
 
@@ -724,6 +726,8 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("testCfNativeWithoutAppNameBlueGreen", func(t *testing.T) {
 
+		defer cleanup()
+
 		config.DeployTool = "cf_native"
 		config.DeployType = "blue-green"
 		config.Manifest = "test-manifest.yml"
@@ -743,8 +747,6 @@ func TestCfDeployment(t *testing.T) {
 				},
 				nil
 		}
-
-		defer cleanup()
 
 		s := mock.ExecMockRunner{}
 
@@ -768,6 +770,8 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("deploytool mtaDeployPlugin blue green", func(t *testing.T) {
 
+		defer cleanup()
+
 		config.DeployTool = "mtaDeployPlugin"
 		config.DeployType = "blue-green"
 		config.MtarPath = "target/test.mtar"
@@ -775,8 +779,6 @@ func TestCfDeployment(t *testing.T) {
 		_fileExists = func(name string) (bool, error) {
 			return name == "target/test.mtar", nil
 		}
-
-		defer cleanup()
 
 		s := mock.ExecMockRunner{}
 
@@ -819,6 +821,8 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("cf push with variables from file and as list", func(t *testing.T) {
 
+		defer cleanup()
+
 		config.DeployTool = "cf_native"
 		config.Manifest = "test-manifest.yml"
 		config.ManifestVariablesFiles = []string{"vars.yaml"}
@@ -840,8 +844,6 @@ func TestCfDeployment(t *testing.T) {
 				},
 				nil
 		}
-
-		defer cleanup()
 
 		s := mock.ExecMockRunner{}
 
@@ -882,6 +884,8 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("cf push with variables from file which does not exist", func(t *testing.T) {
 
+		defer cleanup()
+
 		config.DeployTool = "cf_native"
 		config.Manifest = "test-manifest.yml"
 		config.ManifestVariablesFiles = []string{"vars.yaml", "vars-does-not-exist.yaml"}
@@ -902,8 +906,6 @@ func TestCfDeployment(t *testing.T) {
 				},
 				nil
 		}
-
-		defer cleanup()
 
 		s := mock.ExecMockRunner{}
 
@@ -948,10 +950,10 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("deploytool mtaDeployPlugin", func(t *testing.T) {
 
+		defer cleanup()
+
 		config.DeployTool = "mtaDeployPlugin"
 		config.MtaDeployParameters = "-f"
-
-		defer cleanup()
 
 		t.Run("mta config file from project sources", func(t *testing.T) {
 
