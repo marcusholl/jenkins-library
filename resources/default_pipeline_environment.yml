@@ -574,6 +574,7 @@ steps:
       failIfStatusIsNotInDevelopment: true
   tmsUpload:
     namedUser: 'Piper-Pipeline'
+    mtaVersion: 'MY_MTA_VERSION'
     stashContent:
       - 'buildResult'
   transportRequestCreate:
