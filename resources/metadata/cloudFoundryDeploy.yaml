@@ -199,3 +199,19 @@ spec:
     - name: cfDeploy
       image: ppiper/cf-cli
       imagePullPolicy: Always
+  outputs:
+    resources:
+      - name: influx
+        type: influx
+        params:
+          - name: cf_deploy_data
+            fields:
+              - name: artifactUrl
+              - name: deployTime
+              - name: jobTrigger
+              - name: artifactVersion
+              - name: deployUser
+              - name: deployResult
+              - name: cfApiEndpoint
+              - name: cfOrg
+              - name: cfSpace
