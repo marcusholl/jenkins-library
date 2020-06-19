@@ -74,6 +74,8 @@ func TestCfDeployment(t *testing.T) {
 		logoutCalled = false
 		mtarFileRetrieved = false
 		_getWd = os.Getwd
+
+		config = defaultConfig
 	}
 
 	_glob = func(patterns []string) ([]*glob.FileAsset, []*glob.RegexpInfo, error) {
@@ -97,7 +99,7 @@ func TestCfDeployment(t *testing.T) {
 
 		s := mock.ExecMockRunner{}
 
-		config := cloudFoundryDeployOptions{DeployTool: "invalid"}
+		config.DeployTool = "invalid"
 
 		err := runCloudFoundryDeploy(&config, nil, &s)
 
@@ -125,17 +127,7 @@ func TestCfDeployment(t *testing.T) {
 				nil
 		}
 
-		config := cloudFoundryDeployOptions{
-			DeployTool:          "cf_native",
-			Org:                 "myOrg",
-			Space:               "mySpace",
-			Username:            "me",
-			Password:            "******",
-			APIEndpoint:         "https://examples.sap.com/cf",
-			SmokeTestStatusCode: "200",
-			Manifest:            "manifest.yml", // the default, will be provided in the free wild from the metadata, but here we have to set it.
-		}
-
+		config.DeployTool = "cf_native"
 		defer cleanup()
 
 		s := mock.ExecMockRunner{}
@@ -178,17 +170,12 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("deploy cf native with docker image and docker username", func(t *testing.T) {
 
-		config := cloudFoundryDeployOptions{
-			DeployTool:        "cf_native",
-			Org:               "myOrg",
-			Space:             "mySpace",
-			Username:          "me",
-			Password:          "******",
-			APIEndpoint:       "https://examples.sap.com/cf",
-			DeployDockerImage: "repo/image:tag",
-			DockerUsername:    "me",
-			AppName:           "testAppName",
-		}
+		config.DeployTool = "cf_native"
+		config.DeployDockerImage = "repo/image:tag"
+		config.DockerUsername = "me"
+		config.AppName = "testAppName"
+
+		config.Manifest = ""
 
 		defer cleanup()
 
@@ -228,18 +215,13 @@ func TestCfDeployment(t *testing.T) {
 		// if a private Docker registry is used, --docker-username and DOCKER_PASSWORD
 		// must be set; this is checked by this test
 
-		config := cloudFoundryDeployOptions{
-			DeployTool:        "cf_native",
-			Org:               "myOrg",
-			Space:             "mySpace",
-			Username:          "me",
-			Password:          "******",
-			APIEndpoint:       "https://examples.sap.com/cf",
-			DeployDockerImage: "repo/image:tag",
-			DockerUsername:    "test_cf_docker",
-			DockerPassword:    "********",
-			AppName:           "testAppName",
-		}
+		config.DeployTool = "cf_native"
+		config.DeployDockerImage = "repo/image:tag"
+		config.DockerUsername = "test_cf_docker"
+		config.DockerPassword = "********"
+		config.AppName = "testAppName"
+
+		config.Manifest = ""
 
 		defer cleanup()
 
@@ -286,19 +268,11 @@ func TestCfDeployment(t *testing.T) {
 		// docker username and docker image have to be set in the manifest file
 		// if a private docker repository is used the CF_DOCKER_PASSWORD env variable must be set
 
-		config := cloudFoundryDeployOptions{
-			DeployTool:     "cf_native",
-			DeployType:     "blue-green",
-			Org:            "myOrg",
-			Space:          "mySpace",
-			Username:       "me",
-			Password:       "******",
-			APIEndpoint:    "https://examples.sap.com/cf",
-			DockerUsername: "test_cf_docker",
-			DockerPassword: "********",
-			AppName:        "testAppName",
-			Manifest:       "manifest.yml",
-		}
+		config.DeployTool = "cf_native"
+		config.DeployType = "blue-green"
+		config.DockerUsername = "test_cf_docker"
+		config.DockerPassword = "********"
+		config.AppName = "testAppName"
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "manifest.yml", nil
@@ -356,15 +330,8 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("deploy cf native app name from manifest", func(t *testing.T) {
 
-		config := cloudFoundryDeployOptions{
-			DeployTool:  "cf_native",
-			Org:         "myOrg",
-			Space:       "mySpace",
-			Username:    "me",
-			Password:    "******",
-			APIEndpoint: "https://examples.sap.com/cf",
-			Manifest:    "test-manifest.yml",
-		}
+		config.DeployTool = "cf_native"
+		config.Manifest = "test-manifest.yml"
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml", nil
@@ -414,15 +381,8 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("deploy cf native without app name", func(t *testing.T) {
 
-		config := cloudFoundryDeployOptions{
-			DeployTool:  "cf_native",
-			Org:         "myOrg",
-			Space:       "mySpace",
-			Username:    "me",
-			Password:    "******",
-			APIEndpoint: "https://examples.sap.com/cf",
-			Manifest:    "test-manifest.yml",
-		}
+		config.DeployTool = "cf_native"
+		config.Manifest = "test-manifest.yml"
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml", nil
@@ -461,18 +421,11 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("deploy cf native blue green keep old instance", func(t *testing.T) {
 
-		config := cloudFoundryDeployOptions{
-			DeployTool:      "cf_native",
-			DeployType:      "blue-green",
-			Org:             "myOrg",
-			Space:           "mySpace",
-			Username:        "me",
-			Password:        "******",
-			APIEndpoint:     "https://examples.sap.com/cf",
-			Manifest:        "test-manifest.yml",
-			AppName:         "myTestApp",
-			KeepOldInstance: true,
-		}
+		config.DeployTool = "cf_native"
+		config.DeployType = "blue-green"
+		config.Manifest = "test-manifest.yml"
+		config.AppName = "myTestApp"
+		config.KeepOldInstance = true
 
 		defer cleanup()
 
@@ -515,17 +468,10 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("cf deploy blue green multiple applications", func(t *testing.T) {
 
-		config := cloudFoundryDeployOptions{
-			DeployTool:  "cf_native",
-			DeployType:  "blue-green",
-			Org:         "myOrg",
-			Space:       "mySpace",
-			Username:    "me",
-			Password:    "******",
-			APIEndpoint: "https://examples.sap.com/cf",
-			Manifest:    "test-manifest.yml",
-			AppName:     "myTestApp",
-		}
+		config.DeployTool = "cf_native"
+		config.DeployType = "blue-green"
+		config.Manifest = "test-manifest.yml"
+		config.AppName = "myTestApp"
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml", nil
@@ -563,17 +509,10 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("cf native deploy blue green with no route", func(t *testing.T) {
 
-		config := cloudFoundryDeployOptions{
-			DeployTool:  "cf_native",
-			DeployType:  "blue-green",
-			Org:         "myOrg",
-			Space:       "mySpace",
-			Username:    "me",
-			Password:    "******",
-			APIEndpoint: "https://examples.sap.com/cf",
-			Manifest:    "test-manifest.yml",
-			AppName:     "myTestApp",
-		}
+		config.DeployTool = "cf_native"
+		config.DeployType = "blue-green"
+		config.Manifest = "test-manifest.yml"
+		config.AppName = "myTestApp"
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml", nil
@@ -627,17 +566,10 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("cf native deployment failure", func(t *testing.T) {
 
-		config := cloudFoundryDeployOptions{
-			DeployTool:  "cf_native",
-			DeployType:  "blue-green",
-			Org:         "myOrg",
-			Space:       "mySpace",
-			Username:    "me",
-			Password:    "******",
-			APIEndpoint: "https://examples.sap.com/cf",
-			Manifest:    "test-manifest.yml",
-			AppName:     "myTestApp",
-		}
+		config.DeployTool = "cf_native"
+		config.DeployType = "blue-green"
+		config.Manifest = "test-manifest.yml"
+		config.AppName = "myTestApp"
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml", nil
@@ -674,17 +606,10 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("cf native deployment failure when logging in", func(t *testing.T) {
 
-		config := cloudFoundryDeployOptions{
-			DeployTool:  "cf_native",
-			DeployType:  "blue-green",
-			Org:         "myOrg",
-			Space:       "mySpace",
-			Username:    "me",
-			Password:    "******",
-			APIEndpoint: "https://examples.sap.com/cf",
-			Manifest:    "test-manifest.yml",
-			AppName:     "myTestApp",
-		}
+		config.DeployTool = "cf_native"
+		config.DeployType = "blue-green"
+		config.Manifest = "test-manifest.yml"
+		config.AppName = "myTestApp"
 
 		_cfLogin = func(opts cloudfoundry.LoginOptions) error {
 			loginOpts = opts
@@ -735,18 +660,11 @@ func TestCfDeployment(t *testing.T) {
 	// TODO testCfNativeBlueGreenKeepOldInstanceShouldThrowErrorOnStopError
 
 	t.Run("cf native deploy standard should not stop instance", func(t *testing.T) {
-		config := cloudFoundryDeployOptions{
-			DeployTool:      "cf_native",
-			DeployType:      "standard",
-			Org:             "myOrg",
-			Space:           "mySpace",
-			Username:        "me",
-			Password:        "******",
-			APIEndpoint:     "https://examples.sap.com/cf",
-			Manifest:        "test-manifest.yml",
-			AppName:         "myTestApp",
-			KeepOldInstance: true,
-		}
+		config.DeployTool = "cf_native"
+		config.DeployType = "standard"
+		config.Manifest = "test-manifest.yml"
+		config.AppName = "myTestApp"
+		config.KeepOldInstance = true
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml", nil
@@ -805,16 +723,10 @@ func TestCfDeployment(t *testing.T) {
 	})
 
 	t.Run("testCfNativeWithoutAppNameBlueGreen", func(t *testing.T) {
-		config := cloudFoundryDeployOptions{
-			DeployTool:  "cf_native",
-			DeployType:  "blue-green",
-			Org:         "myOrg",
-			Space:       "mySpace",
-			Username:    "me",
-			Password:    "******",
-			APIEndpoint: "https://examples.sap.com/cf",
-			Manifest:    "test-manifest.yml",
-		}
+
+		config.DeployTool = "cf_native"
+		config.DeployType = "blue-green"
+		config.Manifest = "test-manifest.yml"
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml", nil
@@ -855,17 +767,10 @@ func TestCfDeployment(t *testing.T) {
 	// TODO add test for testCfNativeFailureInShellCall
 
 	t.Run("deploytool mtaDeployPlugin blue green", func(t *testing.T) {
-		config := cloudFoundryDeployOptions{
-			DeployTool:          "mtaDeployPlugin",
-			DeployType:          "blue-green",
-			Org:                 "myOrg",
-			Space:               "mySpace",
-			Username:            "me",
-			Password:            "******",
-			APIEndpoint:         "https://examples.sap.com/cf",
-			MtarPath:            "target/test.mtar",
-			MtaDeployParameters: "-f", // normally provided as default
-		}
+
+		config.DeployTool = "mtaDeployPlugin"
+		config.DeployType = "blue-green"
+		config.MtarPath = "target/test.mtar"
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "target/test.mtar", nil
@@ -914,18 +819,11 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("cf push with variables from file and as list", func(t *testing.T) {
 
-		config := cloudFoundryDeployOptions{
-			DeployTool:             "cf_native",
-			Org:                    "myOrg",
-			Space:                  "mySpace",
-			Username:               "me",
-			Password:               "******",
-			APIEndpoint:            "https://examples.sap.com/cf",
-			Manifest:               "test-manifest.yml",
-			ManifestVariablesFiles: []string{"vars.yaml"},
-			ManifestVariables:      []string{"appName=testApplicationFromVarsList"},
-			AppName:                "testAppName",
-		}
+		config.DeployTool = "cf_native"
+		config.Manifest = "test-manifest.yml"
+		config.ManifestVariablesFiles = []string{"vars.yaml"}
+		config.ManifestVariables = []string{"appName=testApplicationFromVarsList"}
+		config.AppName = "testAppName"
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml" || name == "vars.yaml", nil
@@ -984,17 +882,10 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("cf push with variables from file which does not exist", func(t *testing.T) {
 
-		config := cloudFoundryDeployOptions{
-			DeployTool:             "cf_native",
-			Org:                    "myOrg",
-			Space:                  "mySpace",
-			Username:               "me",
-			Password:               "******",
-			APIEndpoint:            "https://examples.sap.com/cf",
-			Manifest:               "test-manifest.yml",
-			ManifestVariablesFiles: []string{"vars.yaml", "vars-does-not-exist.yaml"},
-			AppName:                "testAppName",
-		}
+		config.DeployTool = "cf_native"
+		config.Manifest = "test-manifest.yml"
+		config.ManifestVariablesFiles = []string{"vars.yaml", "vars-does-not-exist.yaml"}
+		config.AppName = "testAppName"
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml" || name == "vars.yaml", nil
@@ -1057,19 +948,13 @@ func TestCfDeployment(t *testing.T) {
 
 	t.Run("deploytool mtaDeployPlugin", func(t *testing.T) {
 
-		config := cloudFoundryDeployOptions{
-			DeployTool:          "mtaDeployPlugin",
-			Org:                 "myOrg",
-			Space:               "mySpace",
-			Username:            "me",
-			Password:            "******",
-			APIEndpoint:         "https://examples.sap.com/cf",
-			MtaDeployParameters: "-f",
-		}
+		config.DeployTool = "mtaDeployPlugin"
+		config.MtaDeployParameters = "-f"
+
+		defer cleanup()
 
 		t.Run("mta config file from project sources", func(t *testing.T) {
 
-			defer cleanup()
 			s := mock.ExecMockRunner{}
 			err := runCloudFoundryDeploy(&config, nil, &s)
 
@@ -1104,7 +989,6 @@ func TestCfDeployment(t *testing.T) {
 		})
 
 		t.Run("mta config file from project config does not exist", func(t *testing.T) {
-			defer cleanup()
 			defer func() { config.MtarPath = "" }()
 			config.MtarPath = "my.mtar"
 			s := mock.ExecMockRunner{}
