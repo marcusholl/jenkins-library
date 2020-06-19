@@ -84,7 +84,6 @@ func TestCfDeployment(t *testing.T) {
 	}
 
 	withLoginAndLogout := func(t *testing.T, asserts func(t *testing.T)) {
-
 		assert.Equal(t, loginOpts, successfulLogin)
 		asserts(t)
 		assert.True(t, logoutCalled)
