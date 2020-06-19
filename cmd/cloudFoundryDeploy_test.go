@@ -73,10 +73,14 @@ func TestCfDeployment(t *testing.T) {
 		loginOpts = cloudfoundry.LoginOptions{}
 		logoutCalled = false
 		mtarFileRetrieved = false
-		_getWd = os.Getwd
-
 		config = defaultConfig
 	}
+
+	defer func() {
+		_glob = glob.Glob
+		_cfLogin = cloudfoundry.Login
+		_cfLogout = cloudfoundry.Logout
+	}()
 
 	_glob = func(patterns []string) ([]*glob.FileAsset, []*glob.RegexpInfo, error) {
 		mtarFileRetrieved = true
@@ -113,6 +117,12 @@ func TestCfDeployment(t *testing.T) {
 	t.Run("deploytool cf native", func(t *testing.T) {
 
 		defer cleanup()
+
+		defer func() {
+			_getWd = os.Getwd
+			_fileExists = piperutils.FileExists
+			_getManifest = getManifest
+		}()
 
 		_getWd = func() (string, error) {
 			return "/home/me", nil
@@ -277,6 +287,11 @@ func TestCfDeployment(t *testing.T) {
 		config.DockerPassword = "********"
 		config.AppName = "testAppName"
 
+		defer func() {
+			_fileExists = piperutils.FileExists
+			_getManifest = getManifest
+		}()
+
 		_fileExists = func(name string) (bool, error) {
 			return name == "manifest.yml", nil
 		}
@@ -336,6 +351,11 @@ func TestCfDeployment(t *testing.T) {
 		config.DeployTool = "cf_native"
 		config.Manifest = "test-manifest.yml"
 
+		defer func() {
+			_fileExists = piperutils.FileExists
+			_getManifest = getManifest
+		}()
+
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml", nil
 		}
@@ -386,6 +406,12 @@ func TestCfDeployment(t *testing.T) {
 
 		config.DeployTool = "cf_native"
 		config.Manifest = "test-manifest.yml"
+
+
+		defer func() {
+			_fileExists = piperutils.FileExists
+			_getManifest = getManifest
+		}()
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml", nil
@@ -476,6 +502,11 @@ func TestCfDeployment(t *testing.T) {
 		config.Manifest = "test-manifest.yml"
 		config.AppName = "myTestApp"
 
+		defer func() {
+			_fileExists = piperutils.FileExists
+			_getManifest = getManifest
+		}()
+
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml", nil
 		}
@@ -516,6 +547,11 @@ func TestCfDeployment(t *testing.T) {
 		config.DeployType = "blue-green"
 		config.Manifest = "test-manifest.yml"
 		config.AppName = "myTestApp"
+
+		defer func() {
+			_fileExists = piperutils.FileExists
+			_getManifest = getManifest
+		}()
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml", nil
@@ -574,6 +610,11 @@ func TestCfDeployment(t *testing.T) {
 		config.Manifest = "test-manifest.yml"
 		config.AppName = "myTestApp"
 
+		defer func() {
+			_fileExists = piperutils.FileExists
+			_getManifest = getManifest
+		}()
+
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml", nil
 		}
@@ -614,17 +655,21 @@ func TestCfDeployment(t *testing.T) {
 		config.Manifest = "test-manifest.yml"
 		config.AppName = "myTestApp"
 
-		_cfLogin = func(opts cloudfoundry.LoginOptions) error {
-			loginOpts = opts
-			return fmt.Errorf("Unable to login")
-		}
 
 		defer func() {
+			_fileExists = piperutils.FileExists
+			_getManifest = getManifest
+
 			_cfLogin = func(opts cloudfoundry.LoginOptions) error {
 				loginOpts = opts
 				return nil
 			}
 		}()
+
+		_cfLogin = func(opts cloudfoundry.LoginOptions) error {
+			loginOpts = opts
+			return fmt.Errorf("Unable to login")
+		}
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml", nil
@@ -669,6 +714,11 @@ func TestCfDeployment(t *testing.T) {
 		config.Manifest = "test-manifest.yml"
 		config.AppName = "myTestApp"
 		config.KeepOldInstance = true
+
+		defer func() {
+			_fileExists = piperutils.FileExists
+			_getManifest = getManifest
+		}()
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml", nil
@@ -732,6 +782,11 @@ func TestCfDeployment(t *testing.T) {
 		config.DeployType = "blue-green"
 		config.Manifest = "test-manifest.yml"
 
+		defer func() {
+			_fileExists = piperutils.FileExists
+			_getManifest = getManifest
+		}()
+
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml", nil
 		}
@@ -775,6 +830,10 @@ func TestCfDeployment(t *testing.T) {
 		config.DeployTool = "mtaDeployPlugin"
 		config.DeployType = "blue-green"
 		config.MtarPath = "target/test.mtar"
+
+		defer func() {
+			_fileExists = piperutils.FileExists
+		}()
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "target/test.mtar", nil
@@ -828,6 +887,11 @@ func TestCfDeployment(t *testing.T) {
 		config.ManifestVariablesFiles = []string{"vars.yaml"}
 		config.ManifestVariables = []string{"appName=testApplicationFromVarsList"}
 		config.AppName = "testAppName"
+
+		defer func() {
+			_fileExists = piperutils.FileExists
+			_getManifest = getManifest
+		}()
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml" || name == "vars.yaml", nil
@@ -890,6 +954,11 @@ func TestCfDeployment(t *testing.T) {
 		config.Manifest = "test-manifest.yml"
 		config.ManifestVariablesFiles = []string{"vars.yaml", "vars-does-not-exist.yaml"}
 		config.AppName = "testAppName"
+
+		defer func() {
+			_fileExists = piperutils.FileExists
+			_getManifest = getManifest
+		}()
 
 		_fileExists = func(name string) (bool, error) {
 			return name == "test-manifest.yml" || name == "vars.yaml", nil
@@ -1004,13 +1073,13 @@ func TestCfDeployment(t *testing.T) {
 
 func TestManifestVariableFiles(t *testing.T) {
 
-	_fileExists = func(name string) (bool, error) {
-		return name == "a/varsA.txt" || name == "varsB.txt", nil
-	}
-
 	defer func() {
 		_fileExists = piperutils.FileExists
 	}()
+
+	_fileExists = func(name string) (bool, error) {
+		return name == "a/varsA.txt" || name == "varsB.txt", nil
+	}
 
 	t.Run("straight forward", func(t *testing.T) {
 		varOpts, err := getVarFileOptions([]string{"a/varsA.txt", "varsB.txt"})
@@ -1058,6 +1127,10 @@ func TestManifestVariables(t *testing.T) {
 func TestMtarLookup(t *testing.T) {
 	t.Run("One MTAR", func(t *testing.T) {
 
+		defer func() {
+			_glob = glob.Glob
+		}()
+
 		_glob = func(patterns []string) ([]*glob.FileAsset, []*glob.RegexpInfo, error) {
 			return []*glob.FileAsset{&glob.FileAsset{Path: "x.mtar"}}, nil, nil
 		}
@@ -1071,6 +1144,10 @@ func TestMtarLookup(t *testing.T) {
 
 	t.Run("No MTAR", func(t *testing.T) {
 
+		defer func() {
+			_glob = glob.Glob
+		}()
+
 		_glob = func(patterns []string) ([]*glob.FileAsset, []*glob.RegexpInfo, error) {
 			return []*glob.FileAsset{}, nil, nil
 		}
@@ -1081,6 +1158,10 @@ func TestMtarLookup(t *testing.T) {
 	})
 
 	t.Run("Several MTARs", func(t *testing.T) {
+
+		defer func() {
+			_glob = glob.Glob
+		}()
 
 		_glob = func(patterns []string) ([]*glob.FileAsset, []*glob.RegexpInfo, error) {
 			return []*glob.FileAsset{&glob.FileAsset{Path: "x.mtar"}, &glob.FileAsset{Path: "y.mtar"}}, nil, nil
