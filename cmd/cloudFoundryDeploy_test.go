@@ -610,6 +610,66 @@ func TestCfDeployment(t *testing.T) {
 		}
 	})
 
+	t.Run("cf native deployment failure when logging in", func(t *testing.T) {
+
+		config := cloudFoundryDeployOptions{
+			DeployTool:  "cf_native",
+			DeployType:  "blue-green",
+			Org:         "myOrg",
+			Space:       "mySpace",
+			Username:    "me",
+			Password:    "******",
+			APIEndpoint: "https://examples.sap.com/cf",
+			Manifest:    "test-manifest.yml",
+			AppName:     "myTestApp",
+		}
+
+		_cfLogin = func(opts cloudfoundry.LoginOptions) error {
+			loginOpts = opts
+			return fmt.Errorf("Unable to login")
+		}
+
+		defer func() {
+			_cfLogin = func(opts cloudfoundry.LoginOptions) error {
+				loginOpts = opts
+				return nil
+			}
+		}()
+
+		_fileExists = func(name string) (bool, error) {
+			return name == "test-manifest.yml", nil
+		}
+
+		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
+			return manifestMock{
+					manifestFileName: "test-manifest.yml",
+					apps: []map[string]interface{}{
+						map[string]interface{}{
+							"name":     "app1",
+							"no-route": true,
+						},
+					},
+				},
+				nil
+		}
+
+		defer cleanup()
+
+		s := mock.ExecMockRunner{}
+
+		err := runCloudFoundryDeploy(&config, nil, &s)
+
+		if assert.EqualError(t, err, "Unable to login") {
+			t.Run("check shell calls", func(t *testing.T) {
+
+				// no calls to the cf client in this case
+				assert.Empty(t, s.Calls)
+				// no logout
+				assert.False(t, logoutCalled)
+			})
+		}
+	})
+
 	// TODO testCfNativeBlueGreenKeepOldInstanceShouldThrowErrorOnStopError
 
 	t.Run("cf native deploy standard should not stop instance", func(t *testing.T) {
