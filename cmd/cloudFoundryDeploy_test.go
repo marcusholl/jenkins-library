@@ -51,6 +51,21 @@ func (m manifestMock) WriteManifest() error {
 
 func TestCfDeployment(t *testing.T) {
 
+	// everything below in the config map annotated with '//default' is a default in the metadata
+	// since we don't get injected these values during the tests we set it here.
+	defaultConfig := cloudFoundryDeployOptions{
+		Org:                 "myOrg",
+		Space:               "mySpace",
+		Username:            "me",
+		Password:            "******",
+		APIEndpoint:         "https://examples.sap.com/cf",
+		SmokeTestStatusCode: "200",          // default
+		Manifest:            "manifest.yml", //default
+		MtaDeployParameters: "-f",           // default
+	}
+
+	config := defaultConfig
+
 	var loginOpts cloudfoundry.LoginOptions
 	var logoutCalled, mtarFileRetrieved bool
 
