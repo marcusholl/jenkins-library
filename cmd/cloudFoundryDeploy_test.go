@@ -77,6 +77,13 @@ func TestCfDeployment(t *testing.T) {
 	var loginOpts cloudfoundry.LoginOptions
 	var logoutCalled, mtarFileRetrieved bool
 
+	withLoginAndLogout := func(t *testing.T, asserts func(t *testing.T)) {
+
+		assert.Equal(t, loginOpts, successfulLogin)
+		asserts(t)
+		assert.True(t, logoutCalled)
+	}
+
 	var cleanup = func() {
 		loginOpts = cloudfoundry.LoginOptions{}
 		logoutCalled = false
@@ -157,20 +164,12 @@ func TestCfDeployment(t *testing.T) {
 
 			t.Run("check cf api calls", func(t *testing.T) {
 
-				assert.Equal(t, loginOpts, successfulLogin)
-
-				// REVISIT: we have more the less the same test below (deploy cf native app name from manifest)
-				// that other test has been transfered from groovy. But here we have some more checks for the
-				// environment variables. --> check if we really need both tests and try to find out why there
-				// was no need for asserting the environment variables on groovy.
-
+				withLoginAndLogout(t, func(t *testing.T) {
 				assert.Equal(t, []mock.ExecCall{
 					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
 					mock.ExecCall{Exec: "cf", Params: []string{"push", "-f", "manifest.yml"}},
-				}, s.Calls)
+				}, s.Calls)})
 			})
-
-			assert.True(t, logoutCalled)
 		}
 
 		t.Run("check environment variables", func(t *testing.T) {
@@ -197,20 +196,18 @@ func TestCfDeployment(t *testing.T) {
 
 		if assert.NoError(t, err) {
 
-			assert.Equal(t, loginOpts, successfulLogin)
-
-			assert.Equal(t, []mock.ExecCall{
-				mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
-				mock.ExecCall{Exec: "cf", Params: []string{"push",
-					"testAppName",
-					"--docker-image",
-					"repo/image:tag",
-					"--docker-username",
-					"me",
-				}},
-			}, s.Calls)
-
-			assert.True(t, logoutCalled)
+			withLoginAndLogout(t, func(t *testing.T) {
+				assert.Equal(t, []mock.ExecCall{
+					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+					mock.ExecCall{Exec: "cf", Params: []string{"push",
+						"testAppName",
+						"--docker-image",
+						"repo/image:tag",
+						"--docker-username",
+						"me",
+					}},
+				}, s.Calls)
+			})
 		}
 	})
 
@@ -236,20 +233,20 @@ func TestCfDeployment(t *testing.T) {
 
 		if assert.NoError(t, err) {
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts, successfulLogin)
 
-				assert.Equal(t, []mock.ExecCall{
-					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
-					mock.ExecCall{Exec: "cf", Params: []string{"push",
-						"testAppName",
-						"--docker-image",
-						"repo/image:tag",
-						"--docker-username",
-						"test_cf_docker",
-					}},
-				}, s.Calls)
+				withLoginAndLogout(t, func(t *testing.T) {
 
-				assert.True(t, logoutCalled)
+					assert.Equal(t, []mock.ExecCall{
+						mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+						mock.ExecCall{Exec: "cf", Params: []string{"push",
+							"testAppName",
+							"--docker-image",
+							"repo/image:tag",
+							"--docker-username",
+							"test_cf_docker",
+						}},
+					}, s.Calls)
+				})
 			})
 
 			t.Run("check environment variables", func(t *testing.T) {
@@ -297,23 +294,20 @@ func TestCfDeployment(t *testing.T) {
 		if assert.NoError(t, err) {
 
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts, successfulLogin)
 
-				assert.Equal(t, []mock.ExecCall{
-					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+				withLoginAndLogout(t, func(t *testing.T) {
 
-					//cf blue-green-deploy testAppName --delete-old-apps -f 'manifest.yml'
-
-					mock.ExecCall{Exec: "cf", Params: []string{
-						"blue-green-deploy",
-						"testAppName",
-						"--delete-old-apps",
-						"-f",
-						"manifest.yml",
-					}},
-				}, s.Calls)
-
-				assert.True(t, logoutCalled)
+					assert.Equal(t, []mock.ExecCall{
+						mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+						mock.ExecCall{Exec: "cf", Params: []string{
+							"blue-green-deploy",
+							"testAppName",
+							"--delete-old-apps",
+							"-f",
+							"manifest.yml",
+						}},
+					}, s.Calls)
+				})
 			})
 
 			t.Run("check environment variables", func(t *testing.T) {
@@ -357,18 +351,19 @@ func TestCfDeployment(t *testing.T) {
 		if assert.NoError(t, err) {
 
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts, successfulLogin)
 
-				assert.Equal(t, []mock.ExecCall{
-					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
-					mock.ExecCall{Exec: "cf", Params: []string{
-						"push",
-						"-f",
-						"test-manifest.yml",
-					}},
-				}, s.Calls)
+				withLoginAndLogout(t, func(t *testing.T) {
 
-				assert.True(t, logoutCalled)
+					assert.Equal(t, []mock.ExecCall{
+						mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+						mock.ExecCall{Exec: "cf", Params: []string{
+							"push",
+							"-f",
+							"test-manifest.yml",
+						}},
+					}, s.Calls)
+
+				})
 			})
 		}
 	})
@@ -436,25 +431,25 @@ func TestCfDeployment(t *testing.T) {
 		if assert.NoError(t, err) {
 
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts, successfulLogin)
 
-				assert.Equal(t, []mock.ExecCall{
-					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
-					mock.ExecCall{Exec: "cf", Params: []string{
-						"blue-green-deploy",
-						"myTestApp",
-						"-f",
-						"test-manifest.yml",
-					}},
-					mock.ExecCall{Exec: "cf", Params: []string{
-						"stop",
-						"myTestApp-old",
-						// MIGRATE FFROM GROOVY: in contrast to groovy there is not redirect of everything &> to a file since we
-						// read the stream directly now.
-					}},
-				}, s.Calls)
+				withLoginAndLogout(t, func(t *testing.T) {
 
-				assert.True(t, logoutCalled)
+					assert.Equal(t, []mock.ExecCall{
+						mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+						mock.ExecCall{Exec: "cf", Params: []string{
+							"blue-green-deploy",
+							"myTestApp",
+							"-f",
+							"test-manifest.yml",
+						}},
+						mock.ExecCall{Exec: "cf", Params: []string{
+							"stop",
+							"myTestApp-old",
+							// MIGRATE FFROM GROOVY: in contrast to groovy there is not redirect of everything &> to a file since we
+							// read the stream directly now.
+						}},
+					}, s.Calls)	
+				})
 			})
 		}
 	})
@@ -543,19 +538,19 @@ func TestCfDeployment(t *testing.T) {
 		if assert.NoError(t, err) {
 
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts, successfulLogin)
 
-				assert.Equal(t, []mock.ExecCall{
-					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
-					mock.ExecCall{Exec: "cf", Params: []string{
-						"push",
-						"myTestApp",
-						"-f",
-						"test-manifest.yml",
-					}},
-				}, s.Calls)
+				withLoginAndLogout(t, func(t *testing.T) {
 
-				assert.True(t, logoutCalled)
+					assert.Equal(t, []mock.ExecCall{
+						mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+						mock.ExecCall{Exec: "cf", Params: []string{
+							"push",
+							"myTestApp",
+							"-f",
+							"test-manifest.yml",
+						}},
+					}, s.Calls)	
+				})
 			})
 		}
 	})
@@ -703,26 +698,25 @@ func TestCfDeployment(t *testing.T) {
 		if assert.NoError(t, err) {
 
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts, successfulLogin)
 
-				assert.Equal(t, []mock.ExecCall{
-					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
-					mock.ExecCall{Exec: "cf", Params: []string{
-						"push",
-						"myTestApp",
-						"-f",
-						"test-manifest.yml",
-					}},
+				withLoginAndLogout(t, func(t *testing.T) {
 
-					//
-					// There is no cf stop
-					//
-
-				}, s.Calls)
-
-				assert.True(t, logoutCalled)
+					assert.Equal(t, []mock.ExecCall{
+						mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+						mock.ExecCall{Exec: "cf", Params: []string{
+							"push",
+							"myTestApp",
+							"-f",
+							"test-manifest.yml",
+						}},
+	
+						//
+						// There is no cf stop
+						//
+	
+					}, s.Calls)	
+				})
 			})
-
 		}
 	})
 
@@ -798,25 +792,25 @@ func TestCfDeployment(t *testing.T) {
 		if assert.NoError(t, err) {
 
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts, successfulLogin)
 
-				assert.Equal(t, []mock.ExecCall{
-					mock.ExecCall{Exec: "cf", Params: []string{"api", "https://examples.sap.com/cf"}},
-					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
-					mock.ExecCall{Exec: "cf", Params: []string{
-						"bg-deploy",
-						"target/test.mtar",
-						"-f",
-						"--no-confirm",
-					}},
+				withLoginAndLogout(t, func(t *testing.T) {
 
-					//
-					// There is no cf stop
-					//
-
-				}, s.Calls)
-
-				assert.True(t, logoutCalled)
+					assert.Equal(t, []mock.ExecCall{
+						mock.ExecCall{Exec: "cf", Params: []string{"api", "https://examples.sap.com/cf"}},
+						mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+						mock.ExecCall{Exec: "cf", Params: []string{
+							"bg-deploy",
+							"target/test.mtar",
+							"-f",
+							"--no-confirm",
+						}},
+	
+						//
+						// There is no cf stop
+						//
+	
+					}, s.Calls)	
+				})
 			})
 		}
 	})
@@ -861,25 +855,25 @@ func TestCfDeployment(t *testing.T) {
 		if assert.NoError(t, err) {
 
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts, successfulLogin)
 
-				// Revisit: we don't verify a log message in case of a non existing vars file
+				withLoginAndLogout(t, func(t *testing.T) {
 
-				assert.Equal(t, []mock.ExecCall{
-					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
-					mock.ExecCall{Exec: "cf", Params: []string{
-						"push",
-						"testAppName",
-						"--var",
-						"appName=testApplicationFromVarsList",
-						"--vars-file",
-						"vars.yaml",
-						"-f",
-						"test-manifest.yml",
-					}},
-				}, s.Calls)
+					// Revisit: we don't verify a log message in case of a non existing vars file
 
-				assert.True(t, logoutCalled)
+					assert.Equal(t, []mock.ExecCall{
+						mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+						mock.ExecCall{Exec: "cf", Params: []string{
+							"push",
+							"testAppName",
+							"--var",
+							"appName=testApplicationFromVarsList",
+							"--vars-file",
+							"vars.yaml",
+							"-f",
+							"test-manifest.yml",
+						}},
+					}, s.Calls)
+				})
 			})
 		}
 	})
@@ -921,23 +915,22 @@ func TestCfDeployment(t *testing.T) {
 		if assert.NoError(t, err) {
 
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts, successfulLogin)
 
-				// Revisit: we don't verify a log message in case of a non existing vars file
+				withLoginAndLogout(t, func(t *testing.T) {
+					// Revisit: we don't verify a log message in case of a non existing vars file
 
-				assert.Equal(t, []mock.ExecCall{
-					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
-					mock.ExecCall{Exec: "cf", Params: []string{
-						"push",
-						"testAppName",
-						"--vars-file",
-						"vars.yaml",
-						"-f",
-						"test-manifest.yml",
-					}},
-				}, s.Calls)
-
-				assert.True(t, logoutCalled)
+					assert.Equal(t, []mock.ExecCall{
+						mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+						mock.ExecCall{Exec: "cf", Params: []string{
+							"push",
+							"testAppName",
+							"--vars-file",
+							"vars.yaml",
+							"-f",
+							"test-manifest.yml",
+						}},
+					}, s.Calls)
+				})
 			})
 		}
 	})
@@ -962,19 +955,13 @@ func TestCfDeployment(t *testing.T) {
 
 			if assert.NoError(t, err) {
 
-				t.Run("check cf api calls", func(t *testing.T) {
+				withLoginAndLogout(t, func(t *testing.T) {
 
 					assert.Equal(t, s.Calls, []mock.ExecCall{
 						mock.ExecCall{Exec: "cf", Params: []string{"api", "https://examples.sap.com/cf"}},
 						mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
-						mock.ExecCall{Exec: "cf", Params: []string{"deploy", "x.mtar", "-f"}},
-					})
+						mock.ExecCall{Exec: "cf", Params: []string{"deploy", "x.mtar", "-f"}},					})
 
-					t.Run("check cf login", func(t *testing.T) {
-						assert.Equal(t, loginOpts, successfulLogin)
-					})
-
-					assert.True(t, logoutCalled)
 				})
 
 				t.Run("mtar retrieved", func(t *testing.T) {
