@@ -59,13 +59,39 @@ func runCloudFoundryDeploy(config *cloudFoundryDeployOptions, telemetryData *tel
 		log.Entry().Warningf("Found unsupported deployTool ('%s'). Skipping deployment. Supported deploy tools: 'mtaDeployPlugin', 'cf_native'", config.DeployTool)
 	}
 
-	prepareInflux(err == nil, influxData)
+	prepareInflux(err == nil, config, influxData)
 
 	return err
 }
 
-func prepareInflux(success bool, influxData *cloudFoundryDeployInflux) {
+func prepareInflux(success bool, config *cloudFoundryDeployOptions, influxData *cloudFoundryDeployInflux) error {
 
+	if influxData == nil {
+		return nil
+	}
+
+	influxData.deployment_data.tags.cfOrg = config.Org
+
+	return nil
+	/*
+	type cloudFoundryDeployInflux struct {
+		deployment_data struct {
+			fields struct {
+				artifactURL string
+				deployTime  string
+				jobTrigger  string
+			}
+			tags struct {
+				artifactVersion string
+				deployUser      string
+				deployResult    string
+				cfAPIEndpoint   string
+				cfOrg           string
+				cfSpace         string
+			}
+		}
+	}
+*/
 }
 
 func handleMTADeployment(config *cloudFoundryDeployOptions, command execRunner) error {
