@@ -610,6 +610,53 @@ func TestCfDeployment(t *testing.T) {
 		}
 	})
 
+	t.Run("cf native deployment failure", func(t *testing.T) {
+
+		config := cloudFoundryDeployOptions{
+			DeployTool:  "cf_native",
+			DeployType:  "blue-green",
+			Org:         "myOrg",
+			Space:       "mySpace",
+			Username:    "me",
+			Password:    "******",
+			APIEndpoint: "https://examples.sap.com/cf",
+			Manifest:    "test-manifest.yml",
+			AppName:     "myTestApp",
+		}
+
+		_fileExists = func(name string) (bool, error) {
+			return name == "test-manifest.yml", nil
+		}
+
+		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
+			return manifestMock{
+					manifestFileName: "test-manifest.yml",
+					apps: []map[string]interface{}{
+						map[string]interface{}{
+							"name":     "app1",
+							"no-route": true,
+						},
+					},
+				},
+				nil
+		}
+
+		defer cleanup()
+
+		s := mock.ExecMockRunner{}
+
+		s.ShouldFailOnCommand = map[string]error{"cf.*": fmt.Errorf("cf deploy failed")}
+		err := runCloudFoundryDeploy(&config, nil, &s)
+
+		if assert.EqualError(t, err, "cf deploy failed") {
+			t.Run("check shell calls", func(t *testing.T) {
+
+				// we should try to logout in this case
+				assert.True(t, logoutCalled)
+			})
+		}
+	})
+
 	t.Run("cf native deployment failure when logging in", func(t *testing.T) {
 
 		config := cloudFoundryDeployOptions{
