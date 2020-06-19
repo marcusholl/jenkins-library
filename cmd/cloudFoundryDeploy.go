@@ -28,7 +28,7 @@ const smokeTestScript = `#!/usr/bin/env bash
 # this is simply testing if the application root returns HTTP STATUS_CODE
 curl -so /dev/null -w '%{response_code}' https://$1 | grep $STATUS_CODE`
 
-func cloudFoundryDeploy(config cloudFoundryDeployOptions, telemetryData *telemetry.CustomData) {
+func cloudFoundryDeploy(config cloudFoundryDeployOptions, telemetryData *telemetry.CustomData, influxData *cloudFoundryDeployInflux) {
 	// for command execution use Command
 	c := command.Command{}
 	// reroute command output to logging framework
@@ -40,13 +40,13 @@ func cloudFoundryDeploy(config cloudFoundryDeployOptions, telemetryData *telemet
 	// Example: step checkmarxExecuteScan.go
 
 	// error situations should stop execution through log.Entry().Fatal() call which leads to an os.Exit(1) in the end
-	err := runCloudFoundryDeploy(&config, telemetryData, &c)
+	err := runCloudFoundryDeploy(&config, telemetryData, influxData, &c)
 	if err != nil {
 		log.Entry().WithError(err).Fatalf("step execution failed: %s", err)
 	}
 }
 
-func runCloudFoundryDeploy(config *cloudFoundryDeployOptions, telemetryData *telemetry.CustomData, command execRunner) error {
+func runCloudFoundryDeploy(config *cloudFoundryDeployOptions, telemetryData *telemetry.CustomData, influxData *cloudFoundryDeployInflux, command execRunner) error {
 	log.Entry().Infof("General parameters: deployTool='%s', cfApiEndpoint='%s'", config.DeployTool, config.APIEndpoint)
 
 	var err error

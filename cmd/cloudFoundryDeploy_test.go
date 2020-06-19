@@ -125,7 +125,7 @@ func TestCfDeployment(t *testing.T) {
 
 		config.DeployTool = "invalid"
 
-		err := runCloudFoundryDeploy(&config, nil, &s)
+		err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 		if assert.NoError(t, err) {
 			noopCfAPICalls(t, s)
@@ -161,7 +161,7 @@ func TestCfDeployment(t *testing.T) {
 
 		s := mock.ExecMockRunner{}
 
-		err := runCloudFoundryDeploy(&config, nil, &s)
+		err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 		if assert.NoError(t, err) {
 
@@ -196,7 +196,7 @@ func TestCfDeployment(t *testing.T) {
 
 		s := mock.ExecMockRunner{}
 
-		err := runCloudFoundryDeploy(&config, nil, &s)
+		err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 		if assert.NoError(t, err) {
 
@@ -233,7 +233,7 @@ func TestCfDeployment(t *testing.T) {
 
 		s := mock.ExecMockRunner{}
 
-		err := runCloudFoundryDeploy(&config, nil, &s)
+		err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 		if assert.NoError(t, err) {
 			t.Run("check shell calls", func(t *testing.T) {
@@ -293,7 +293,7 @@ func TestCfDeployment(t *testing.T) {
 
 		s := mock.ExecMockRunner{}
 
-		err := runCloudFoundryDeploy(&config, nil, &s)
+		err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 		if assert.NoError(t, err) {
 
@@ -350,7 +350,7 @@ func TestCfDeployment(t *testing.T) {
 
 		s := mock.ExecMockRunner{}
 
-		err := runCloudFoundryDeploy(&config, nil, &s)
+		err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 		if assert.NoError(t, err) {
 
@@ -399,7 +399,7 @@ func TestCfDeployment(t *testing.T) {
 
 		s := mock.ExecMockRunner{}
 
-		err := runCloudFoundryDeploy(&config, nil, &s)
+		err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 		if assert.EqualError(t, err, "No appName available in manifest 'test-manifest.yml'") {
 
@@ -423,7 +423,7 @@ func TestCfDeployment(t *testing.T) {
 
 		s := mock.ExecMockRunner{}
 
-		err := runCloudFoundryDeploy(&config, nil, &s)
+		err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 		if assert.NoError(t, err) {
 
@@ -482,7 +482,7 @@ func TestCfDeployment(t *testing.T) {
 
 		s := mock.ExecMockRunner{}
 
-		err := runCloudFoundryDeploy(&config, nil, &s)
+		err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 		if assert.EqualError(t, err, "Your manifest contains more than one application. For blue green deployments your manifest file may contain only one application") {
 			t.Run("check shell calls", func(t *testing.T) {
@@ -524,7 +524,7 @@ func TestCfDeployment(t *testing.T) {
 
 		s := mock.ExecMockRunner{}
 
-		err := runCloudFoundryDeploy(&config, nil, &s)
+		err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 		if assert.NoError(t, err) {
 
@@ -580,7 +580,7 @@ func TestCfDeployment(t *testing.T) {
 		s := mock.ExecMockRunner{}
 
 		s.ShouldFailOnCommand = map[string]error{"cf.*": fmt.Errorf("cf deploy failed")}
-		err := runCloudFoundryDeploy(&config, nil, &s)
+		err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 		if assert.EqualError(t, err, "cf deploy failed") {
 			t.Run("check shell calls", func(t *testing.T) {
@@ -634,7 +634,7 @@ func TestCfDeployment(t *testing.T) {
 
 		s := mock.ExecMockRunner{}
 
-		err := runCloudFoundryDeploy(&config, nil, &s)
+		err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 		if assert.EqualError(t, err, "Unable to login") {
 			t.Run("check shell calls", func(t *testing.T) {
@@ -683,7 +683,7 @@ func TestCfDeployment(t *testing.T) {
 
 		s := mock.ExecMockRunner{}
 
-		err := runCloudFoundryDeploy(&config, nil, &s)
+		err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 		if assert.NoError(t, err) {
 
@@ -741,7 +741,7 @@ func TestCfDeployment(t *testing.T) {
 
 		s := mock.ExecMockRunner{}
 
-		err := runCloudFoundryDeploy(&config, nil, &s)
+		err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 		if assert.EqualError(t, err, "Blue-green plugin requires app name to be passed (see https://github.com/bluemixgaragelondon/cf-blue-green-deploy/issues/27)") {
 
@@ -771,7 +771,7 @@ func TestCfDeployment(t *testing.T) {
 
 		s := mock.ExecMockRunner{}
 
-		err := runCloudFoundryDeploy(&config, nil, &s)
+		err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 		if assert.NoError(t, err) {
 
@@ -834,7 +834,7 @@ func TestCfDeployment(t *testing.T) {
 
 		s := mock.ExecMockRunner{}
 
-		err := runCloudFoundryDeploy(&config, nil, &s)
+		err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 		if assert.NoError(t, err) {
 
@@ -894,7 +894,7 @@ func TestCfDeployment(t *testing.T) {
 
 		s := mock.ExecMockRunner{}
 
-		err := runCloudFoundryDeploy(&config, nil, &s)
+		err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 		if assert.NoError(t, err) {
 
@@ -935,7 +935,7 @@ func TestCfDeployment(t *testing.T) {
 		t.Run("mta config file from project sources", func(t *testing.T) {
 
 			s := mock.ExecMockRunner{}
-			err := runCloudFoundryDeploy(&config, nil, &s)
+			err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
 			if assert.NoError(t, err) {
 
@@ -958,7 +958,7 @@ func TestCfDeployment(t *testing.T) {
 			defer func() { config.MtarPath = "" }()
 			config.MtarPath = "my.mtar"
 			s := mock.ExecMockRunner{}
-			err := runCloudFoundryDeploy(&config, nil, &s)
+			err := runCloudFoundryDeploy(&config, nil, nil, &s)
 			assert.EqualError(t, err, "mtar file 'my.mtar' retrieved from configuration does not exist")
 		})
 
