@@ -14,6 +14,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 )
 
 var _glob = glob.Glob // func(patterns []string) ([]*glob.FileAsset, []*glob.RegexpInfo, error)
@@ -59,13 +60,42 @@ func runCloudFoundryDeploy(config *cloudFoundryDeployOptions, telemetryData *tel
 		log.Entry().Warningf("Found unsupported deployTool ('%s'). Skipping deployment. Supported deploy tools: 'mtaDeployPlugin', 'cf_native'", config.DeployTool)
 	}
 
-	prepareInflux(err == nil, influxData)
+	prepareInflux(err == nil, config, influxData)
 
 	return err
 }
 
-func prepareInflux(success bool, influxData *cloudFoundryDeployInflux) {
+func prepareInflux(success bool, config *cloudFoundryDeployOptions, influxData *cloudFoundryDeployInflux) error {
 
+	if influxData == nil {
+		return nil
+	}
+
+	result := "FAILURE"
+
+	if success {
+		result = "SUCCESS"
+	}
+
+	// TODO done via CPE in groovy. In case we need this we have to enhance CPE
+	influxData.deployment_data.tags.artifactVersion = "<n/a>"
+	influxData.deployment_data.tags.deployUser = config.Username
+	influxData.deployment_data.tags.deployResult = result
+	influxData.deployment_data.tags.cfAPIEndpoint = config.APIEndpoint
+	influxData.deployment_data.tags.cfOrg = config.Org
+	influxData.deployment_data.tags.cfSpace = config.Space
+
+	// n/a (literally) is also reported in groovy
+	influxData.deployment_data.fields.artifactURL = "n/a"
+
+	influxData.deployment_data.fields.deployTime = strings.ToUpper(time.Now().Format("Jan 02 2006 15:04:05"))
+
+	// we should discuss how we handle the job trigger
+	// 1.) outside Jenkins
+	// 2.) inside Jenkins (how to get)
+	influxData.deployment_data.fields.jobTrigger = "<n/a>"
+
+	return nil
 }
 
 func handleMTADeployment(config *cloudFoundryDeployOptions, command execRunner) error {
