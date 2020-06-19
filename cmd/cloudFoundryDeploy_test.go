@@ -927,6 +927,12 @@ func TestCfDeployment(t *testing.T) {
 		}
 	})
 
+	// TODO: testCfPushDeploymentWithoutVariableSubstitution is already handled above (?)
+
+	// TODO: testCfBlueGreenDeploymentWithVariableSubstitution variable substitution is not handled at the moment (pr pending).
+	// but anyway we should not test the full cycle here, but only that the variables substitution tool is called in the appropriate way.
+	// variable substitution should be tested at the variables substitution tool itself (yaml util)
+
 	t.Run("deploytool mtaDeployPlugin", func(t *testing.T) {
 
 		config := cloudFoundryDeployOptions{
