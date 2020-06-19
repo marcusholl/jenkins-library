@@ -204,14 +204,16 @@ spec:
       - name: influx
         type: influx
         params:
-          - name: cf_deploy_data
+          - name: deployment_data
             fields:
               - name: artifactUrl
               - name: deployTime
               - name: jobTrigger
+            tags:
               - name: artifactVersion
               - name: deployUser
               - name: deployResult
               - name: cfApiEndpoint
               - name: cfOrg
               - name: cfSpace
+
