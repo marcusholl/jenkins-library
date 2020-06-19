@@ -41,19 +41,19 @@ type cloudFoundryDeployOptions struct {
 }
 
 type cloudFoundryDeployInflux struct {
-	cf_deploy_data struct {
+	deployment_data struct {
 		fields struct {
-			artifactURL     string
-			deployTime      string
-			jobTrigger      string
+			artifactURL string
+			deployTime  string
+			jobTrigger  string
+		}
+		tags struct {
 			artifactVersion string
 			deployUser      string
 			deployResult    string
 			cfAPIEndpoint   string
 			cfOrg           string
 			cfSpace         string
-		}
-		tags struct {
 		}
 	}
 }
@@ -65,15 +65,15 @@ func (i *cloudFoundryDeployInflux) persist(path, resourceName string) {
 		name        string
 		value       string
 	}{
-		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "artifactUrl", value: i.cf_deploy_data.fields.artifactURL},
-		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "deployTime", value: i.cf_deploy_data.fields.deployTime},
-		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "jobTrigger", value: i.cf_deploy_data.fields.jobTrigger},
-		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "artifactVersion", value: i.cf_deploy_data.fields.artifactVersion},
-		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "deployUser", value: i.cf_deploy_data.fields.deployUser},
-		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "deployResult", value: i.cf_deploy_data.fields.deployResult},
-		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "cfApiEndpoint", value: i.cf_deploy_data.fields.cfAPIEndpoint},
-		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "cfOrg", value: i.cf_deploy_data.fields.cfOrg},
-		{valType: config.InfluxField, measurement: "cf_deploy_data", name: "cfSpace", value: i.cf_deploy_data.fields.cfSpace},
+		{valType: config.InfluxField, measurement: "deployment_data", name: "artifactUrl", value: i.deployment_data.fields.artifactURL},
+		{valType: config.InfluxField, measurement: "deployment_data", name: "deployTime", value: i.deployment_data.fields.deployTime},
+		{valType: config.InfluxField, measurement: "deployment_data", name: "jobTrigger", value: i.deployment_data.fields.jobTrigger},
+		{valType: config.InfluxTag, measurement: "deployment_data", name: "artifactVersion", value: i.deployment_data.tags.artifactVersion},
+		{valType: config.InfluxTag, measurement: "deployment_data", name: "deployUser", value: i.deployment_data.tags.deployUser},
+		{valType: config.InfluxTag, measurement: "deployment_data", name: "deployResult", value: i.deployment_data.tags.deployResult},
+		{valType: config.InfluxTag, measurement: "deployment_data", name: "cfApiEndpoint", value: i.deployment_data.tags.cfAPIEndpoint},
+		{valType: config.InfluxTag, measurement: "deployment_data", name: "cfOrg", value: i.deployment_data.tags.cfOrg},
+		{valType: config.InfluxTag, measurement: "deployment_data", name: "cfSpace", value: i.deployment_data.tags.cfSpace},
 	}
 
 	errCount := 0
