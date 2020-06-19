@@ -89,7 +89,7 @@ func TestCfDeployment(t *testing.T) {
 		assert.True(t, logoutCalled)
 	}
 
-	var cleanup = func() {
+	cleanup := func() {
 		loginOpts = cloudfoundry.LoginOptions{}
 		logoutCalled = false
 		mtarFileRetrieved = false
