@@ -66,6 +66,14 @@ func TestCfDeployment(t *testing.T) {
 
 	config := defaultConfig
 
+	successfulLogin := cloudfoundry.LoginOptions{
+		CfAPIEndpoint: "https://examples.sap.com/cf",
+		CfOrg:         "myOrg",
+		CfSpace:       "mySpace",
+		Username:      "me",
+		Password:      "******",
+	}
+
 	var loginOpts cloudfoundry.LoginOptions
 	var logoutCalled, mtarFileRetrieved bool
 
@@ -149,14 +157,7 @@ func TestCfDeployment(t *testing.T) {
 
 			t.Run("check cf api calls", func(t *testing.T) {
 
-				assert.Equal(t, loginOpts,
-					cloudfoundry.LoginOptions{
-						CfAPIEndpoint: "https://examples.sap.com/cf",
-						CfOrg:         "myOrg",
-						CfSpace:       "mySpace",
-						Username:      "me",
-						Password:      "******",
-					})
+				assert.Equal(t, loginOpts, successfulLogin)
 
 				// REVISIT: we have more the less the same test below (deploy cf native app name from manifest)
 				// that other test has been transfered from groovy. But here we have some more checks for the
@@ -196,14 +197,7 @@ func TestCfDeployment(t *testing.T) {
 
 		if assert.NoError(t, err) {
 
-			assert.Equal(t, loginOpts,
-				cloudfoundry.LoginOptions{
-					CfAPIEndpoint: "https://examples.sap.com/cf",
-					CfOrg:         "myOrg",
-					CfSpace:       "mySpace",
-					Username:      "me",
-					Password:      "******",
-				})
+			assert.Equal(t, loginOpts, successfulLogin)
 
 			assert.Equal(t, []mock.ExecCall{
 				mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
@@ -242,14 +236,7 @@ func TestCfDeployment(t *testing.T) {
 
 		if assert.NoError(t, err) {
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts,
-					cloudfoundry.LoginOptions{
-						CfAPIEndpoint: "https://examples.sap.com/cf",
-						CfOrg:         "myOrg",
-						CfSpace:       "mySpace",
-						Username:      "me",
-						Password:      "******",
-					})
+				assert.Equal(t, loginOpts, successfulLogin)
 
 				assert.Equal(t, []mock.ExecCall{
 					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
@@ -310,14 +297,7 @@ func TestCfDeployment(t *testing.T) {
 		if assert.NoError(t, err) {
 
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts,
-					cloudfoundry.LoginOptions{
-						CfAPIEndpoint: "https://examples.sap.com/cf",
-						CfOrg:         "myOrg",
-						CfSpace:       "mySpace",
-						Username:      "me",
-						Password:      "******",
-					})
+				assert.Equal(t, loginOpts, successfulLogin)
 
 				assert.Equal(t, []mock.ExecCall{
 					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
@@ -377,14 +357,7 @@ func TestCfDeployment(t *testing.T) {
 		if assert.NoError(t, err) {
 
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts,
-					cloudfoundry.LoginOptions{
-						CfAPIEndpoint: "https://examples.sap.com/cf",
-						CfOrg:         "myOrg",
-						CfSpace:       "mySpace",
-						Username:      "me",
-						Password:      "******",
-					})
+				assert.Equal(t, loginOpts, successfulLogin)
 
 				assert.Equal(t, []mock.ExecCall{
 					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
@@ -463,14 +436,7 @@ func TestCfDeployment(t *testing.T) {
 		if assert.NoError(t, err) {
 
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts,
-					cloudfoundry.LoginOptions{
-						CfAPIEndpoint: "https://examples.sap.com/cf",
-						CfOrg:         "myOrg",
-						CfSpace:       "mySpace",
-						Username:      "me",
-						Password:      "******",
-					})
+				assert.Equal(t, loginOpts, successfulLogin)
 
 				assert.Equal(t, []mock.ExecCall{
 					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
@@ -577,14 +543,7 @@ func TestCfDeployment(t *testing.T) {
 		if assert.NoError(t, err) {
 
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts,
-					cloudfoundry.LoginOptions{
-						CfAPIEndpoint: "https://examples.sap.com/cf",
-						CfOrg:         "myOrg",
-						CfSpace:       "mySpace",
-						Username:      "me",
-						Password:      "******",
-					})
+				assert.Equal(t, loginOpts, successfulLogin)
 
 				assert.Equal(t, []mock.ExecCall{
 					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
@@ -744,14 +703,7 @@ func TestCfDeployment(t *testing.T) {
 		if assert.NoError(t, err) {
 
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts,
-					cloudfoundry.LoginOptions{
-						CfAPIEndpoint: "https://examples.sap.com/cf",
-						CfOrg:         "myOrg",
-						CfSpace:       "mySpace",
-						Username:      "me",
-						Password:      "******",
-					})
+				assert.Equal(t, loginOpts, successfulLogin)
 
 				assert.Equal(t, []mock.ExecCall{
 					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
@@ -846,14 +798,7 @@ func TestCfDeployment(t *testing.T) {
 		if assert.NoError(t, err) {
 
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts,
-					cloudfoundry.LoginOptions{
-						CfAPIEndpoint: "https://examples.sap.com/cf",
-						CfOrg:         "myOrg",
-						CfSpace:       "mySpace",
-						Username:      "me",
-						Password:      "******",
-					})
+				assert.Equal(t, loginOpts, successfulLogin)
 
 				assert.Equal(t, []mock.ExecCall{
 					mock.ExecCall{Exec: "cf", Params: []string{"api", "https://examples.sap.com/cf"}},
@@ -916,14 +861,7 @@ func TestCfDeployment(t *testing.T) {
 		if assert.NoError(t, err) {
 
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts,
-					cloudfoundry.LoginOptions{
-						CfAPIEndpoint: "https://examples.sap.com/cf",
-						CfOrg:         "myOrg",
-						CfSpace:       "mySpace",
-						Username:      "me",
-						Password:      "******",
-					})
+				assert.Equal(t, loginOpts, successfulLogin)
 
 				// Revisit: we don't verify a log message in case of a non existing vars file
 
@@ -983,14 +921,7 @@ func TestCfDeployment(t *testing.T) {
 		if assert.NoError(t, err) {
 
 			t.Run("check shell calls", func(t *testing.T) {
-				assert.Equal(t, loginOpts,
-					cloudfoundry.LoginOptions{
-						CfAPIEndpoint: "https://examples.sap.com/cf",
-						CfOrg:         "myOrg",
-						CfSpace:       "mySpace",
-						Username:      "me",
-						Password:      "******",
-					})
+				assert.Equal(t, loginOpts, successfulLogin)
 
 				// Revisit: we don't verify a log message in case of a non existing vars file
 
@@ -1040,14 +971,7 @@ func TestCfDeployment(t *testing.T) {
 					})
 
 					t.Run("check cf login", func(t *testing.T) {
-						assert.Equal(t, loginOpts,
-							cloudfoundry.LoginOptions{
-								CfAPIEndpoint: "https://examples.sap.com/cf",
-								CfOrg:         "myOrg",
-								CfSpace:       "mySpace",
-								Username:      "me",
-								Password:      "******",
-							})
+						assert.Equal(t, loginOpts, successfulLogin)
 					})
 
 					assert.True(t, logoutCalled)
