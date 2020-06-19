@@ -77,6 +77,12 @@ func TestCfDeployment(t *testing.T) {
 	var loginOpts cloudfoundry.LoginOptions
 	var logoutCalled, mtarFileRetrieved bool
 
+	noopCfAPICalls := func(t *testing.T, s mock.ExecMockRunner) {
+		assert.Empty(t, s.Calls)   // --> in case of an invalid deploy tool there must be no cf api calls
+		assert.Empty(t, loginOpts) // no login options: login has not been called
+		assert.False(t, logoutCalled)
+	}
+
 	withLoginAndLogout := func(t *testing.T, asserts func(t *testing.T)) {
 
 		assert.Equal(t, loginOpts, successfulLogin)
@@ -123,9 +129,7 @@ func TestCfDeployment(t *testing.T) {
 		err := runCloudFoundryDeploy(&config, nil, &s)
 
 		if assert.NoError(t, err) {
-			assert.Empty(t, s.Calls)                                // --> in case of an invalid deploy tool there must be no cf api calls
-			assert.Equal(t, loginOpts, cloudfoundry.LoginOptions{}) // no login options: login has not been called
-			assert.False(t, logoutCalled)
+			noopCfAPICalls(t, s)
 		}
 	})
 
@@ -165,10 +169,11 @@ func TestCfDeployment(t *testing.T) {
 			t.Run("check cf api calls", func(t *testing.T) {
 
 				withLoginAndLogout(t, func(t *testing.T) {
-				assert.Equal(t, []mock.ExecCall{
-					mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
-					mock.ExecCall{Exec: "cf", Params: []string{"push", "-f", "manifest.yml"}},
-				}, s.Calls)})
+					assert.Equal(t, []mock.ExecCall{
+						mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
+						mock.ExecCall{Exec: "cf", Params: []string{"push", "-f", "manifest.yml"}},
+					}, s.Calls)
+				})
 			})
 		}
 
@@ -375,7 +380,6 @@ func TestCfDeployment(t *testing.T) {
 		config.DeployTool = "cf_native"
 		config.Manifest = "test-manifest.yml"
 
-
 		defer func() {
 			_fileExists = piperutils.FileExists
 			_getManifest = getManifest
@@ -401,13 +405,7 @@ func TestCfDeployment(t *testing.T) {
 		if assert.EqualError(t, err, "No appName available in manifest 'test-manifest.yml'") {
 
 			t.Run("check shell calls", func(t *testing.T) {
-
-				// no login in this case
-				assert.Equal(t, cloudfoundry.LoginOptions{}, loginOpts)
-				// no calls to the cf client in this case
-				assert.Empty(t, s.Calls)
-				// no logout
-				assert.False(t, logoutCalled)
+				noopCfAPICalls(t, s)
 			})
 		}
 	})
@@ -448,7 +446,7 @@ func TestCfDeployment(t *testing.T) {
 							// MIGRATE FFROM GROOVY: in contrast to groovy there is not redirect of everything &> to a file since we
 							// read the stream directly now.
 						}},
-					}, s.Calls)	
+					}, s.Calls)
 				})
 			})
 		}
@@ -489,13 +487,7 @@ func TestCfDeployment(t *testing.T) {
 
 		if assert.EqualError(t, err, "Your manifest contains more than one application. For blue green deployments your manifest file may contain only one application") {
 			t.Run("check shell calls", func(t *testing.T) {
-
-				// no login in this case
-				assert.Equal(t, cloudfoundry.LoginOptions{}, loginOpts)
-				// no calls to the cf client in this case
-				assert.Empty(t, s.Calls)
-				// no logout
-				assert.False(t, logoutCalled)
+				noopCfAPICalls(t, s)
 			})
 		}
 	})
@@ -549,7 +541,7 @@ func TestCfDeployment(t *testing.T) {
 							"-f",
 							"test-manifest.yml",
 						}},
-					}, s.Calls)	
+					}, s.Calls)
 				})
 			})
 		}
@@ -608,7 +600,6 @@ func TestCfDeployment(t *testing.T) {
 		config.DeployType = "blue-green"
 		config.Manifest = "test-manifest.yml"
 		config.AppName = "myTestApp"
-
 
 		defer func() {
 			_fileExists = piperutils.FileExists
@@ -709,12 +700,12 @@ func TestCfDeployment(t *testing.T) {
 							"-f",
 							"test-manifest.yml",
 						}},
-	
+
 						//
 						// There is no cf stop
 						//
-	
-					}, s.Calls)	
+
+					}, s.Calls)
 				})
 			})
 		}
@@ -756,13 +747,7 @@ func TestCfDeployment(t *testing.T) {
 		if assert.EqualError(t, err, "Blue-green plugin requires app name to be passed (see https://github.com/bluemixgaragelondon/cf-blue-green-deploy/issues/27)") {
 
 			t.Run("check shell calls", func(t *testing.T) {
-
-				// no login in this case
-				assert.Equal(t, cloudfoundry.LoginOptions{}, loginOpts)
-				// no calls to the cf client in this case
-				assert.Empty(t, s.Calls)
-				// no logout
-				assert.False(t, logoutCalled)
+				noopCfAPICalls(t, s)
 			})
 		}
 	})
@@ -804,12 +789,12 @@ func TestCfDeployment(t *testing.T) {
 							"-f",
 							"--no-confirm",
 						}},
-	
+
 						//
 						// There is no cf stop
 						//
-	
-					}, s.Calls)	
+
+					}, s.Calls)
 				})
 			})
 		}
@@ -960,7 +945,7 @@ func TestCfDeployment(t *testing.T) {
 					assert.Equal(t, s.Calls, []mock.ExecCall{
 						mock.ExecCall{Exec: "cf", Params: []string{"api", "https://examples.sap.com/cf"}},
 						mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
-						mock.ExecCall{Exec: "cf", Params: []string{"deploy", "x.mtar", "-f"}},					})
+						mock.ExecCall{Exec: "cf", Params: []string{"deploy", "x.mtar", "-f"}}})
 
 				})
 
