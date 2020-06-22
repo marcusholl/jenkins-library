@@ -18,6 +18,7 @@ import (
 )
 
 var _glob = glob.Glob // func(patterns []string) ([]*glob.FileAsset, []*glob.RegexpInfo, error)
+var _now = time.Now
 var _cfLogin = cloudfoundry.Login
 var _cfLogout = cloudfoundry.Logout
 var _fileExists = piperutils.FileExists
@@ -88,7 +89,7 @@ func prepareInflux(success bool, config *cloudFoundryDeployOptions, influxData *
 	// n/a (literally) is also reported in groovy
 	influxData.deployment_data.fields.artifactURL = "n/a"
 
-	influxData.deployment_data.fields.deployTime = strings.ToUpper(time.Now().Format("Jan 02 2006 15:04:05"))
+	influxData.deployment_data.fields.deployTime = strings.ToUpper(_now().Format("Jan 02 2006 15:04:05"))
 
 	// we should discuss how we handle the job trigger
 	// 1.) outside Jenkins

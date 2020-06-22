@@ -9,6 +9,7 @@ import (
 	"gopkg.in/godo.v2/glob"
 	"os"
 	"testing"
+	"time"
 )
 
 type manifestMock struct {
@@ -181,6 +182,66 @@ func TestCfDeployment(t *testing.T) {
 			assert.Contains(t, s.Env, "CF_PLUGIN_HOME=/home/me") // REVISIT: cross check if that variable should point to the user home dir
 			assert.Contains(t, s.Env, "STATUS_CODE=200")
 		})
+	})
+
+	t.Run("influx reporting", func(t *testing.T) {
+
+		defer cleanup()
+
+		s := mock.ExecMockRunner{}
+
+		defer func() {
+			_getWd = os.Getwd
+			_fileExists = piperutils.FileExists
+			_getManifest = getManifest
+			_now = time.Now
+		}()
+
+		_now = func() time.Time {
+			// There was the big eclise in Karlsruhe
+			return time.Date(1999, time.August, 11, 12, 32, 0, 0, time.UTC)
+		}
+
+		_getWd = func() (string, error) {
+			return "/home/me", nil
+		}
+
+		_fileExists = func(name string) (bool, error) {
+			return name == "manifest.yml", nil
+		}
+
+		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
+			return manifestMock{
+					manifestFileName: "manifest.yml",
+					apps:             []map[string]interface{}{map[string]interface{}{"name": "testAppName"}}},
+				nil
+		}
+
+		config.DeployTool = "cf_native"
+
+		influxData := cloudFoundryDeployInflux{}
+
+		err := runCloudFoundryDeploy(&config, nil, &influxData, &s)
+
+		if assert.NoError(t, err) {
+
+			expected := cloudFoundryDeployInflux{}
+
+			expected.deployment_data.fields.artifactURL = "n/a"
+			expected.deployment_data.fields.deployTime = "AUG 11 1999 12:32:00"
+			expected.deployment_data.fields.jobTrigger = "<n/a>"
+
+			expected.deployment_data.tags.artifactVersion = "<n/a>" // TODO revisit
+			expected.deployment_data.tags.deployUser = "me"
+			expected.deployment_data.tags.deployResult = "SUCCESS"
+			expected.deployment_data.tags.cfAPIEndpoint = "https://examples.sap.com/cf"
+			expected.deployment_data.tags.cfOrg = "myOrg"
+			expected.deployment_data.tags.cfSpace = "mySpace"
+
+			assert.Equal(t, expected, influxData)
+
+		}
+
 	})
 
 	t.Run("deploy cf native with docker image and docker username", func(t *testing.T) {
