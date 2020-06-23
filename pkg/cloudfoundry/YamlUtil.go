@@ -23,7 +23,7 @@ func (s *myutil) ReadFile(name string) ([]byte, error) {
 	return ioutil.ReadFile(name)
 }
 
-var _xxxutil util
+var _fileUtils util
 
 var _stat = os.Stat
 var _writeFile = ioutil.WriteFile
@@ -32,11 +32,11 @@ var _traverse = traverse
 // Substitute ...
 func Substitute(ymlFile string, replacements map[string]interface{}, replacementsFiles []string) (bool, error) {
 
-	if _xxxutil == nil {
-		_xxxutil = &myutil{}
+	if _fileUtils == nil {
+		_fileUtils = &myutil{}
 	}
 
-	bIn, err := _xxxutil.ReadFile(ymlFile)
+	bIn, err := _fileUtils.ReadFile(ymlFile)
 	if err != nil {
 		return false, err
 	}
@@ -214,7 +214,7 @@ func getReplacements(replacements map[string]interface{}, replacementsFiles []st
 	mReplacements := make(map[string]interface{})
 
 	for _, replacementsFile := range replacementsFiles {
-		bReplacements, err := _xxxutil.ReadFile(replacementsFile)
+		bReplacements, err := _fileUtils.ReadFile(replacementsFile)
 		if err != nil {
 			return nil, err
 		}

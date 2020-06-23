@@ -47,13 +47,13 @@ func TestFilesRelated(t *testing.T) {
 	oldWriteFile := _writeFile
 	oldTraverse := _traverse
 
-	_xxxutil = &fMock{}
+	_fileUtils = &fMock{}
 
 	defer func() {
 		_stat = oldStat
 		_writeFile = oldWriteFile
 		_traverse = oldTraverse
-		_xxxutil = &myutil{}
+		_fileUtils = &myutil{}
 	}()
 
 	reset := func() {
@@ -68,7 +68,7 @@ func TestFilesRelated(t *testing.T) {
 			return fileInfoMock{}, nil
 		}
 
-		_xxxutil = &fMock {
+		_fileUtils = &fMock {
 			files: map[string][]byte {
 				"manifest.yml": []byte("a: dummy"),
 				"replacements.yml": []byte{}},
@@ -124,7 +124,7 @@ func TestFilesRelated(t *testing.T) {
 		// expected behaviour in case of multiple yaml documents in one "file":
 		// we merge the content. The latest wins
 
-		_xxxutil = &fMock {
+		_fileUtils = &fMock {
 			files: map[string][]byte {
 				"manifest.yml": []byte("a: dummy"),
 				"replacements.yml": []byte("a: b # A comment.\nc: d\n---\nzz: 1234\n"),
@@ -153,7 +153,7 @@ func TestFilesRelated(t *testing.T) {
 			return map[string]interface{}{"called": true}, true, nil
 		}
 
-		_xxxutil = &fMock {
+		_fileUtils = &fMock {
 			files: map[string][]byte {
 				"manifest.yml": []byte("a: dummy\n---\n b: otherDummy\n"),
 				// here we have two yaml documents in one "file" ...
@@ -175,7 +175,7 @@ func TestFilesRelated(t *testing.T) {
 	t.Run("Handle single manifest", func(t *testing.T) {
 
 
-		_xxxutil = &fMock {
+		_fileUtils = &fMock {
 			files: map[string][]byte {
 				"manifest.yml": []byte("a: dummy\n"),
 				// here we have two yaml documents in one "file" ...
@@ -230,7 +230,7 @@ func TestFilesRelated(t *testing.T) {
 
 	t.Run("Replacements from map has precedence over replacments from file", func(t *testing.T) {
 
-		_xxxutil = &fMock {
+		_fileUtils = &fMock {
 			files: map[string][]byte {
 				"manifest.yml": []byte("a: ((a))\nb: ((b))"),
 				// here we have two yaml documents in one "file" ...
