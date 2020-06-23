@@ -45,6 +45,9 @@ func (f *fMock) WriteFile(name string, data []byte, mode os.FileMode) error {
 	return nil
 }
 
+func (f *fMock)Stat(name string) (os.FileInfo, error) {
+	return fileInfoMock{}, nil
+}
 
 func TestFilesRelated(t *testing.T) {
 
@@ -52,13 +55,11 @@ func TestFilesRelated(t *testing.T) {
 
 	var replacements map[string]interface{}
 
-	oldStat := _stat
 	oldTraverse := _traverse
 
 	var fileMock *fMock
 
 	defer func() {
-		_stat = oldStat
 		_traverse = oldTraverse
 		fileMock = nil
 		_fileUtils = &fileUtils{}
@@ -70,9 +71,6 @@ func TestFilesRelated(t *testing.T) {
 
 		replacements = make(map[string]interface{})
 
-		_stat = func(name string) (os.FileInfo, error) {
-			return fileInfoMock{}, nil
-		}
 		fileMock = &fMock {
 			files: map[string][]byte {
 				"manifest.yml": []byte("a: dummy"),

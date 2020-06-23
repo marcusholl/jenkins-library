@@ -16,6 +16,7 @@ import (
 type fUtils interface {
 	ReadFile(name string) ([]byte, error)
 	WriteFile(name string, data []byte, mode os.FileMode) error
+	Stat(name string) (os.FileInfo, error)
 }
 
 type fileUtils struct {}
@@ -28,9 +29,12 @@ func (s *fileUtils) WriteFile(name string, data []byte, mode os.FileMode) error 
 	return ioutil.WriteFile(name, data, mode)
 }
 
+func (s *fileUtils) Stat(name string) (os.FileInfo, error) {
+	return os.Stat(name)
+}
+
 var _fileUtils fUtils
 
-var _stat = os.Stat
 var _traverse = traverse
 
 // Substitute ...
@@ -86,7 +90,7 @@ func Substitute(ymlFile string, replacements map[string]interface{}, replacement
 
 	if updated {
 
-		fInfo, err := _stat(ymlFile)
+		fInfo, err := _fileUtils.Stat(ymlFile)
 		if err != nil {
 			return false, err
 		}
