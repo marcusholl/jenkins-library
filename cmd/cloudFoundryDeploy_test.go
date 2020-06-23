@@ -84,6 +84,31 @@ func TestCfDeployment(t *testing.T) {
 		assert.False(t, logoutCalled)
 	}
 
+	prepareDefaultManifestMocking := func(manifestName string, appNames []string) func() {
+
+		_fileExists = func(name string) (bool, error) {
+			return name == manifestName, nil
+		}
+
+		apps := []map[string]interface{} {}
+
+		for _, appName := range appNames {
+			apps = append(apps, map[string]interface{}{"name": appName})
+		}
+
+		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
+			return manifestMock{
+					manifestFileName: manifestName,
+					apps:             apps,
+				}, nil
+		}
+
+		return func() {
+			_fileExists = piperutils.FileExists
+			_getManifest = getManifest
+		}
+	}
+
 	withLoginAndLogout := func(t *testing.T, asserts func(t *testing.T)) {
 		assert.Equal(t, loginOpts, successfulLogin)
 		asserts(t)
@@ -139,24 +164,13 @@ func TestCfDeployment(t *testing.T) {
 
 		defer func() {
 			_getWd = os.Getwd
-			_fileExists = piperutils.FileExists
-			_getManifest = getManifest
 		}()
 
 		_getWd = func() (string, error) {
 			return "/home/me", nil
 		}
 
-		_fileExists = func(name string) (bool, error) {
-			return name == "manifest.yml", nil
-		}
-
-		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
-			return manifestMock{
-					manifestFileName: "manifest.yml",
-					apps:             []map[string]interface{}{map[string]interface{}{"name": "testAppName"}}},
-				nil
-		}
+		defer prepareDefaultManifestMocking("manifest.yml", []string{"testAppName"})()
 
 		config.DeployTool = "cf_native"
 
@@ -192,8 +206,6 @@ func TestCfDeployment(t *testing.T) {
 
 		defer func() {
 			_getWd = os.Getwd
-			_fileExists = piperutils.FileExists
-			_getManifest = getManifest
 			_now = time.Now
 		}()
 
@@ -206,16 +218,7 @@ func TestCfDeployment(t *testing.T) {
 			return "/home/me", nil
 		}
 
-		_fileExists = func(name string) (bool, error) {
-			return name == "manifest.yml", nil
-		}
-
-		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
-			return manifestMock{
-					manifestFileName: "manifest.yml",
-					apps:             []map[string]interface{}{map[string]interface{}{"name": "testAppName"}}},
-				nil
-		}
+		defer prepareDefaultManifestMocking("manifest.yml", []string{"testAppName"})()
 
 		config.DeployTool = "cf_native"
 
@@ -336,21 +339,8 @@ func TestCfDeployment(t *testing.T) {
 		config.DockerPassword = "********"
 		config.AppName = "testAppName"
 
-		defer func() {
-			_fileExists = piperutils.FileExists
-			_getManifest = getManifest
-		}()
 
-		_fileExists = func(name string) (bool, error) {
-			return name == "manifest.yml", nil
-		}
-
-		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
-			return manifestMock{
-					manifestFileName: "manifest.yml",
-					apps:             []map[string]interface{}{map[string]interface{}{"name": "testAppName"}}},
-				nil
-		}
+		defer prepareDefaultManifestMocking("manifest.yml", []string{"testAppName"})()
 
 		s := mock.ExecMockRunner{}
 
@@ -390,24 +380,9 @@ func TestCfDeployment(t *testing.T) {
 		config.DeployTool = "cf_native"
 		config.Manifest = "test-manifest.yml"
 
-		defer func() {
-			_fileExists = piperutils.FileExists
-			_getManifest = getManifest
-		}()
-
-		_fileExists = func(name string) (bool, error) {
-			return name == "test-manifest.yml", nil
-		}
-
-		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
-			return manifestMock{
-					manifestFileName: "test-manifest.yml",
-					// app name is not asserted since it does not appear in the cf calls
-					// but it is checked that an app name is present, hence we need it here.
-
-					apps: []map[string]interface{}{map[string]interface{}{"name": "dummyApp"}}},
-				nil
-		}
+		// app name is not asserted since it does not appear in the cf calls
+		// but it is checked that an app name is present, hence we need it here.
+		defer prepareDefaultManifestMocking("test-manifest.yml", []string{"dummyApp"})()
 
 		s := mock.ExecMockRunner{}
 
@@ -440,23 +415,9 @@ func TestCfDeployment(t *testing.T) {
 		config.DeployTool = "cf_native"
 		config.Manifest = "test-manifest.yml"
 
-		defer func() {
-			_fileExists = piperutils.FileExists
-			_getManifest = getManifest
-		}()
-
-		_fileExists = func(name string) (bool, error) {
-			return name == "test-manifest.yml", nil
-		}
-
-		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
-			return manifestMock{
-					manifestFileName: "test-manifest.yml",
-					// Here we don't provide an application name from the mock. To make that
-					// more explicit we provide the empty string default explicitly.
-					apps: []map[string]interface{}{map[string]interface{}{"name": ""}}},
-				nil
-		}
+		// Here we don't provide an application name from the mock. To make that
+		// more explicit we provide the empty string default explicitly.
+		defer prepareDefaultManifestMocking("test-manifest.yml", []string{""})()
 
 		s := mock.ExecMockRunner{}
 
@@ -521,25 +482,7 @@ func TestCfDeployment(t *testing.T) {
 		config.Manifest = "test-manifest.yml"
 		config.AppName = "myTestApp"
 
-		defer func() {
-			_fileExists = piperutils.FileExists
-			_getManifest = getManifest
-		}()
-
-		_fileExists = func(name string) (bool, error) {
-			return name == "test-manifest.yml", nil
-		}
-
-		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
-			return manifestMock{
-					manifestFileName: "test-manifest.yml",
-					apps: []map[string]interface{}{
-						map[string]interface{}{"name": "app1"},
-						map[string]interface{}{"name": "app2"},
-					},
-				},
-				nil
-		}
+		defer prepareDefaultManifestMocking("test-manifest.yml", []string{"app1", "app2"})()
 
 		s := mock.ExecMockRunner{}
 
@@ -616,27 +559,7 @@ func TestCfDeployment(t *testing.T) {
 		config.Manifest = "test-manifest.yml"
 		config.AppName = "myTestApp"
 
-		defer func() {
-			_fileExists = piperutils.FileExists
-			_getManifest = getManifest
-		}()
-
-		_fileExists = func(name string) (bool, error) {
-			return name == "test-manifest.yml", nil
-		}
-
-		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
-			return manifestMock{
-					manifestFileName: "test-manifest.yml",
-					apps: []map[string]interface{}{
-						map[string]interface{}{
-							"name":     "app1",
-							"no-route": true,
-						},
-					},
-				},
-				nil
-		}
+		defer prepareDefaultManifestMocking("test-manifest.yml", []string{"app"})()
 
 		s := mock.ExecMockRunner{}
 
@@ -662,8 +585,6 @@ func TestCfDeployment(t *testing.T) {
 		config.AppName = "myTestApp"
 
 		defer func() {
-			_fileExists = piperutils.FileExists
-			_getManifest = getManifest
 
 			_cfLogin = func(opts cloudfoundry.LoginOptions) error {
 				loginOpts = opts
@@ -676,22 +597,7 @@ func TestCfDeployment(t *testing.T) {
 			return fmt.Errorf("Unable to login")
 		}
 
-		_fileExists = func(name string) (bool, error) {
-			return name == "test-manifest.yml", nil
-		}
-
-		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
-			return manifestMock{
-					manifestFileName: "test-manifest.yml",
-					apps: []map[string]interface{}{
-						map[string]interface{}{
-							"name":     "app1",
-							"no-route": true,
-						},
-					},
-				},
-				nil
-		}
+		defer prepareDefaultManifestMocking("test-manifest.yml", []string{"app1"})()
 
 		s := mock.ExecMockRunner{}
 
@@ -720,27 +626,7 @@ func TestCfDeployment(t *testing.T) {
 		config.AppName = "myTestApp"
 		config.KeepOldInstance = true
 
-		defer func() {
-			_fileExists = piperutils.FileExists
-			_getManifest = getManifest
-		}()
-
-		_fileExists = func(name string) (bool, error) {
-			return name == "test-manifest.yml", nil
-		}
-
-		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
-			return manifestMock{
-					manifestFileName: "test-manifest.yml",
-					apps: []map[string]interface{}{
-						map[string]interface{}{
-							"name":     "app1",
-							"no-route": true,
-						},
-					},
-				},
-				nil
-		}
+		defer prepareDefaultManifestMocking("test-manifest.yml", []string{"app"})()
 
 		s := mock.ExecMockRunner{}
 
