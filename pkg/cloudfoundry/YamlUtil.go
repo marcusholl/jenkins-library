@@ -13,7 +13,18 @@ import (
 	"strings"
 )
 
-var _readFile = ioutil.ReadFile
+type util interface {
+	ReadFile(name string) ([]byte, error)
+}
+
+type myutil struct {}
+
+func (s *myutil) ReadFile(name string) ([]byte, error) {
+	return ioutil.ReadFile(name)
+}
+
+var _xxxutil util
+
 var _stat = os.Stat
 var _writeFile = ioutil.WriteFile
 var _traverse = traverse
@@ -21,7 +32,11 @@ var _traverse = traverse
 // Substitute ...
 func Substitute(ymlFile string, replacements map[string]interface{}, replacementsFiles []string) (bool, error) {
 
-	bIn, err := _readFile(ymlFile)
+	if _xxxutil == nil {
+		_xxxutil = &myutil{}
+	}
+
+	bIn, err := _xxxutil.ReadFile(ymlFile)
 	if err != nil {
 		return false, err
 	}
@@ -199,7 +214,7 @@ func getReplacements(replacements map[string]interface{}, replacementsFiles []st
 	mReplacements := make(map[string]interface{})
 
 	for _, replacementsFile := range replacementsFiles {
-		bReplacements, err := _readFile(replacementsFile)
+		bReplacements, err := _xxxutil.ReadFile(replacementsFile)
 		if err != nil {
 			return nil, err
 		}

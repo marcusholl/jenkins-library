@@ -22,6 +22,20 @@ func (fInfo fileInfoMock) ModTime() time.Time { return time.Time{} }
 func (fInfo fileInfoMock) IsDir() bool        { return false }
 func (fInfo fileInfoMock) Sys() interface{}   { return nil }
 
+type fMock struct {
+	files map[string][]byte
+}
+
+func (f *fMock) ReadFile(name string) ([]byte, error) {
+
+	result := f.files[name]
+
+	if result != nil {
+		return result, nil
+	}
+	return []byte{}, fmt.Errorf("open %s: no such file or directory", name)
+}
+
 func TestFilesRelated(t *testing.T) {
 
 	writeFileCalled := false
@@ -30,15 +44,16 @@ func TestFilesRelated(t *testing.T) {
 	var replacements map[string]interface{}
 
 	oldStat := _stat
-	oldReadFile := _readFile
 	oldWriteFile := _writeFile
 	oldTraverse := _traverse
 
+	_xxxutil = &fMock{}
+
 	defer func() {
 		_stat = oldStat
-		_readFile = oldReadFile
 		_writeFile = oldWriteFile
 		_traverse = oldTraverse
+		_xxxutil = &myutil{}
 	}()
 
 	reset := func() {
@@ -53,13 +68,10 @@ func TestFilesRelated(t *testing.T) {
 			return fileInfoMock{}, nil
 		}
 
-		_readFile = func(name string) ([]byte, error) {
-			if name == "manifest.yml" {
-				return []byte("a: dummy"), nil
-			} else if name == "replacements.yml" {
-				return []byte{}, nil
-			}
-			return []byte{}, fmt.Errorf("open %s: no such file or directory", name)
+		_xxxutil = &fMock {
+			files: map[string][]byte {
+				"manifest.yml": []byte("a: dummy"),
+				"replacements.yml": []byte{}},
 		}
 
 		_writeFile = func(name string, data []byte, mode os.FileMode) error {
@@ -112,14 +124,11 @@ func TestFilesRelated(t *testing.T) {
 		// expected behaviour in case of multiple yaml documents in one "file":
 		// we merge the content. The latest wins
 
-		_readFile = func(name string) ([]byte, error) {
-			if name == "manifest.yml" {
-				return []byte("a: dummy"), nil
-			} else if name == "replacements.yml" {
-				// here we have two yaml documents in one "file"
-				return []byte("a: b # A comment.\nc: d\n---\nzz: 1234\n"), nil
-			}
-			return []byte{}, fmt.Errorf("open %s: no such file or directory", name)
+		_xxxutil = &fMock {
+			files: map[string][]byte {
+				"manifest.yml": []byte("a: dummy"),
+				"replacements.yml": []byte("a: b # A comment.\nc: d\n---\nzz: 1234\n"),
+			},
 		}
 
 		defer reset()
@@ -144,15 +153,14 @@ func TestFilesRelated(t *testing.T) {
 			return map[string]interface{}{"called": true}, true, nil
 		}
 
-		_readFile = func(name string) ([]byte, error) {
-			if name == "manifest.yml" {
-				return []byte("a: dummy\n---\n b: otherDummy\n"), nil
-			} else if name == "replacements.yml" {
+		_xxxutil = &fMock {
+			files: map[string][]byte {
+				"manifest.yml": []byte("a: dummy\n---\n b: otherDummy\n"),
 				// here we have two yaml documents in one "file" ...
-				return []byte("a: b # A comment.\nc: d\n---\nzz: 1234\n"), nil
-			}
-			return []byte{}, fmt.Errorf("open %s: no such file or directory", name)
+				"replacements.yml": []byte("a: b # A comment.\nc: d\n---\nzz: 1234\n"),
+			},
 		}
+
 
 		defer reset()
 
@@ -166,14 +174,13 @@ func TestFilesRelated(t *testing.T) {
 
 	t.Run("Handle single manifest", func(t *testing.T) {
 
-		_readFile = func(name string) ([]byte, error) {
-			if name == "manifest.yml" {
-				return []byte("a: dummy\n"), nil
-			} else if name == "replacements.yml" {
-				// here we have two yaml documents in one "file"
-				return []byte("a: b # A comment.\nc: d\n---\nzz: 1234\n"), nil
-			}
-			return []byte{}, fmt.Errorf("open %s: no such file or directory", name)
+
+		_xxxutil = &fMock {
+			files: map[string][]byte {
+				"manifest.yml": []byte("a: dummy\n"),
+				// here we have two yaml documents in one "file" ...
+				"replacements.yml": []byte("a: b # A comment.\nc: d\n---\nzz: 1234\n"),
+			},
 		}
 
 		var written string
@@ -223,13 +230,12 @@ func TestFilesRelated(t *testing.T) {
 
 	t.Run("Replacements from map has precedence over replacments from file", func(t *testing.T) {
 
-		_readFile = func(name string) ([]byte, error) {
-			if name == "manifest.yml" {
-				return []byte("a: ((a))\nb: ((b))"), nil
-			} else if name == "replacements.yml" {
-				return []byte("a: aa # A comment.\nb: bb\n"), nil
-			}
-			return []byte{}, fmt.Errorf("open %s: no such file or directory", name)
+		_xxxutil = &fMock {
+			files: map[string][]byte {
+				"manifest.yml": []byte("a: ((a))\nb: ((b))"),
+				// here we have two yaml documents in one "file" ...
+				"replacements.yml": []byte("a: aa # A comment.\nb: bb\n"),
+			},
 		}
 
 		var written string
