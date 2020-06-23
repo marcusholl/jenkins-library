@@ -17,9 +17,9 @@ type util interface {
 	ReadFile(name string) ([]byte, error)
 }
 
-type myutil struct {}
+type fileUtils struct {}
 
-func (s *myutil) ReadFile(name string) ([]byte, error) {
+func (s *fileUtils) ReadFile(name string) ([]byte, error) {
 	return ioutil.ReadFile(name)
 }
 
@@ -33,7 +33,7 @@ var _traverse = traverse
 func Substitute(ymlFile string, replacements map[string]interface{}, replacementsFiles []string) (bool, error) {
 
 	if _fileUtils == nil {
-		_fileUtils = &myutil{}
+		_fileUtils = &fileUtils{}
 	}
 
 	bIn, err := _fileUtils.ReadFile(ymlFile)

@@ -53,7 +53,7 @@ func TestFilesRelated(t *testing.T) {
 		_stat = oldStat
 		_writeFile = oldWriteFile
 		_traverse = oldTraverse
-		_fileUtils = &myutil{}
+		_fileUtils = &fileUtils{}
 	}()
 
 	reset := func() {
