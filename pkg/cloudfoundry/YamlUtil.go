@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-type util interface {
+type fUtils interface {
 	ReadFile(name string) ([]byte, error)
 }
 
@@ -23,7 +23,7 @@ func (s *fileUtils) ReadFile(name string) ([]byte, error) {
 	return ioutil.ReadFile(name)
 }
 
-var _fileUtils util
+var _fileUtils fUtils
 
 var _stat = os.Stat
 var _writeFile = ioutil.WriteFile
