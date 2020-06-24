@@ -36,7 +36,6 @@ func TestFilesRelated(t *testing.T) {
 	defer func() {
 		_stat = oldStat
 		_traverse = oldTraverse
-		_fileUtils = &fileUtils{}
 	}()
 
 	setupFileMock := func(files map[string][]byte) {
@@ -45,7 +44,6 @@ func TestFilesRelated(t *testing.T) {
 		for name, content := range files {
 			fileMock.AddFile(name, content)
 		}
-		_fileUtils = fileMock
 	}
 
 	reset := func() {
@@ -77,7 +75,7 @@ func TestFilesRelated(t *testing.T) {
 			"replacements.yml": []byte{},
 		})
 
-		updated, err := Substitute("manifest.yml", map[string]interface{}{}, []string{"replacements.yml"})
+		updated, err := substitute("manifest.yml", map[string]interface{}{}, []string{"replacements.yml"}, fileMock)
 
 		if assert.NoError(t, err) {
 			assert.True(t, updated)
@@ -103,7 +101,7 @@ func TestFilesRelated(t *testing.T) {
 			return nil, false, nil
 		}
 
-		updated, err := Substitute("manifest.yml", map[string]interface{}{}, []string{"replacements.yml"})
+		updated, err := substitute("manifest.yml", map[string]interface{}{}, []string{"replacements.yml"}, fileMock)
 
 		if assert.NoError(t, err) {
 			assert.False(t, updated)
@@ -126,7 +124,7 @@ func TestFilesRelated(t *testing.T) {
 			"replacements.yml": []byte("a: x # A comment.\nc: d\n---\na: b\nzz: 1234\n"),
 		})
 
-		_, err := Substitute("manifest.yml", map[string]interface{}{}, []string{"replacements.yml"})
+		_, err := substitute("manifest.yml", map[string]interface{}{}, []string{"replacements.yml"}, fileMock)
 
 		if assert.NoError(t, err) {
 			assert.Equal(t, map[string]interface{}{"a": "b", "c": "d", "zz": 1234}, replacements)
@@ -148,7 +146,7 @@ func TestFilesRelated(t *testing.T) {
 			"replacements.yml": []byte("a: b # A comment.\nc: d\n---\nzz: 1234\n"),
 		})
 
-		_, err := Substitute("manifest.yml", map[string]interface{}{}, []string{"replacements.yml"})
+		_, err := substitute("manifest.yml", map[string]interface{}{}, []string{"replacements.yml"}, fileMock)
 
 		if assert.NoError(t, err) {
 			content, err := fileMock.FileRead("manifest.yml")
@@ -174,7 +172,7 @@ func TestFilesRelated(t *testing.T) {
 			return map[string]interface{}{"called": true}, true, nil
 		}
 
-		_, err := Substitute("manifest.yml", map[string]interface{}{}, []string{"replacements.yml"})
+		_, err := substitute("manifest.yml", map[string]interface{}{}, []string{"replacements.yml"}, fileMock)
 
 		if assert.NoError(t, err) {
 			content, err := fileMock.FileRead("manifest.yml")
@@ -190,7 +188,7 @@ func TestFilesRelated(t *testing.T) {
 		reset()
 		defer reset()
 
-		_, err := Substitute("manifestDoesNotExist.yml", map[string]interface{}{}, []string{"replacements.yml"})
+		_, err := substitute("manifestDoesNotExist.yml", map[string]interface{}{}, []string{"replacements.yml"}, fileMock)
 
 		if assert.EqualError(t, err, "could not read 'manifestDoesNotExist.yml'") {
 			assert.False(t, traverseCalled)
@@ -206,7 +204,7 @@ func TestFilesRelated(t *testing.T) {
 			"manifest.yml": []byte("a: dummy\n"),
 		})
 
-		_, err := Substitute("manifest.yml", map[string]interface{}{}, []string{"replacementsDoesNotExist.yml"})
+		_, err := substitute("manifest.yml", map[string]interface{}{}, []string{"replacementsDoesNotExist.yml"}, fileMock)
 
 		if assert.EqualError(t, err, "could not read 'replacementsDoesNotExist.yml'") {
 			assert.True(t, fileMock.HasFile("manifest.yml"))
@@ -226,7 +224,7 @@ func TestFilesRelated(t *testing.T) {
 
 		_traverse = traverse
 
-		_, err := Substitute("manifest.yml", map[string]interface{}{"b": "xx"}, []string{"replacements.yml"})
+		_, err := substitute("manifest.yml", map[string]interface{}{"b": "xx"}, []string{"replacements.yml"}, fileMock)
 
 		if assert.NoError(t, err) {
 			content, err := fileMock.FileRead("manifest.yml")

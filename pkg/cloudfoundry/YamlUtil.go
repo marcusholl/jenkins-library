@@ -28,17 +28,15 @@ func (s *fileUtils) FileWrite(name string, data []byte, mode os.FileMode) error 
 	return ioutil.WriteFile(name, data, mode)
 }
 
-var _fileUtils fUtils
-
 var _stat = os.Stat
 var _traverse = traverse
 
 // Substitute ...
 func Substitute(ymlFile string, replacements map[string]interface{}, replacementsFiles []string) (bool, error) {
+	return substitute(ymlFile, replacements, replacementsFiles, &fileUtils{})
+}
 
-	if _fileUtils == nil {
-		_fileUtils = &fileUtils{}
-	}
+func substitute(ymlFile string, replacements map[string]interface{}, replacementsFiles []string, _fileUtils fUtils) (bool, error) {
 
 	bIn, err := _fileUtils.FileRead(ymlFile)
 	if err != nil {
@@ -52,7 +50,7 @@ func Substitute(ymlFile string, replacements map[string]interface{}, replacement
 
 	var updated bool
 
-	mergedReplacements, err := getReplacements(replacements, replacementsFiles)
+	mergedReplacements, err := getReplacements(replacements, replacementsFiles, _fileUtils)
 	if err != nil {
 		return false, err
 	}
@@ -213,7 +211,7 @@ func handleMap(t map[string]interface{}, replacements map[string]interface{}) (m
 	return tNode, updated, nil
 }
 
-func getReplacements(replacements map[string]interface{}, replacementsFiles []string) (map[string]interface{}, error) {
+func getReplacements(replacements map[string]interface{}, replacementsFiles []string, _fileUtils fUtils) (map[string]interface{}, error) {
 
 	mReplacements := make(map[string]interface{})
 
