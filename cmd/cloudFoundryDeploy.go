@@ -18,15 +18,20 @@ import (
 	"time"
 )
 
+
+type cfFileUtil interface {
+	FileWrite(path string, content []byte, perm os.FileMode) error
+	Getwd() (string, error)
+}
+
 var _glob = glob.Glob // func(patterns []string) ([]*glob.FileAsset, []*glob.RegexpInfo, error)
 var _now = time.Now
 var _cfLogin = cloudfoundry.Login
 var _cfLogout = cloudfoundry.Logout
 var _fileExists = piperutils.FileExists
 var _getManifest = getManifest
-var _getWd = os.Getwd
 var _substitute = yaml.Substitute
-var fileUtils = piperutils.Files{}
+var fileUtils cfFileUtil = piperutils.Files{}
 
 const smokeTestScript = `#!/usr/bin/env bash
 # this is simply testing if the application root returns HTTP STATUS_CODE
@@ -189,7 +194,7 @@ func handleCFNativeDeployment(config *cloudFoundryDeployOptions, command execRun
 	       echo "[${STEP_NAME}] - smokeTestScript=${config.smokeTestScript}"
 	*/
 
-	pwd, err := _getWd()
+	pwd, err := fileUtils.Getwd()
 	if err != nil {
 		return err
 	}
@@ -365,7 +370,7 @@ func handleSmokeTestScript(smokeTestScript string) ([]string, error) {
 		if err != nil {
 			return []string{}, err
 		}
-		pwd, err := _getWd()
+		pwd, err := fileUtils.Getwd()
 		if err != nil {
 			return []string{}, err
 		}

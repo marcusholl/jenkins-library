@@ -7,7 +7,6 @@ import (
 	"github.com/SAP/jenkins-library/pkg/piperutils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/godo.v2/glob"
-	"os"
 	"testing"
 	"time"
 )
@@ -51,6 +50,11 @@ func (m manifestMock) WriteManifest() error {
 }
 
 func TestCfDeployment(t *testing.T) {
+
+	filesMock := mock.FilesMock{}
+	filesMock.AddDir("/home/me")
+	filesMock.Chdir("/home/me")
+	fileUtils = &filesMock
 
 	// everything below in the config map annotated with '//default' is a default in the metadata
 	// since we don't get injected these values during the tests we set it here.
@@ -162,14 +166,6 @@ func TestCfDeployment(t *testing.T) {
 
 		defer cleanup()
 
-		defer func() {
-			_getWd = os.Getwd
-		}()
-
-		_getWd = func() (string, error) {
-			return "/home/me", nil
-		}
-
 		defer prepareDefaultManifestMocking("manifest.yml", []string{"testAppName"})()
 
 		config.DeployTool = "cf_native"
@@ -205,17 +201,12 @@ func TestCfDeployment(t *testing.T) {
 		s := mock.ExecMockRunner{}
 
 		defer func() {
-			_getWd = os.Getwd
 			_now = time.Now
 		}()
 
 		_now = func() time.Time {
 			// There was the big eclise in Karlsruhe
 			return time.Date(1999, time.August, 11, 12, 32, 0, 0, time.UTC)
-		}
-
-		_getWd = func() (string, error) {
-			return "/home/me", nil
 		}
 
 		defer prepareDefaultManifestMocking("manifest.yml", []string{"testAppName"})()
