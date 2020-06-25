@@ -9,6 +9,7 @@ import (
 	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
 	"github.com/SAP/jenkins-library/pkg/telemetry"
+	"github.com/SAP/jenkins-library/pkg/yaml"
 	"github.com/pkg/errors"
 	"gopkg.in/godo.v2/glob"
 	"io"
@@ -24,6 +25,7 @@ var _cfLogout = cloudfoundry.Logout
 var _fileExists = piperutils.FileExists
 var _getManifest = getManifest
 var _getWd = os.Getwd
+var _substitute = yaml.Substitute
 var fileUtils = piperutils.Files{}
 
 const smokeTestScript = `#!/usr/bin/env bash
@@ -398,16 +400,12 @@ func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) (string, 
 
 		} else {
 
-			manifestVariablesAsMap, err := toParameterMap(config.ManifestVariables)
+			manifestVariables, err := crazyConvert(toParameterMap(config.ManifestVariables))
 			if err != nil {
 				return "", []string{}, []string{}, err
 			}
 
-			// TODO here we have to introduce substitution of the other PR has been merged.
-			log.Entry().Infof("Here we have to add the missing substitution later: manifest: '%s', parameters: '%s', parameter files: '%s'",
-				config.Manifest, manifestVariablesAsMap, config.ManifestVariablesFiles)
-
-			//cloudfoundry.Substitute(config.Manifest, map[string]interface{} {}, config.ManifestVariablesFiles)
+			_substitute(config.Manifest, manifestVariables, config.ManifestVariablesFiles)
 
 			err = handleLegacyCfManifest(config.Manifest)
 			if err != nil {
@@ -476,6 +474,18 @@ func prepareCfPushCfNativeDeploy(config *cloudFoundryDeployOptions) (string, []s
 	return "push", deployOptions, []string{}, nil
 }
 
+func crazyConvert(in map[string]string, err error) (map[string]interface{}, error) {
+
+	out := map[string]interface{}{}
+
+	if err == nil {
+		for key, val := range in {
+			out[key] = val
+		}
+	}
+
+	return out, err
+}
 func getVarOptions(vars []string) ([]string, error) {
 
 	varsMap, err := toParameterMap(vars)
