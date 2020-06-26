@@ -6,7 +6,6 @@ import (
 	"github.com/SAP/jenkins-library/pkg/mock"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/godo.v2/glob"
 	"testing"
 	"time"
 )
@@ -84,7 +83,7 @@ func TestCfDeployment(t *testing.T) {
 	}
 
 	var loginOpts cloudfoundry.LoginOptions
-	var logoutCalled, mtarFileRetrieved bool
+	var logoutCalled bool
 
 	noopCfAPICalls := func(t *testing.T, s mock.ExecMockRunner) {
 		assert.Empty(t, s.Calls)   // --> in case of an invalid deploy tool there must be no cf api calls
@@ -124,20 +123,13 @@ func TestCfDeployment(t *testing.T) {
 	cleanup := func() {
 		loginOpts = cloudfoundry.LoginOptions{}
 		logoutCalled = false
-		mtarFileRetrieved = false
 		config = defaultConfig
 	}
 
 	defer func() {
-		_glob = glob.Glob
 		_cfLogin = cloudfoundry.Login
 		_cfLogout = cloudfoundry.Logout
 	}()
-
-	_glob = func(patterns []string) ([]*glob.FileAsset, []*glob.RegexpInfo, error) {
-		mtarFileRetrieved = true
-		return []*glob.FileAsset{&glob.FileAsset{Path: "x.mtar"}}, nil, nil
-	}
 
 	_cfLogin = func(opts cloudfoundry.LoginOptions) error {
 		loginOpts = opts
@@ -865,6 +857,18 @@ func TestCfDeployment(t *testing.T) {
 
 		t.Run("mta config file from project sources", func(t *testing.T) {
 
+			defer filesMock.FileRemove("xyz.mtar")
+
+			// The mock is inaccurat here.
+			// AddFile() adds the file absolute, prefix with the current working directory
+			// Glob() returns the absolute path - but without leading slash - , whereas
+			// the real Glob returns the path relative to the current workdir.
+			// In order to mimic the behavour in the free wild we add the mtar at the root dir.
+			filesMock.AddDir("/")
+			assert.NoError(t, filesMock.Chdir("/"))
+			filesMock.AddFile("xyz.mtar", []byte("content does not matter"))
+			// restor the expected working dir.
+			assert.NoError(t, filesMock.Chdir("/home/me"))
 			s := mock.ExecMockRunner{}
 			err := runCloudFoundryDeploy(&config, nil, nil, &s)
 
@@ -875,12 +879,8 @@ func TestCfDeployment(t *testing.T) {
 					assert.Equal(t, s.Calls, []mock.ExecCall{
 						mock.ExecCall{Exec: "cf", Params: []string{"api", "https://examples.sap.com/cf"}},
 						mock.ExecCall{Exec: "cf", Params: []string{"plugins"}},
-						mock.ExecCall{Exec: "cf", Params: []string{"deploy", "x.mtar", "-f"}}})
+						mock.ExecCall{Exec: "cf", Params: []string{"deploy", "xyz.mtar", "-f"}}})
 
-				})
-
-				t.Run("mtar retrieved", func(t *testing.T) {
-					assert.True(t, mtarFileRetrieved)
 				})
 			}
 		})
@@ -953,15 +953,18 @@ func TestManifestVariables(t *testing.T) {
 }
 
 func TestMtarLookup(t *testing.T) {
+
+	defer func() {
+		fileUtils = piperutils.Files{}
+	}()
+
+	filesMock := mock.FilesMock{}
+	fileUtils = &filesMock
+
 	t.Run("One MTAR", func(t *testing.T) {
 
-		defer func() {
-			_glob = glob.Glob
-		}()
-
-		_glob = func(patterns []string) ([]*glob.FileAsset, []*glob.RegexpInfo, error) {
-			return []*glob.FileAsset{&glob.FileAsset{Path: "x.mtar"}}, nil, nil
-		}
+		defer filesMock.FileRemove("x.mtar")
+		filesMock.AddFile("x.mtar", []byte("content does not matter"))
 
 		path, err := findMtar()
 
@@ -972,13 +975,8 @@ func TestMtarLookup(t *testing.T) {
 
 	t.Run("No MTAR", func(t *testing.T) {
 
-		defer func() {
-			_glob = glob.Glob
-		}()
-
-		_glob = func(patterns []string) ([]*glob.FileAsset, []*glob.RegexpInfo, error) {
-			return []*glob.FileAsset{}, nil, nil
-		}
+		// nothing needs to be configures. There is simply no
+		// mtar in the file system mock, so no mtar will be found.
 
 		_, err := findMtar()
 
@@ -988,12 +986,12 @@ func TestMtarLookup(t *testing.T) {
 	t.Run("Several MTARs", func(t *testing.T) {
 
 		defer func() {
-			_glob = glob.Glob
+			filesMock.FileRemove("x.mtar")
+			filesMock.FileRemove("y.mtar")
 		}()
 
-		_glob = func(patterns []string) ([]*glob.FileAsset, []*glob.RegexpInfo, error) {
-			return []*glob.FileAsset{&glob.FileAsset{Path: "x.mtar"}, &glob.FileAsset{Path: "y.mtar"}}, nil, nil
-		}
+		filesMock.AddFile("x.mtar", []byte("content does not matter"))
+		filesMock.AddFile("y.mtar", []byte("content does not matter"))
 
 		_, err := findMtar()
 		assert.EqualError(t, err, "Found multiple mtar files matching pattern '**/*.mtar' (x.mtar,y.mtar), please specify file via mtaPath parameter 'mtarPath'")

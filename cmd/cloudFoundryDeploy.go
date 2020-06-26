@@ -11,7 +11,6 @@ import (
 	"github.com/SAP/jenkins-library/pkg/telemetry"
 	"github.com/SAP/jenkins-library/pkg/yaml"
 	"github.com/pkg/errors"
-	"gopkg.in/godo.v2/glob"
 	"io"
 	"os"
 	"strings"
@@ -22,9 +21,9 @@ type cfFileUtil interface {
 	FileExists(string) (bool, error)
 	FileWrite(path string, content []byte, perm os.FileMode) error
 	Getwd() (string, error)
+	Glob(string) ([]string, error)
 }
 
-var _glob = glob.Glob // func(patterns []string) ([]*glob.FileAsset, []*glob.RegexpInfo, error)
 var _now = time.Now
 var _cfLogin = cloudfoundry.Login
 var _cfLogout = cloudfoundry.Logout
@@ -725,7 +724,7 @@ func findMtar() (string, error) {
 
 	const pattern = "**/*.mtar"
 
-	mtars, _, err := _glob([]string{pattern})
+	mtars, err := fileUtils.Glob(pattern)
 
 	if err != nil {
 		return "", err
@@ -738,12 +737,12 @@ func findMtar() (string, error) {
 	if len(mtars) > 1 {
 		sMtars := []string{}
 		for _, mtar := range mtars {
-			sMtars = append(sMtars, mtar.Path)
+			sMtars = append(sMtars, mtar)
 		}
 		return "", fmt.Errorf("Found multiple mtar files matching pattern '%s' (%s), please specify file via mtaPath parameter 'mtarPath'", pattern, strings.Join(sMtars, ","))
 	}
 
-	return mtars[0].Path, nil
+	return mtars[0], nil
 }
 
 func handleCfCliLog(logFile string) error {
