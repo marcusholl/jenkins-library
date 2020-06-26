@@ -780,7 +780,7 @@ func handleCfCliLog(logFile string) error {
 				break
 			}
 
-			log.Entry().Info(line)
+			log.Entry().Info(strings.TrimSuffix(line, "\n"))
 
 			if done {
 				break
