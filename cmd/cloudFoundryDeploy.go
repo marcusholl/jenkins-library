@@ -408,7 +408,16 @@ func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) (string, 
 				return "", []string{}, []string{}, err
 			}
 
-			_substitute(config.Manifest, manifestVariables, config.ManifestVariablesFiles)
+			modified, err := _substitute(config.Manifest, manifestVariables, config.ManifestVariablesFiles)
+			if err != nil {
+				return "", []string{}, []string{}, errors.Wrap(err, "Cannot prepare manifest file")
+			}
+
+			if modified {
+				log.Entry().Infof("Manifest file '%s' has been updated (variable substitution)", config.Manifest)
+			} else {
+				log.Entry().Infof("Manifest file '%s' has not been updated (variable substitution)", config.Manifest)
+			}
 
 			err = handleLegacyCfManifest(config.Manifest)
 			if err != nil {

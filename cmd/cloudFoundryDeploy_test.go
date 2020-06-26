@@ -5,6 +5,7 @@ import (
 	"github.com/SAP/jenkins-library/pkg/cloudfoundry"
 	"github.com/SAP/jenkins-library/pkg/mock"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
+	"github.com/SAP/jenkins-library/pkg/yaml"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -52,6 +53,7 @@ func TestCfDeployment(t *testing.T) {
 
 	defer func() {
 		fileUtils = &piperutils.Files{}
+		_substitute = yaml.Substitute
 	}()
 
 	filesMock := mock.FilesMock{}
@@ -140,6 +142,78 @@ func TestCfDeployment(t *testing.T) {
 		logoutCalled = true
 		return nil
 	}
+
+	_substitute = func(manifest string, replacements map[string]interface{}, replacementsFiles []string) (bool, error) {
+		return false, nil
+	}
+
+	t.Run("Manifest substitution", func(t *testing.T) {
+
+		defer func() {
+			cleanup()
+			_substitute = func(manifest string, replacements map[string]interface{}, replacementsFiles []string) (bool, error) {
+				return false, nil
+			}
+		}()
+
+		s := mock.ExecMockRunner{}
+
+		var manifestForSubstitution string
+		var replacements map[string]interface{}
+		var replacementFiles []string
+
+		defer prepareDefaultManifestMocking("substitute-manifest.yml", []string{"testAppName"})()
+		config.DeployTool = "cf_native"
+		config.DeployType = "blue-green"
+		config.AppName = "myApp"
+		config.Manifest = "substitute-manifest.yml"
+
+		_substitute = func(manifest string, _replacements map[string]interface{}, _replacementsFiles []string) (bool, error) {
+			manifestForSubstitution = manifest
+			replacements = _replacements
+			replacementFiles = _replacementsFiles
+			return false, nil
+		}
+
+		t.Run("straight forward", func(t *testing.T) {
+
+			defer func() {
+				config.ManifestVariables = []string{}
+				config.ManifestVariablesFiles = []string{}
+			}()
+
+			config.ManifestVariables = []string{"k1=v1"}
+			config.ManifestVariablesFiles = []string{"myVars.yml"}
+
+			err := runCloudFoundryDeploy(&config, nil, nil, &s)
+
+			if assert.NoError(t, err) {
+				assert.Equal(t, "substitute-manifest.yml", manifestForSubstitution)
+				assert.Equal(t, map[string]interface{}{"k1":"v1"}, replacements)
+				assert.Equal(t, []string{"myVars.yml"}, replacementFiles)
+			}
+		})
+
+
+		t.Run("empty", func(t *testing.T) {
+
+			defer func() {
+				config.ManifestVariables = []string{}
+				config.ManifestVariablesFiles = []string{}
+			}()
+
+			config.ManifestVariables = []string{}
+			config.ManifestVariablesFiles = []string{}
+
+			err := runCloudFoundryDeploy(&config, nil, nil, &s)
+
+			if assert.NoError(t, err) {
+				assert.Equal(t, "substitute-manifest.yml", manifestForSubstitution)
+				assert.Equal(t, map[string]interface{}{}, replacements)
+				assert.Equal(t, []string{}, replacementFiles)
+			}
+		})
+	})
 
 	t.Run("Invalid deploytool", func(t *testing.T) {
 
