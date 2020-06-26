@@ -185,13 +185,13 @@ func TestCfDeployment(t *testing.T) {
 					}, s.Calls)
 				})
 			})
-		}
 
-		t.Run("check environment variables", func(t *testing.T) {
-			assert.Contains(t, s.Env, "CF_HOME=/home/me")        // REVISIT: cross check if that variable should point to the user home dir
-			assert.Contains(t, s.Env, "CF_PLUGIN_HOME=/home/me") // REVISIT: cross check if that variable should point to the user home dir
-			assert.Contains(t, s.Env, "STATUS_CODE=200")
-		})
+			t.Run("check environment variables", func(t *testing.T) {
+				assert.Contains(t, s.Env, "CF_HOME=/home/me")        // REVISIT: cross check if that variable should point to the user home dir
+				assert.Contains(t, s.Env, "CF_PLUGIN_HOME=/home/me") // REVISIT: cross check if that variable should point to the user home dir
+				assert.Contains(t, s.Env, "STATUS_CODE=200")
+			})
+		}
 	})
 
 	t.Run("influx reporting", func(t *testing.T) {
