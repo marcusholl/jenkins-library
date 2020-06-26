@@ -51,6 +51,10 @@ func (m manifestMock) WriteManifest() error {
 
 func TestCfDeployment(t *testing.T) {
 
+	defer func() {
+		fileUtils = &piperutils.Files{}
+	}()
+
 	filesMock := mock.FilesMock{}
 	filesMock.AddDir("/home/me")
 	filesMock.Chdir("/home/me")
@@ -90,9 +94,7 @@ func TestCfDeployment(t *testing.T) {
 
 	prepareDefaultManifestMocking := func(manifestName string, appNames []string) func() {
 
-		_fileExists = func(name string) (bool, error) {
-			return name == manifestName, nil
-		}
+		filesMock.AddFile(manifestName, []byte("file content does not matter"))
 
 		apps := []map[string]interface{} {}
 
@@ -108,7 +110,7 @@ func TestCfDeployment(t *testing.T) {
 		}
 
 		return func() {
-			_fileExists = piperutils.FileExists
+			filesMock.FileRemove(manifestName) // slightly mis-use since that is intended to be used by code under test, not test code
 			_getManifest = getManifest
 		}
 	}
@@ -496,13 +498,11 @@ func TestCfDeployment(t *testing.T) {
 		config.AppName = "myTestApp"
 
 		defer func() {
-			_fileExists = piperutils.FileExists
+			filesMock.FileRemove("test-manifest.yml")
 			_getManifest = getManifest
 		}()
 
-		_fileExists = func(name string) (bool, error) {
-			return name == "test-manifest.yml", nil
-		}
+		filesMock.AddFile("test-manifest.yml", []byte("Content does not matter"))
 
 		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
 			return manifestMock{
@@ -657,13 +657,11 @@ func TestCfDeployment(t *testing.T) {
 		config.Manifest = "test-manifest.yml"
 
 		defer func() {
-			_fileExists = piperutils.FileExists
+			filesMock.FileRemove("test-manifest.yml")
 			_getManifest = getManifest
 		}()
 
-		_fileExists = func(name string) (bool, error) {
-			return name == "test-manifest.yml", nil
-		}
+		filesMock.AddFile("test-manifest.yml", []byte("The content does not matter"))
 
 		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
 			return manifestMock{
@@ -700,12 +698,10 @@ func TestCfDeployment(t *testing.T) {
 		config.MtarPath = "target/test.mtar"
 
 		defer func() {
-			_fileExists = piperutils.FileExists
+			filesMock.FileRemove("target/test.mtar")
 		}()
 
-		_fileExists = func(name string) (bool, error) {
-			return name == "target/test.mtar", nil
-		}
+		filesMock.AddFile("target/test.mtar", []byte("content does not matter"))
 
 		s := mock.ExecMockRunner{}
 
@@ -750,13 +746,11 @@ func TestCfDeployment(t *testing.T) {
 		config.AppName = "testAppName"
 
 		defer func() {
-			_fileExists = piperutils.FileExists
 			_getManifest = getManifest
 		}()
 
-		_fileExists = func(name string) (bool, error) {
-			return name == "test-manifest.yml" || name == "vars.yaml", nil
-		}
+		filesMock.AddFile("vars.yaml", []byte("content does not matter"))
+		filesMock.AddFile("test-manifest.yml", []byte("content does not matter"))
 
 		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
 			return manifestMock{
@@ -810,13 +804,13 @@ func TestCfDeployment(t *testing.T) {
 		config.AppName = "testAppName"
 
 		defer func() {
-			_fileExists = piperutils.FileExists
+			filesMock.FileRemove("test-manifest.yml")
+			filesMock.FileRemove("vars.yaml")
 			_getManifest = getManifest
 		}()
 
-		_fileExists = func(name string) (bool, error) {
-			return name == "test-manifest.yml" || name == "vars.yaml", nil
-		}
+		filesMock.AddFile("test-manifest.yml", []byte("content does not matter"))
+		filesMock.AddFile("vars.yaml", []byte("content does not matter"))
 
 		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
 			return manifestMock{
@@ -907,12 +901,14 @@ func TestCfDeployment(t *testing.T) {
 func TestManifestVariableFiles(t *testing.T) {
 
 	defer func() {
-		_fileExists = piperutils.FileExists
+		fileUtils = &piperutils.Files{}
 	}()
 
-	_fileExists = func(name string) (bool, error) {
-		return name == "a/varsA.txt" || name == "varsB.txt", nil
-	}
+	filesMock := mock.FilesMock{}
+	fileUtils = &filesMock
+
+	filesMock.AddFile("a/varsA.txt", []byte("content does not matter"))
+	filesMock.AddFile("varsB.txt", []byte("content does not matter"))
 
 	t.Run("straight forward", func(t *testing.T) {
 		varOpts, err := getVarFileOptions([]string{"a/varsA.txt", "varsB.txt"})

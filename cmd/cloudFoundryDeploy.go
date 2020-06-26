@@ -20,6 +20,7 @@ import (
 
 
 type cfFileUtil interface {
+	FileExists(string) (bool, error)
 	FileWrite(path string, content []byte, perm os.FileMode) error
 	Getwd() (string, error)
 }
@@ -28,7 +29,6 @@ var _glob = glob.Glob // func(patterns []string) ([]*glob.FileAsset, []*glob.Reg
 var _now = time.Now
 var _cfLogin = cloudfoundry.Login
 var _cfLogout = cloudfoundry.Logout
-var _fileExists = piperutils.FileExists
 var _getManifest = getManifest
 var _substitute = yaml.Substitute
 var fileUtils cfFileUtil = piperutils.Files{}
@@ -123,7 +123,7 @@ func handleMTADeployment(config *cloudFoundryDeployOptions, command execRunner) 
 
 	} else {
 
-		exists, err := _fileExists(mtarFilePath)
+		exists, err := fileUtils.FileExists(mtarFilePath)
 
 		if err != nil {
 			return err
@@ -314,7 +314,7 @@ func getAppNameOrFail(config *cloudFoundryDeployOptions, manifestFile string) (s
 	if config.DeployType == "blue-green" {
 		return "", fmt.Errorf("Blue-green plugin requires app name to be passed (see https://github.com/bluemixgaragelondon/cf-blue-green-deploy/issues/27)")
 	}
-	fileExists, err := _fileExists(manifestFile)
+	fileExists, err := fileUtils.FileExists(manifestFile)
 	if err != nil {
 		return "", err
 	}
@@ -394,7 +394,7 @@ func prepareBlueGreenCfNativeDeploy(config *cloudFoundryDeployOptions) (string, 
 	}
 
 	if len(config.Manifest) > 0 {
-		manifestFileExists, err := _fileExists(config.Manifest)
+		manifestFileExists, err := fileUtils.FileExists(config.Manifest)
 		if err != nil {
 			return "", []string{}, []string{}, err
 		}
@@ -511,7 +511,7 @@ func getVarFileOptions(varFiles []string) ([]string, error) {
 	varFilesResult := []string{}
 
 	for _, varFile := range varFiles {
-		fExists, err := _fileExists(varFile)
+		fExists, err := fileUtils.FileExists(varFile)
 		if err != nil {
 			return []string{}, err
 		}
@@ -541,7 +541,7 @@ func checkAndUpdateDeployTypeForNotSupportedManifest(config *cloudFoundryDeployO
 	var err error
 
 	if len(manifestFile) > 0 {
-		manifestFileExists, err = _fileExists(manifestFile)
+		manifestFileExists, err = fileUtils.FileExists(manifestFile)
 		if err != nil {
 			return "", err
 		}
@@ -749,7 +749,7 @@ func findMtar() (string, error) {
 
 func handleCfCliLog(logFile string) error {
 
-	fExists, err := _fileExists(logFile)
+	fExists, err := fileUtils.FileExists(logFile)
 
 	if err != nil {
 		return err
