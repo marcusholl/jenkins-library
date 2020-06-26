@@ -96,7 +96,7 @@ func TestCfDeployment(t *testing.T) {
 
 		filesMock.AddFile(manifestName, []byte("file content does not matter"))
 
-		apps := []map[string]interface{} {}
+		apps := []map[string]interface{}{}
 
 		for _, appName := range appNames {
 			apps = append(apps, map[string]interface{}{"name": appName})
@@ -104,9 +104,9 @@ func TestCfDeployment(t *testing.T) {
 
 		_getManifest = func(name string) (cloudfoundry.Manifest, error) {
 			return manifestMock{
-					manifestFileName: manifestName,
-					apps:             apps,
-				}, nil
+				manifestFileName: manifestName,
+				apps:             apps,
+			}, nil
 		}
 
 		return func() {
@@ -331,7 +331,6 @@ func TestCfDeployment(t *testing.T) {
 		config.DockerUsername = "test_cf_docker"
 		config.DockerPassword = "********"
 		config.AppName = "testAppName"
-
 
 		defer prepareDefaultManifestMocking("manifest.yml", []string{"testAppName"})()
 

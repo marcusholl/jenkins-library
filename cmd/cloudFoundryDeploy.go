@@ -18,7 +18,6 @@ import (
 	"time"
 )
 
-
 type cfFileUtil interface {
 	FileExists(string) (bool, error)
 	FileWrite(path string, content []byte, perm os.FileMode) error
