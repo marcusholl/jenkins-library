@@ -184,13 +184,10 @@ func handleCFNativeDeployment(config *cloudFoundryDeployOptions, command execRun
 		}
 	}
 
-	/*
-	   	echo "[${STEP_NAME}] - cfManifestVariables=${config.cloudFoundry.manifestVariables ?: 'none specified'}"
-	       echo "[${STEP_NAME}] - cfManifestVariablesFiles=${config.cloudFoundry.manifestVariablesFiles ?: 'none specified'}"
-	       echo "[${STEP_NAME}] - cfdeployDockerImage=${config.deployDockerImage ?: 'none specified'}"
-	       echo "[${STEP_NAME}] - cfdockerCredentialsId=${config.dockerCredentialsId ?: 'none specified'}"
-	       echo "[${STEP_NAME}] - smokeTestScript=${config.smokeTestScript}"
-	*/
+	log.Entry().Info("cfManifestVariables: '%v'", config.ManifestVariables)
+	log.Entry().Info("cfManifestVariablesFiles: '%v'", config.ManifestVariablesFiles)
+	log.Entry().Info("cfdeployDockerImage: '%s'", config.DeployDockerImage)
+	log.Entry().Info("smokeTestScript: '%s'", config.SmokeTestScript)
 
 	pwd, err := fileUtils.Getwd()
 	if err != nil {
