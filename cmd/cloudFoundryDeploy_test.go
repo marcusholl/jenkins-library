@@ -189,11 +189,10 @@ func TestCfDeployment(t *testing.T) {
 
 			if assert.NoError(t, err) {
 				assert.Equal(t, "substitute-manifest.yml", manifestForSubstitution)
-				assert.Equal(t, map[string]interface{}{"k1":"v1"}, replacements)
+				assert.Equal(t, map[string]interface{}{"k1": "v1"}, replacements)
 				assert.Equal(t, []string{"myVars.yml"}, replacementFiles)
 			}
 		})
-
 
 		t.Run("empty", func(t *testing.T) {
 

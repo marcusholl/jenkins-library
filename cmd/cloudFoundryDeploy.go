@@ -171,7 +171,6 @@ func handleCFNativeDeployment(config *cloudFoundryDeployOptions, command execRun
 		if err != nil {
 			return errors.Wrapf(err, "Cannot prepare cf push native deployment. DeployType '%s'", deployType)
 		}
-
 	}
 
 	if len(config.AppName) == 0 {
