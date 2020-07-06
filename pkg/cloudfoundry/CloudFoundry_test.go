@@ -19,9 +19,9 @@ func TestCloudFoundryLoginCheck(t *testing.T) {
 	m := &mock.ExecMockRunner{}
 
 	defer func() {
-		c = &command.Command{}
+		ExecRunner = &command.Command{}
 	}()
-	c = m
+	ExecRunner = m
 
 	t.Run("CF Login check: missing endpoint parameter", func(t *testing.T) {
 		cfconfig := LoginOptions{}
@@ -87,9 +87,9 @@ func TestCloudFoundryLogin(t *testing.T) {
 	m := &mock.ExecMockRunner{}
 
 	defer func() {
-		c = &command.Command{}
+		ExecRunner = &command.Command{}
 	}()
-	c = m
+	ExecRunner = m
 
 	t.Run("CF Login: missing parameter", func(t *testing.T) {
 
