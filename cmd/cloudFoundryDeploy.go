@@ -684,6 +684,12 @@ func cfDeploy(
 	// TODO set HOME to config.DockerWorkspace
 	command.SetEnv(additionalEnvironment)
 
+	oldCloudFoundryExecRunner := cloudfoundry.ExecRunner
+	defer func() {
+		cloudfoundry.ExecRunner = oldCloudFoundryExecRunner
+	}()
+	cloudfoundry.ExecRunner = command
+
 	err = _cfLogin(cloudfoundry.LoginOptions{
 		CfAPIEndpoint: config.APIEndpoint,
 		CfOrg:         config.Org,
