@@ -26,8 +26,13 @@ func LoginCheck(options LoginOptions) (bool, error) {
 	//Check if logged in --> Cf api command responds with "not logged in" if positive
 	var cfCheckLoginScript = append([]string{"api", options.CfAPIEndpoint}, options.CfAPIOpts...)
 
+	defer func() {
+		ExecRunner.Stdout(log.Writer())
+	}()
+
 	var cfLoginBytes bytes.Buffer
 	ExecRunner.Stdout(&cfLoginBytes)
+
 
 	var result string
 
