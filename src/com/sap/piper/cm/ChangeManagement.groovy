@@ -194,7 +194,10 @@ public class ChangeManagement implements Serializable {
         //      upload is faster, but we have to maintain the image.
         // 2.2) the call in the narrower sense
 
-        def cmd = '''
+        def cmd = '''#!/bin/bash
+                      # we should make the install call configurable since the dependencies might change.
+                      # apparently the transitive deps are not installed automatically, this did not happen
+                      # at least for logger and fs ...
                       npm install -g @ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs
                       su node
                       fiori deploy
