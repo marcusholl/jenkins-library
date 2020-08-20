@@ -188,7 +188,17 @@ public class ChangeManagement implements Serializable {
         //     that file from environmentVariables.
 
         // 2.) create the call
-        def cmd = 'fiori deploy'
+        // 2.1) prepare environment --> currently I assume a node default image. We need to start
+        //      as root, after that we can switch to a standard user (node/1000). Other approach would
+        //      be to provide a derived image already containing the fiori upload deps. With this the
+        //      upload is faster, but we have to maintain the image.
+        // 2.2) the call in the narrower sense
+
+        def cmd = '''
+                      npm install -g @ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs
+                      su node
+                      fiori deploy
+                  '''
 
         // 3.) execute the call in an appropirate docker container (fiori toolset) and evaluate the return code
         //     or let the AbortException bubble up.
@@ -200,10 +210,13 @@ public class ChangeManagement implements Serializable {
             // Set userName and password for the node call
             dockerEnvVars << [ABAP_USER: username, ABAP_PASSWORD: password]
 
+            // when we install globally we need to be root
+            dockerOptions = docker.options '-u 0' // should only be added if not already present.
+
             this.script.dockerExecute
                 script: this.script,
                 dockerImage: docker.image,
-                dockerOptions: docker.options,
+                dockerOptions: dockerOptions,
                 dockerEnvVars: dockerEnvVars,
                 dockerPullImage: docker.pullImage) {
 
@@ -219,6 +232,8 @@ public class ChangeManagement implements Serializable {
         // different toolset for three ways to perform the upload. The general code flow cannot be explained anymore to
         // anybody. ==> we should rework that. Makes also a shift to go easier at a later point in time when the code is
         // well structured.
+        //
+        // currently fiori deploy requires a confirmation (Y) --> needs to be changed with some kind of --auto-confirm.
 
     }
 
