@@ -177,15 +177,11 @@ public class ChangeManagement implements Serializable {
         String credentialsId,
         String cmclientOpts = '') {
 
-        // 1.) if needed in the context of fiori deploy (for 'ui5 build' this is needed):
-        //     create the config file file, eg. by calling the correponding wizzard
-        //     if possible we should locate that file somehere in a tmp folder in .pipeline
+        // 1.) Create the config file file, eg. by calling the correponding wizzard.
+        //     If possible we should locate that file somehere in a tmp folder in .pipeline
         //     in order to avoid collisions with file from the project or in order to avoid
         //     having that file in some build results (... zip).
-        //     revisit: how does this work when calling fiori deploy. There is no need for
-        //     providing a config file. But from the config file which is used for ui5 build
-        //     we fetch the credentials (not directy contained in that file, but exctracted via
-        //     that file from environmentVariables.
+        //     config file can be forwarded by -c
 
         // 2.) create the call
         // 2.1) prepare environment --> currently I assume a node default image. We need to start
@@ -194,14 +190,16 @@ public class ChangeManagement implements Serializable {
         //      upload is faster, but we have to maintain the image.
         // 2.2) the call in the narrower sense
 
-        def cmd = '''#!/bin/bash
+        def deployConfigFile = 'ui5-deploy.yaml' // this is the default value assumed by the toolset anyhow.
+
+        def cmd = """#!/bin/bash
                       # we should make the install call configurable since the dependencies might change.
                       # apparently the transitive deps are not installed automatically, this did not happen
                       # at least for logger and fs ...
                       npm install -g @ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs
                       su node
-                      fiori deploy
-                  '''
+                      fiori deploy -c "${deployConfigFile}"
+                  """
 
         // 3.) execute the call in an appropirate docker container (fiori toolset) and evaluate the return code
         //     or let the AbortException bubble up.
