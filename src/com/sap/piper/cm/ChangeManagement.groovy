@@ -177,25 +177,49 @@ public class ChangeManagement implements Serializable {
         String credentialsId,
         String cmclientOpts = '') {
 
-        def args = [
-                '-tID', transportRequestId,
-                "\"$filePath\""
-            ]
+        // 1.) if needed in the context of fiori deploy (for 'ui5 build' this is needed):
+        //     create the config file file, eg. by calling the correponding wizzard
+        //     if possible we should locate that file somehere in a tmp folder in .pipeline
+        //     in order to avoid collisions with file from the project or in order to avoid
+        //     having that file in some build results (... zip).
+        //     revisit: how does this work when calling fiori deploy. There is no need for
+        //     providing a config file. But from the config file which is used for ui5 build
+        //     we fetch the credentials (not directy contained in that file, but exctracted via
+        //     that file from environmentVariables.
 
-        int rc = executeWithCredentials(
-            BackendType.CTS,
-            docker,
-            endpoint,
-            credentialsId,
-            'upload-file-to-transport',
-            args,
-            false,
-            cmclientOpts) as int
+        // 2.) create the call
+        def cmd = 'fiori deploy'
 
-        if(rc != 0) {
-            throw new ChangeManagementException(
-                "Cannot upload file into transport request. Return code from  cm client: $rc.")
+        // 3.) execute the call in an appropirate docker container (fiori toolset) and evaluate the return code
+        //     or let the AbortException bubble up.
+        this.script.withCredentials([script.usernamePassword(
+            credentialsId: credentialsId,
+            passwordVariable: 'password',
+            usernameVariable: 'username')]) {
+
+            // Set userName and password for the node call
+            dockerEnvVars << [ABAP_USER: username, ABAP_PASSWORD: password]
+
+            this.script.dockerExecute
+                script: this.script,
+                dockerImage: docker.image,
+                dockerOptions: docker.options,
+                dockerEnvVars: dockerEnvVars,
+                dockerPullImage: docker.pullImage) {
+
+                this.script.sh script: cmd
+            }
         }
+        // === Dungheap ===
+        // We need to cross check the dependencies between a project and our deployment code. e.g. the fiori toolset
+        // expects the folder containing the app inside a folder 'dist' (hard coded).
+        //
+        // In the meantime the code is not well structed anymore. We started with supporting the cm client only.
+        // Afterwards we added RFC upload support. Now we use node based toolset for the CTS upload. We have now three
+        // different toolset for three ways to perform the upload. The general code flow cannot be explained anymore to
+        // anybody. ==> we should rework that. Makes also a shift to go easier at a later point in time when the code is
+        // well structured.
+
     }
 
     void uploadFileToTransportRequestRFC(
