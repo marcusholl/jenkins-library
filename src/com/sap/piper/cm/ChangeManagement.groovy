@@ -207,13 +207,20 @@ public class ChangeManagement implements Serializable {
             passwordVariable: 'password',
             usernameVariable: 'username')]) {
 
-            // Set userName and password for the node call
+            // Set userName and password for the node call, we have to prepare the config
+            // file so that this reads the variables from the environment (e.g.
+
+            //   credentials:
+            //   username: env:ABAP_USER
+            //   password: env:ABAP_PASSWORD
+            // )
+
             dockerEnvVars << [ABAP_USER: username, ABAP_PASSWORD: password]
 
-            // when we install globally we need to be root
-            dockerOptions = docker.options '-u 0' // should only be added if not already present.
+            // when we install globally we need to be root, after preparing that we can su node` in the bash script.
+            dockerOptions = docker.options + '-u 0' // should only be added if not already present.
 
-            this.script.dockerExecute
+            this.script.dockerExecute(
                 script: this.script,
                 dockerImage: docker.image,
                 dockerOptions: dockerOptions,
