@@ -341,6 +341,10 @@ public void testGetCommandLineWithCMClientOpts() {
         assert script.shell[0].contains("fiori deploy -c \"ui5-deploy.yaml\"")
         assert dockerExecuteRule.getDockerParams().dockerImage == 'node'
         assert dockerExecuteRule.getDockerParams().dockerPullImage == true
+
+        // we launch the container as root (uid 0) in order to be able to install
+        // the deploytool. Before deploying we su to another user.
+        dockerExecuteRule.getDockerParams().dockerOptions = ['-u', '0']
     }
 
     @Test

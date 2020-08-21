@@ -263,7 +263,7 @@ public class ChangeManagement implements Serializable {
             def dockerEnvVars = docker.envVars ?: [:] + [ABAP_USER: script.username, ABAP_PASSWORD: script.password]
 
             // when we install globally we need to be root, after preparing that we can su node` in the bash script.
-            def dockerOptions = docker.options + '-u 0' // should only be added if not already present.
+            def dockerOptions = docker.options ?: [] + ['-u', '0'] // should only be added if not already present.
 
             script.dockerExecute(
                 script: script,
