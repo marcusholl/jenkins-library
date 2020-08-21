@@ -181,15 +181,14 @@ public class ChangeManagement implements Serializable {
 
         def script = this.script
 
-        // 1.) Create the config file file, eg. by calling the correponding wizzard.
-        //     If possible we should locate that file somehere in a tmp folder in .pipeline
-        //     in order to avoid collisions with file from the project or in order to avoid
-        //     having that file in some build results (... zip).
-        //     config file can be forwarded by -c
-
+        // 1.) Create the config file
+        //
         // REVISIT:
         //   * either switch to wizzard or convert to map which gets serialized
         //   * make excludes configurable --> easier with a map which gets serialized
+        //   * maybe we should relocate the config file into a tmp folder inside .pipeline in order not
+        //     to avoid collisions with files from the project or in order to void having that
+        //     file in some build results (e.g. zipped).
         //
         // Environment variables ABAP_USER and ABAP_PASSWORD needs to be set on the docker container
         // REVISIT: do we need to support also the local use case (dockerExecute performs a fallback
@@ -252,14 +251,10 @@ public class ChangeManagement implements Serializable {
             passwordVariable: 'password',
             usernameVariable: 'username')]) {
 
-            // Set userName and password for the node call, we have to prepare the config
-            // file so that this reads the variables from the environment (e.g.
-
-            //   credentials:
-            //   username: env:ABAP_USER
-            //   password: env:ABAP_PASSWORD
-            // )
-
+            // Set username and password for the fiori deploy call. The config file is configured to read the
+            // credentials from the environment (see above in the config file template).
+            // After installing the deploy toolset we switch the user. Since we do not su with option '-l' the
+            // environment variables are preserved.
             def dockerEnvVars = docker.envVars ?: [:] + [ABAP_USER: script.username, ABAP_PASSWORD: script.password]
 
             // when we install globally we need to be root, after preparing that we can su node` in the bash script.
@@ -274,7 +269,6 @@ public class ChangeManagement implements Serializable {
 
                 script.sh script: cmd
             }
-
         }
         // === Dungheap ===
         // We need to cross check the dependencies between a project and our deployment code. e.g. the fiori toolset
@@ -287,7 +281,6 @@ public class ChangeManagement implements Serializable {
         // well structured.
         //
         // currently fiori deploy requires a confirmation (Y) --> needs to be changed with some kind of --auto-confirm.
-
     }
 
     void uploadFileToTransportRequestRFC(
