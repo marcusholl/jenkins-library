@@ -172,16 +172,57 @@ public class ChangeManagement implements Serializable {
     void uploadFileToTransportRequestCTS(
         Map docker,
         String transportRequestId,
-        String filePath,
+        // String filePath, --> hard coded "dist" folder
         String endpoint,
-        String credentialsId,
-        String cmclientOpts = '') {
+        String client,
+        String applicationName,
+        String abapPackage, // "package" would be better, but this is a keyword
+        String credentialsId) {
 
         // 1.) Create the config file file, eg. by calling the correponding wizzard.
         //     If possible we should locate that file somehere in a tmp folder in .pipeline
         //     in order to avoid collisions with file from the project or in order to avoid
         //     having that file in some build results (... zip).
         //     config file can be forwarded by -c
+
+        // REVISIT:
+        //   * either switch to wizzard or convert to map which gets serialized
+        //   * make excludes configurable --> easier with a map which gets serialized
+        //
+        // Environment variables ABAP_USER and ABAP_PASSWORD needs to be set on the docker container
+        // REVISIT: do we need to support also the local use case (dockerExecute performs a fallback
+        // to current system in case no docker environment is available).
+        // In that case we need to provide the environment variables for the local shell. I guess running
+        // tasks locally is the meantime somehow outdated. But to my knowledge we never dropped that officially
+        def deployConfig =   """|specVersion: '1.0'
+                                |metadata:
+                                |  name: ${applicationName}
+                                |type: application
+                                |builder:
+                                |  customTasks:
+                                |  - name: deploy-to-abap
+                                |    afterTask: replaceVersion
+                                |    configuration:
+                                |      target:
+                                |        url: ${endpoint}
+                                |        client: ${client}
+                                |        auth: basic
+                                |      credentials:
+                                |        username: env:ABAP_USER
+                                |        password: env:ABAP_PASSWORD
+                                |      app:
+                                |        name: ${applicationName}
+                                |        package: ${abapPackage}
+                                |        transport: ${transportRequestId}
+                                |      exclude:
+                                |      - .*\\.test.js
+                                |      - internal.md
+                                |""".stripMargin()
+
+        def deployConfigFile = 'ui5-deploy.yaml' // this is the default value assumed by the toolset anyhow.
+
+        // Revisit: should be located in a tmp dir inside '.pipeline'
+        script.writeFile file: deployConfigFile, text: deployConfig, encoding: 'UTF-8'
 
         // 2.) create the call
         // 2.1) prepare environment --> currently I assume a node default image. We need to start
@@ -190,7 +231,6 @@ public class ChangeManagement implements Serializable {
         //      upload is faster, but we have to maintain the image.
         // 2.2) the call in the narrower sense
 
-        def deployConfigFile = 'ui5-deploy.yaml' // this is the default value assumed by the toolset anyhow.
 
         // TODO make configurable
         def osDeployUser = 'node'
@@ -203,7 +243,7 @@ public class ChangeManagement implements Serializable {
                         | fiori deploy -c "${deployConfigFile}"
                         |""".stripMargin()
 
-        // 3.) execute the call in an appropirate docker container (fiori toolset) and evaluate the return code
+        // 3.) execute the call in an appropirate docker container (node) and evaluate the return code
         //     or let the AbortException bubble up.
         this.script.withCredentials([script.usernamePassword(
             credentialsId: credentialsId,
