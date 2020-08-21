@@ -299,12 +299,9 @@ public void testGetCommandLineWithCMClientOpts() {
     @Test
     public void testUploadFileToTransportSucceedsCTS() {
 
-        // the regex provided below is an implicit check that the command line is fine.
-        script.setReturnValue(JenkinsShellCallRule.Type.REGEX, '-t CTS upload-file-to-transport -tID 002 "/path"', 0)
-
         new ChangeManagement(nullScript).uploadFileToTransportRequestCTS(
             [
-                image: 'ppiper/cmclient',
+                image: 'node',
                 pullImage: true
              ],
             '002',
@@ -315,11 +312,35 @@ public void testGetCommandLineWithCMClientOpts() {
             'me',
         )
 
-        assert dockerExecuteRule.getDockerParams().dockerImage == 'ppiper/cmclient'
-        assert dockerExecuteRule.getDockerParams().dockerPullImage == true
+        def configFileExpected = """|specVersion: '1.0'
+                                    |metadata:
+                                    |  name: myApp
+                                    |type: application
+                                    |builder:
+                                    |  customTasks:
+                                    |  - name: deploy-to-abap
+                                    |    afterTask: replaceVersion
+                                    |    configuration:
+                                    |      target:
+                                    |        url: https://example.org/cm
+                                    |        client: 001
+                                    |        auth: basic
+                                    |      credentials:
+                                    |        username: env:ABAP_USER
+                                    |        password: env:ABAP_PASSWORD
+                                    |      app:
+                                    |        name: myApp
+                                    |        package: aPackage
+                                    |        transport: 002
+                                    |      exclude:
+                                    |      - .*\\.test.js
+                                    |      - internal.md
+                                    |""".stripMargin()
 
-        // no assert for the shell command required here, since the regex registered
-        // above to the script rule is an implicit check for the command line.
+        assert writeFileRule.files['ui5-deploy.yaml'].equals(configFileExpected)
+        assert script.shell[0].contains("fiori deploy -c \"ui5-deploy.yaml\"")
+        assert dockerExecuteRule.getDockerParams().dockerImage == 'node'
+        assert dockerExecuteRule.getDockerParams().dockerPullImage == true
     }
 
     @Test
