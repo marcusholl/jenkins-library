@@ -192,14 +192,16 @@ public class ChangeManagement implements Serializable {
 
         def deployConfigFile = 'ui5-deploy.yaml' // this is the default value assumed by the toolset anyhow.
 
-        def cmd = """#!/bin/bash
-                      # we should make the install call configurable since the dependencies might change.
-                      # apparently the transitive deps are not installed automatically, this did not happen
-                      # at least for logger and fs ...
-                      npm install -g @ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs
-                      su node
-                      fiori deploy -c "${deployConfigFile}"
-                  """
+        // TODO make configurable
+        def osDeployUser = 'node'
+        // TODO make configurable
+        def deployTools = '@ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs'
+
+        def cmd =    """|#!/bin/bash
+                        |npm install -g ${deployTools}
+                        |su ${osDeployUser}
+                        | fiori deploy -c "${deployConfigFile}"
+                        |""".stripMargin()
 
         // 3.) execute the call in an appropirate docker container (fiori toolset) and evaluate the return code
         //     or let the AbortException bubble up.
