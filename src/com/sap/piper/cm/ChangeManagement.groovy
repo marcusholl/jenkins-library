@@ -179,6 +179,8 @@ public class ChangeManagement implements Serializable {
         String abapPackage, // "package" would be better, but this is a keyword
         String credentialsId) {
 
+        def script = this.script
+
         // 1.) Create the config file file, eg. by calling the correponding wizzard.
         //     If possible we should locate that file somehere in a tmp folder in .pipeline
         //     in order to avoid collisions with file from the project or in order to avoid
@@ -245,7 +247,7 @@ public class ChangeManagement implements Serializable {
 
         // 3.) execute the call in an appropirate docker container (node) and evaluate the return code
         //     or let the AbortException bubble up.
-        this.script.withCredentials([script.usernamePassword(
+        script.withCredentials([script.usernamePassword(
             credentialsId: credentialsId,
             passwordVariable: 'password',
             usernameVariable: 'username')]) {
@@ -263,15 +265,16 @@ public class ChangeManagement implements Serializable {
             // when we install globally we need to be root, after preparing that we can su node` in the bash script.
             def dockerOptions = docker.options + '-u 0' // should only be added if not already present.
 
-            this.script.dockerExecute(
-                script: this.script,
+            script.dockerExecute(
+                script: script,
                 dockerImage: docker.image,
                 dockerOptions: dockerOptions,
                 dockerEnvVars: dockerEnvVars,
                 dockerPullImage: docker.pullImage) {
 
-                this.script.sh script: cmd
+                script.sh script: cmd
             }
+
         }
         // === Dungheap ===
         // We need to cross check the dependencies between a project and our deployment code. e.g. the fiori toolset
