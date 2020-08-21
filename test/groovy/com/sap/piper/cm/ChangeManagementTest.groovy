@@ -338,10 +338,12 @@ public void testGetCommandLineWithCMClientOpts() {
                                     |""".stripMargin()
 
         assert writeFileRule.files['ui5-deploy.yaml'].equals(configFileExpected)
+
         assert script.shell[0].contains("fiori deploy -c \"ui5-deploy.yaml\"")
+
         assert dockerExecuteRule.getDockerParams().dockerImage == 'node'
         assert dockerExecuteRule.getDockerParams().dockerPullImage == true
-
+        assert dockerExecuteRule.getDockerParams().dockerEnvVars == [ABAP_USER: "user", ABAP_PASSWORD: 'password']
         // we launch the container as root (uid 0) in order to be able to install
         // the deploytool. Before deploying we su to another user.
         dockerExecuteRule.getDockerParams().dockerOptions = ['-u', '0']
