@@ -344,6 +344,29 @@ public void testGetCommandLineWithCMClientOpts() {
     }
 
     @Test
+    public void testUploadFileToTransportShellFailsCTS() {
+
+        thrown.expect(AbortException)
+        thrown.expectMessage('script returned exit code 1')
+
+        script.setReturnValue(JenkinsShellCallRule.Type.REGEX, '.*fiori deploy.*',
+            { throw new AbortException('script returned exit code 1') })
+
+        new ChangeManagement(nullScript).uploadFileToTransportRequestCTS(
+            [
+                image: 'node',
+                pullImage: true
+            ],
+            '002',
+            'https://example.org/cm',
+            '001',
+            'myApp',
+            'aPackage',
+            'me',
+        )
+    }
+
+    @Test
     public void testUploadFileToTransportSucceedsRFC() {
 
         new ChangeManagement(nullScript).uploadFileToTransportRequestRFC(
