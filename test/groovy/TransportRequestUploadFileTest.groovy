@@ -156,31 +156,37 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
     @Test
     public void uploadFileToTransportRequestCTSSuccessTest() {
 
-        loggingRule.expect("[INFO] Uploading file '/path' to transport request '002'.")
-        loggingRule.expect("[INFO] File '/path' has been successfully uploaded to transport request '002'.")
+        loggingRule.expect("[INFO] Uploading application 'myApp' to transport request '002'.")
+        loggingRule.expect("[INFO] Application 'myApp' has been successfully uploaded to transport request '002'.")
 
         ChangeManagement cm = new ChangeManagement(nullScript) {
             void uploadFileToTransportRequestCTS(
                                               Map docker,
                                               String transportRequestId,
-                                              String filePath,
                                               String endpoint,
-                                              String credentialsId,
-                                              String cmclientOpts) {
+                                              String client,
+                                              String appName,
+                                              String abapPackage,
+                                              String credentialsId) {
 
                 cmUtilReceivedParams.docker = docker
                 cmUtilReceivedParams.transportRequestId = transportRequestId
-                cmUtilReceivedParams.filePath = filePath
                 cmUtilReceivedParams.endpoint = endpoint
+                cmUtilReceivedParams.client = client
+                cmUtilReceivedParams.appName = appName
+                cmUtilReceivedParams.abapPackage = abapPackage
                 cmUtilReceivedParams.credentialsId = credentialsId
-                cmUtilReceivedParams.cmclientOpts = cmclientOpts
             }
         }
 
         stepRule.step.transportRequestUploadFile(script: nullScript,
-                      changeManagement: [type: 'CTS'],
+                      changeManagement: [
+                          type: 'CTS',
+                          client: '001',
+                      ],
+                      applicationName: 'myApp',
+                      abapPackage: 'myPackage',
                       transportRequestId: '002',
-                      filePath: '/path',
                       cmUtils: cm)
 
         assert cmUtilReceivedParams ==
@@ -192,12 +198,12 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
                     pullImage:true
                 ],
                 transportRequestId: '002',
-                filePath: '/path',
                 endpoint: 'https://example.org/cm',
+                client: '001',
+                appName: 'myApp',
+                abapPackage: 'myPackage',
                 credentialsId: 'CM',
-                cmclientOpts: ''
             ]
-
     }
 
     @Test
