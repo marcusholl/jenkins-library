@@ -195,7 +195,7 @@ public class ChangeManagement implements Serializable {
         // to current system in case no docker environment is available).
         // In that case we need to provide the environment variables for the local shell. I guess running
         // tasks locally is the meantime somehow outdated. But to my knowledge we never dropped that officially
-        def deployConfig =   """|specVersion: '1.0'
+        def deployConfig =  ("""|specVersion: '1.0'
                                 |metadata:
                                 |  name: ${applicationName}
                                 |type: application
@@ -218,7 +218,7 @@ public class ChangeManagement implements Serializable {
                                 |      exclude:
                                 |      - .*\\.test.js
                                 |      - internal.md
-                                |""".stripMargin()
+                                |""" as CharSequence).stripMargin()
 
         def deployConfigFile = 'ui5-deploy.yaml' // this is the default value assumed by the toolset anyhow.
 
@@ -238,11 +238,11 @@ public class ChangeManagement implements Serializable {
         // TODO make configurable
         def deployTools = '@ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs'
 
-        def cmd =    """|#!/bin/bash -e
+        def cmd =   ("""|#!/bin/bash -e
                         |npm install -g ${deployTools}
                         |su ${osDeployUser}
                         | fiori deploy -c "${deployConfigFile}"
-                        |""".stripMargin()
+                        |""" as CharSequence).stripMargin()
 
         // 3.) execute the call in an appropirate docker container (node) and evaluate the return code
         //     or let the AbortException bubble up.
