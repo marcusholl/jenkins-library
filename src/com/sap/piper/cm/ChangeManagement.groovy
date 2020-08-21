@@ -239,7 +239,7 @@ public class ChangeManagement implements Serializable {
         // TODO make configurable
         def deployTools = '@ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs'
 
-        def cmd =    """|#!/bin/bash
+        def cmd =    """|#!/bin/bash -e
                         |npm install -g ${deployTools}
                         |su ${osDeployUser}
                         | fiori deploy -c "${deployConfigFile}"
