@@ -7,6 +7,9 @@ import static org.hamcrest.Matchers.hasItem
 import static org.hamcrest.Matchers.is
 import static org.hamcrest.Matchers.not
 import static org.junit.Assert.assertThat
+
+import java.util.Map
+
 import static org.junit.Assert.assertEquals
 
 import org.hamcrest.Matchers
@@ -22,6 +25,7 @@ import util.BasePiperTest
 import util.JenkinsLoggingRule
 import util.JenkinsScriptLoaderRule
 import util.JenkinsShellCallRule
+import util.JenkinsWriteFileRule
 import util.JenkinsCredentialsRule
 import util.JenkinsDockerExecuteRule
 import util.Rules
@@ -35,6 +39,7 @@ public class ChangeManagementTest extends BasePiperTest {
     private JenkinsShellCallRule script = new JenkinsShellCallRule(this)
     private JenkinsLoggingRule logging = new JenkinsLoggingRule(this)
     private JenkinsDockerExecuteRule dockerExecuteRule = new JenkinsDockerExecuteRule(this)
+    private JenkinsWriteFileRule writeFileRule = new JenkinsWriteFileRule(this)
 
     @Rule
     public RuleChain rules = Rules.getCommonRules(this)
@@ -43,6 +48,7 @@ public class ChangeManagementTest extends BasePiperTest {
         .around(logging)
         .around(new JenkinsCredentialsRule(this).withCredentials('me','user','password'))
         .around(dockerExecuteRule)
+        .around(writeFileRule)
 
     @Test
     public void testRetrieveChangeDocumentIdOutsideGitWorkTreeTest() {
@@ -302,9 +308,12 @@ public void testGetCommandLineWithCMClientOpts() {
                 pullImage: true
              ],
             '002',
-            '/path',
             'https://example.org/cm',
-            'me')
+            '001',
+            'myApp',
+            'aPackage',
+            'me',
+        )
 
         assert dockerExecuteRule.getDockerParams().dockerImage == 'ppiper/cmclient'
         assert dockerExecuteRule.getDockerParams().dockerPullImage == true
