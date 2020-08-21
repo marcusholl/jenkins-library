@@ -309,6 +309,8 @@ public void testGetCommandLineWithCMClientOpts() {
             '001',
             'myApp',
             'aPackage',
+            'node',
+            '@ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs',
             'me',
         )
 
@@ -368,6 +370,8 @@ public void testGetCommandLineWithCMClientOpts() {
             '001',
             'myApp',
             'aPackage',
+            'node',
+            '@ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs',
             'me',
         )
     }

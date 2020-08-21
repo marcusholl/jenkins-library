@@ -172,11 +172,12 @@ public class ChangeManagement implements Serializable {
     void uploadFileToTransportRequestCTS(
         Map docker,
         String transportRequestId,
-        // String filePath, --> hard coded "dist" folder
         String endpoint,
         String client,
         String applicationName,
         String abapPackage, // "package" would be better, but this is a keyword
+        String osDeployUser,
+        String deployToolDependencies,
         String credentialsId) {
 
         def script = this.script
@@ -227,19 +228,19 @@ public class ChangeManagement implements Serializable {
 
         // 2.) create the call
         // 2.1) prepare environment --> currently I assume a node default image. We need to start
-        //      as root, after that we can switch to a standard user (node/1000). Other approach would
-        //      be to provide a derived image already containing the fiori upload deps. With this the
-        //      upload is faster, but we have to maintain the image.
+        //      as root, after that we can switch to a standard user (e.g. node/1000). Since we dont su
+        //      with '-l' flag the environment variables are presenved. This is important for the credentials.
+        //      Other approach would be to provide a derived image already containing the fiori upload deps.
+        //      With this the upload is faster, but we have to maintain the image.
         // 2.2) the call in the narrower sense
-
-
-        // TODO make configurable
-        def osDeployUser = 'node'
-        // TODO make configurable
-        def deployTools = '@ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs'
+        //
+        // REVISIT: in case the customer uses a preconfigured image with the deploy tools already installed
+        //          there is no need for the npm call. --> in case the deployToolDependencies we should omit the
+        //          npm install call. In that case we should also drop the su and we don't launch the container as
+        //          root.
 
         def cmd =   ("""|#!/bin/bash -e
-                        |npm install -g ${deployTools}
+                        |npm install -g ${deployToolDependencies}
                         |su ${osDeployUser}
                         | fiori deploy -c "${deployConfigFile}"
                         |""" as CharSequence).stripMargin()
@@ -280,7 +281,10 @@ public class ChangeManagement implements Serializable {
         // anybody. ==> we should rework that. Makes also a shift to go easier at a later point in time when the code is
         // well structured.
         //
-        // currently fiori deploy requires a confirmation (Y) --> needs to be changed with some kind of --auto-confirm.
+        // REVISIT
+        //
+        //  * dist folder is hard coded in fiori deploy toolset. We should discuss if that is a potential problem.
+        //  * currently fiori deploy requires a confirmation (Y) --> needs to be changed with some kind of --auto-confirm.
     }
 
     void uploadFileToTransportRequestRFC(
