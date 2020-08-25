@@ -216,8 +216,8 @@ void call(parameters = [:]) {
                             configuration.changeManagement.client,
                             configuration.applicationName,
                             configuration.abapPackage,
-                            'node', // TODO: make configurable
-                            '@ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs', // TODO: make configurable
+                            configuration.changeManagement.cts.osDeployUser,
+                            configuration.changeManagement.cts.deployToolDependencies,
                             configuration.changeManagement.credentialsId)
 
                         echo "[INFO] Application '${configuration.applicationName}' has been successfully uploaded to transport request '${configuration.transportRequestId}'."

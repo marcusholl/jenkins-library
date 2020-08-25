@@ -187,6 +187,10 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
                       changeManagement: [
                           type: 'CTS',
                           client: '001',
+                          cts: [
+                              osDeployUser: 'node2',
+                              deployToolDependencies: '@ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs @dummy/foo',
+                          ]
                       ],
                       applicationName: 'myApp',
                       abapPackage: 'myPackage',
@@ -206,8 +210,8 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
                 client: '001',
                 appName: 'myApp',
                 abapPackage: 'myPackage',
-                osDeployUser: 'node',
-                deployToolDependencies: '@ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs',
+                osDeployUser: 'node2',
+                deployToolDependencies: '@ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs @dummy/foo',
                 credentialsId: 'CM',
             ]
     }

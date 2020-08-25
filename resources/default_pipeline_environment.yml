@@ -24,6 +24,8 @@ general:
         envVars: {}
         pullImage: true
     cts:
+      osDeployUser: 'node'
+      deployToolDependencies: '@ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs'
       docker:
         image: 'ppiper/cm-client'
         options: []
