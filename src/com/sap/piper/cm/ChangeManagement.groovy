@@ -177,7 +177,7 @@ public class ChangeManagement implements Serializable {
         String applicationName,
         String abapPackage, // "package" would be better, but this is a keyword
         String osDeployUser,
-        String deployToolDependencies,
+        def deployToolDependencies,
         String credentialsId) {
 
         def script = this.script
@@ -238,6 +238,12 @@ public class ChangeManagement implements Serializable {
         //          there is no need for the npm call. --> in case the deployToolDependencies we should omit the
         //          npm install call. In that case we should also drop the su and we don't launch the container as
         //          root.
+
+        if (deployToolDependencies in List) {
+            deployToolDependencies = deployToolDependencies.join(' ')
+        }
+
+        deployToolDependencies = deployToolDependencies.trim()
 
         def cmd =   ("""|#!/bin/bash -e
                         |npm install -g ${deployToolDependencies}
