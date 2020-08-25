@@ -354,6 +354,36 @@ public void testGetCommandLineWithCMClientOpts() {
     }
 
     @Test
+    public void testUploadFileToTransportSucceedsEmptyDeployToolDependenciesCTS() {
+
+        new ChangeManagement(nullScript).uploadFileToTransportRequestCTS(
+            [
+                image: 'fioriDeployImage',
+                pullImage: true
+             ],
+            '002',
+            'https://example.org/cm',
+            '001',
+            'myApp',
+            'aPackage',
+            'node2',
+            [],
+            'me',
+        )
+
+        assert ! script.shell[0].contains('npm install')
+        assert ! script.shell[0].contains('su')
+
+        assert script.shell[0].contains("fiori deploy -c \"ui5-deploy.yaml\"")
+
+        assert dockerExecuteRule.getDockerParams().dockerImage == 'fioriDeployImage'
+        assert dockerExecuteRule.getDockerParams().dockerPullImage == true
+        assert dockerExecuteRule.getDockerParams().dockerEnvVars == [ABAP_USER: "user", ABAP_PASSWORD: 'password']
+        // we don't start with the root user since there is no need to install something (globally)
+        assert dockerExecuteRule.getDockerParams().dockerOptions == []
+    }
+
+    @Test
     public void testUploadFileToTransportShellFailsCTS() {
 
         thrown.expect(AbortException)

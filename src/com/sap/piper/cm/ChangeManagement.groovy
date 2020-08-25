@@ -245,11 +245,20 @@ public class ChangeManagement implements Serializable {
 
         deployToolDependencies = deployToolDependencies.trim()
 
-        def cmd =   ("""|#!/bin/bash -e
-                        |npm install -g ${deployToolDependencies}
-                        |su ${osDeployUser}
-                        | fiori deploy -c "${deployConfigFile}"
-                        |""" as CharSequence).stripMargin()
+        // --> Default config has been adjusted so that no dependencies needs to be installed.
+        // This is the case when an image is used which contains already all dependencies.
+        // In this case we don't invoke npm install and we run the image with the standard user
+        // already, since there is no need for being root. Hence we don't need to switch user also
+        // in the script.
+        boolean noInstall = deployToolDependencies.isEmpty()
+
+        def cmd = ['#!/bin/bash -e']
+
+        if (! noInstall) {
+            cmd << "npm install -g ${deployToolDependencies}"
+            cmd << "su ${osDeployUser}"
+        }
+        cmd << "fiori deploy -c \"${deployConfigFile}\""
 
         // 3.) execute the call in an appropirate docker container (node) and evaluate the return code
         //     or let the AbortException bubble up.
@@ -264,8 +273,11 @@ public class ChangeManagement implements Serializable {
             // environment variables are preserved.
             def dockerEnvVars = docker.envVars ?: [:] + [ABAP_USER: script.username, ABAP_PASSWORD: script.password]
 
-            // when we install globally we need to be root, after preparing that we can su node` in the bash script.
-            def dockerOptions = docker.options ?: [] + ['-u', '0'] // should only be added if not already present.
+            def dockerOptions = docker.options ?: []
+            if (!noInstall) {
+                // when we install globally we need to be root, after preparing that we can su node` in the bash script.
+                dockerOptions << ['-u', '0'] // should only be added if not already present.
+            }
 
             script.dockerExecute(
                 script: script,
@@ -274,7 +286,7 @@ public class ChangeManagement implements Serializable {
                 dockerEnvVars: dockerEnvVars,
                 dockerPullImage: docker.pullImage) {
 
-                script.sh script: cmd
+                script.sh script: (cmd as Iterable).join('\n')
             }
         }
         // === Dungheap ===
