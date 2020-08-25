@@ -258,7 +258,7 @@ public class ChangeManagement implements Serializable {
             cmd << "npm install -g ${deployToolDependencies}"
             cmd << "su ${osDeployUser}"
         }
-        cmd << "fiori deploy -c \"${deployConfigFile}\""
+        cmd << "fiori deploy -c \"${deployConfigFile}\" -- -y"
 
         // 3.) execute the call in an appropirate docker container (node) and evaluate the return code
         //     or let the AbortException bubble up.
