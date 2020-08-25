@@ -276,7 +276,7 @@ public class ChangeManagement implements Serializable {
             def dockerOptions = docker.options ?: []
             if (!noInstall) {
                 // when we install globally we need to be root, after preparing that we can su node` in the bash script.
-                dockerOptions << ['-u', '0'] // should only be added if not already present.
+                dockerOptions += ['-u', '0'] // should only be added if not already present.
             }
 
             script.dockerExecute(

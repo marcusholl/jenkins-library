@@ -350,7 +350,7 @@ public void testGetCommandLineWithCMClientOpts() {
         assert dockerExecuteRule.getDockerParams().dockerEnvVars == [ABAP_USER: "user", ABAP_PASSWORD: 'password']
         // we launch the container as root (uid 0) in order to be able to install
         // the deploytool. Before deploying we su to another user.
-        dockerExecuteRule.getDockerParams().dockerOptions = ['-u', '0']
+        assert dockerExecuteRule.getDockerParams().dockerOptions == ['-u', '0']
     }
 
     @Test
