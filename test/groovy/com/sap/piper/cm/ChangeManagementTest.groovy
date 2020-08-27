@@ -308,8 +308,8 @@ public void testGetCommandLineWithCMClientOpts() {
             'https://example.org/cm',
             '001',
             'myApp',
-            'aPackage',
             'the description',
+            'aPackage',
             'node2',
             ['@ui5/cli', '@sap/ux-ui5-tooling', '@ui5/logger', '@ui5/fs', '@dummy/foo'],
             'me',
@@ -334,7 +334,6 @@ public void testGetCommandLineWithCMClientOpts() {
                                     |        name: myApp
                                     |        description: the description
                                     |        package: aPackage
-                                    |        transport: 002
                                     |      exclude:
                                     |      - .*\\.test.js
                                     |      - internal.md
@@ -344,7 +343,7 @@ public void testGetCommandLineWithCMClientOpts() {
 
         assert script.shell[0].contains('npm install -g @ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs @dummy/foo')
 
-        assert script.shell[0].contains("fiori deploy -c \"ui5-deploy.yaml\" -u https://example.org/cm")
+        assert script.shell[0].contains("fiori deploy -c \"ui5-deploy.yaml\" -t 002 -u https://example.org/cm")
 
         assert dockerExecuteRule.getDockerParams().dockerImage == 'node'
         assert dockerExecuteRule.getDockerParams().dockerPullImage == true

@@ -175,8 +175,8 @@ public class ChangeManagement implements Serializable {
         String endpoint,
         String client,
         String applicationName,
-        String abapPackage, // "package" would be better, but this is a keyword
         String description,
+        String abapPackage, // "package" would be better, but this is a keyword
         String osDeployUser,
         def deployToolDependencies,
         String credentialsId) {
@@ -218,7 +218,6 @@ public class ChangeManagement implements Serializable {
                                 |        name: ${applicationName}
                                 |        description: ${desc}
                                 |        package: ${abapPackage}
-                                |        transport: ${transportRequestId}
                                 |      exclude:
                                 |      - .*\\.test.js
                                 |      - internal.md
@@ -261,7 +260,7 @@ public class ChangeManagement implements Serializable {
             cmd << "npm install -g ${deployToolDependencies}"
             cmd << "su ${osDeployUser}"
         }
-        cmd << "fiori deploy -c \"${deployConfigFile}\" -u ${endpoint} -- -y"
+        cmd << "fiori deploy -c \"${deployConfigFile}\" -t ${transportRequestId} -u ${endpoint} -- -y"
 
         // 3.) execute the call in an appropirate docker container (node) and evaluate the return code
         //     or let the AbortException bubble up.
