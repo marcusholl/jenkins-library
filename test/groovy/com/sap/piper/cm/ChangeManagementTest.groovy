@@ -325,7 +325,6 @@ public void testGetCommandLineWithCMClientOpts() {
                                     |    afterTask: replaceVersion
                                     |    configuration:
                                     |      target:
-                                    |        url: https://example.org/cm
                                     |        client: 001
                                     |        auth: basic
                                     |      credentials:
@@ -345,7 +344,7 @@ public void testGetCommandLineWithCMClientOpts() {
 
         assert script.shell[0].contains('npm install -g @ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs @dummy/foo')
 
-        assert script.shell[0].contains("fiori deploy -c \"ui5-deploy.yaml\"")
+        assert script.shell[0].contains("fiori deploy -c \"ui5-deploy.yaml\" -u https://example.org/cm")
 
         assert dockerExecuteRule.getDockerParams().dockerImage == 'node'
         assert dockerExecuteRule.getDockerParams().dockerPullImage == true
