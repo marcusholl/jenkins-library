@@ -214,6 +214,7 @@ public class ChangeManagement implements Serializable {
                                 |        password: env:ABAP_PASSWORD
                                 |      app:
                                 |        name: ${applicationName}
+                                |        description: Deployed with Piper based on SAP Fiori tools
                                 |        package: ${abapPackage}
                                 |        transport: ${transportRequestId}
                                 |      exclude:
