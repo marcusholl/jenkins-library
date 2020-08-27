@@ -176,11 +176,14 @@ public class ChangeManagement implements Serializable {
         String client,
         String applicationName,
         String abapPackage, // "package" would be better, but this is a keyword
+        String description,
         String osDeployUser,
         def deployToolDependencies,
         String credentialsId) {
 
         def script = this.script
+
+        def desc = description ?: 'Deployed with Piper based on SAP Fiori tools'
 
         // 1.) Create the config file
         //
@@ -214,7 +217,7 @@ public class ChangeManagement implements Serializable {
                                 |        password: env:ABAP_PASSWORD
                                 |      app:
                                 |        name: ${applicationName}
-                                |        description: Deployed with Piper based on SAP Fiori tools
+                                |        description: ${desc}
                                 |        package: ${abapPackage}
                                 |        transport: ${transportRequestId}
                                 |      exclude:

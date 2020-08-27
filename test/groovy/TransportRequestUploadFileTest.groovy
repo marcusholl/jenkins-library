@@ -166,6 +166,7 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
                                               String endpoint,
                                               String client,
                                               String appName,
+                                              String appDescription,
                                               String abapPackage,
                                               String osDeployUser,
                                               def deployToolsDependencies,
@@ -176,6 +177,7 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
                 cmUtilReceivedParams.endpoint = endpoint
                 cmUtilReceivedParams.client = client
                 cmUtilReceivedParams.appName = appName
+                cmUtilReceivedParams.appDescription = appDescription
                 cmUtilReceivedParams.abapPackage = abapPackage
                 cmUtilReceivedParams.osDeployUser = osDeployUser
                 cmUtilReceivedParams.deployToolDependencies = deployToolsDependencies
@@ -193,6 +195,7 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
                           ]
                       ],
                       applicationName: 'myApp',
+                      applicationDescription: 'the description',
                       abapPackage: 'myPackage',
                       transportRequestId: '002',
                       cmUtils: cm)
@@ -209,6 +212,7 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
                 endpoint: 'https://example.org/cm',
                 client: '001',
                 appName: 'myApp',
+                appDescription: 'the description',
                 abapPackage: 'myPackage',
                 osDeployUser: 'node2',
                 deployToolDependencies: ['@ui5/cli', '@sap/ux-ui5-tooling', '@ui5/logger', '@ui5/fs', '@dummy/foo'],

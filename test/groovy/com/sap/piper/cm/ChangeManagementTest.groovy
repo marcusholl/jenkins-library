@@ -309,6 +309,7 @@ public void testGetCommandLineWithCMClientOpts() {
             '001',
             'myApp',
             'aPackage',
+            'the description',
             'node2',
             ['@ui5/cli', '@sap/ux-ui5-tooling', '@ui5/logger', '@ui5/fs', '@dummy/foo'],
             'me',
@@ -332,6 +333,7 @@ public void testGetCommandLineWithCMClientOpts() {
                                     |        password: env:ABAP_PASSWORD
                                     |      app:
                                     |        name: myApp
+                                    |        description: the description
                                     |        package: aPackage
                                     |        transport: 002
                                     |      exclude:
@@ -366,6 +368,7 @@ public void testGetCommandLineWithCMClientOpts() {
             '001',
             'myApp',
             'aPackage',
+            'the description',
             'node2',
             [],
             'me',
@@ -402,6 +405,7 @@ public void testGetCommandLineWithCMClientOpts() {
             '001',
             'myApp',
             'aPackage',
+            'the description',
             'node',
             '@ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs',
             'me',

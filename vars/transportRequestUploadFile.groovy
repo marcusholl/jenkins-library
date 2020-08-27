@@ -215,6 +215,7 @@ void call(parameters = [:]) {
                             configuration.changeManagement.endpoint,
                             configuration.changeManagement.client,
                             configuration.applicationName,
+                            configuration.applicationDescription,
                             configuration.abapPackage,
                             configuration.changeManagement.cts.osDeployUser,
                             configuration.changeManagement.cts.deployToolDependencies,
