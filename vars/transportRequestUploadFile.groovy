@@ -210,7 +210,7 @@ void call(parameters = [:]) {
                         echo "[INFO] Uploading application '${configuration.applicationName}' to transport request '${configuration.transportRequestId}'."
 
                         cm.uploadFileToTransportRequestCTS(
-                            configuration.changeManagement.cts?.docker ?: [:],
+                            configuration.changeManagement.cts?.nodeDocker ?: [:],
                             configuration.transportRequestId,
                             configuration.changeManagement.endpoint,
                             configuration.changeManagement.client,

@@ -30,6 +30,11 @@ general:
         - '@sap/ux-ui5-tooling'
         - '@ui5/logger'
         - '@ui5/fs'
+      nodeDocker:
+        image: 'node'
+        options: []
+        envVars: {}
+        pullImage: true
       docker:
         image: 'ppiper/cm-client'
         options: []

@@ -203,7 +203,7 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
         assert cmUtilReceivedParams ==
             [
                 docker: [
-                    image: 'ppiper/cm-client',
+                    image: 'node',
                     options:[],
                     envVars:[:],
                     pullImage:true
