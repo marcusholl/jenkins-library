@@ -264,8 +264,6 @@ public class ChangeManagement implements Serializable {
         }
         cmd << "fiori deploy -c \"${deployConfigFile}\" -t ${transportRequestId} -u ${endpoint} -- -y"
 
-        // 3.) execute the call in an appropirate docker container (node) and evaluate the return code
-        //     or let the AbortException bubble up.
         script.withCredentials([script.usernamePassword(
             credentialsId: credentialsId,
             passwordVariable: 'password',
