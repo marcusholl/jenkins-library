@@ -225,7 +225,7 @@ public class ChangeManagement implements Serializable {
 
         def deployConfigFile = 'ui5-deploy.yaml' // this is the default value assumed by the toolset anyhow.
 
-        // Revisit: should be located in a tmp dir inside '.pipeline'
+
         script.writeFile file: deployConfigFile, text: deployConfig, encoding: 'UTF-8'
 
         // 2.) create the call
@@ -304,7 +304,6 @@ public class ChangeManagement implements Serializable {
         // REVISIT
         //
         //  * dist folder is hard coded in fiori deploy toolset. We should discuss if that is a potential problem.
-        //  * currently fiori deploy requires a confirmation (Y) --> needs to be changed with some kind of --auto-confirm.
     }
 
     void uploadFileToTransportRequestRFC(
