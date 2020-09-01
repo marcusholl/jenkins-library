@@ -188,17 +188,16 @@ public class ChangeManagement implements Serializable {
         // 1.) Create the config file
         //
         // REVISIT:
-        //   * either switch to wizzard or convert to map which gets serialized
-        //   * make excludes configurable --> easier with a map which gets serialized
-        //   * maybe we should relocate the config file into a tmp folder inside .pipeline in order not
-        //     to avoid collisions with files from the project or in order to void having that
-        //     file in some build results (e.g. zipped).
-        //
-        // Environment variables ABAP_USER and ABAP_PASSWORD needs to be set on the docker container
-        // REVISIT: do we need to support also the local use case (dockerExecute performs a fallback
-        // to current system in case no docker environment is available).
-        // In that case we need to provide the environment variables for the local shell. I guess running
-        // tasks locally is the meantime somehow outdated. But to my knowledge we never dropped that officially
+        //   * some parameters (project name, application name, excludes) are considered to be close to the project.
+        //     Other parameters are related to the build time environment, e.g. the endpoint, the client, the credentials,
+        //     the transport request number.
+        //     For e.g. the abap package we need to discuss to where it belongs.
+        //     Maybe we can require a deploy config file in the sources containing all the parameters close to the project.
+        //     The parameters related to the build time environment should be provided via command line parameters. They overwrite
+        //     the corresponding parameters in the config file (which might be present for local deployment purposes).
+        //   * Having the credentials handled like they are currently handled makes trouble for use cases where we run
+        //     central builds without docker environment. In that case the credentials needs to be set as environment
+        //     variables on the Jenkins instance.
         def deployConfig =  ("""|specVersion: '1.0'
                                 |metadata:
                                 |  name: ${applicationName}
@@ -228,30 +227,19 @@ public class ChangeManagement implements Serializable {
 
         script.writeFile file: deployConfigFile, text: deployConfig, encoding: 'UTF-8'
 
-        // 2.) create the call
-        // 2.1) prepare environment --> currently I assume a node default image. We need to start
-        //      as root, after that we can switch to a standard user (e.g. node/1000). Since we dont su
-        //      with '-l' flag the environment variables are presenved. This is important for the credentials.
-        //      Other approach would be to provide a derived image already containing the fiori upload deps.
-        //      With this the upload is faster, but we have to maintain the image.
-        // 2.2) the call in the narrower sense
-        //
-        // REVISIT: in case the customer uses a preconfigured image with the deploy tools already installed
-        //          there is no need for the npm call. --> in case the deployToolDependencies we should omit the
-        //          npm install call. In that case we should also drop the su and we don't launch the container as
-        //          root.
-
         if (deployToolDependencies in List) {
             deployToolDependencies = deployToolDependencies.join(' ')
         }
 
         deployToolDependencies = deployToolDependencies.trim()
 
-        // --> Default config has been adjusted so that no dependencies needs to be installed.
-        // This is the case when an image is used which contains already all dependencies.
-        // In this case we don't invoke npm install and we run the image with the standard user
-        // already, since there is no need for being root. Hence we don't need to switch user also
-        // in the script.
+        /*
+            In case the configuration has been adjusted so that no deployToolDependencies are provided
+            we assume an image is used which contains already all dependencies.
+            In this case we don't invoke npm install and we run the image with the standard user
+            already, since there is no need for being root. Hence we don't need to switch user also
+            in the script.
+         */
         boolean noInstall = deployToolDependencies.isEmpty()
 
         Iterable cmd = ['#!/bin/bash -e']
@@ -269,16 +257,21 @@ public class ChangeManagement implements Serializable {
             passwordVariable: 'password',
             usernameVariable: 'username')]) {
 
-            // Set username and password for the fiori deploy call. The config file is configured to read the
-            // credentials from the environment (see above in the config file template).
-            // After installing the deploy toolset we switch the user. Since we do not su with option '-l' the
-            // environment variables are preserved.
+            /*
+                The config file is configured to read the credentials from the environment,
+                see above in the config file template.
+                After installing the deploy toolset we switch the user. Since we do not su with option '-l' the
+                environment variables are preserved.
+            */
+            // REVISIT: we should check if username and password can be provided via command line parameter. With such an
+            // approach we don't need to configure that above in the config file and export that here to the environment.
             def dockerEnvVars = docker.envVars ?: [:] + [ABAP_USER: script.username, ABAP_PASSWORD: script.password]
 
             def dockerOptions = docker.options ?: []
             if (!noInstall) {
                 // when we install globally we need to be root, after preparing that we can su node` in the bash script.
-                dockerOptions += ['-u', '0'] // should only be added if not already present.
+                // in case there is already a u provided the latest (... what we set here wins).
+                dockerOptions += ['-u', '0']
             }
 
             script.dockerExecute(
@@ -291,19 +284,6 @@ public class ChangeManagement implements Serializable {
                 script.sh script: cmd.join('\n')
             }
         }
-        // === Dungheap ===
-        // We need to cross check the dependencies between a project and our deployment code. e.g. the fiori toolset
-        // expects the folder containing the app inside a folder 'dist' (hard coded).
-        //
-        // In the meantime the code is not well structed anymore. We started with supporting the cm client only.
-        // Afterwards we added RFC upload support. Now we use node based toolset for the CTS upload. We have now three
-        // different toolset for three ways to perform the upload. The general code flow cannot be explained anymore to
-        // anybody. ==> we should rework that. Makes also a shift to go easier at a later point in time when the code is
-        // well structured.
-        //
-        // REVISIT
-        //
-        //  * dist folder is hard coded in fiori deploy toolset. We should discuss if that is a potential problem.
     }
 
     void uploadFileToTransportRequestRFC(
