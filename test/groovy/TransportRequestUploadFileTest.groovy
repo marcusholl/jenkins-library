@@ -170,6 +170,7 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
                                               String abapPackage,
                                               String osDeployUser,
                                               def deployToolsDependencies,
+                                              String deployConfigFile,
                                               String credentialsId) {
 
                 cmUtilReceivedParams.docker = docker
@@ -181,6 +182,7 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
                 cmUtilReceivedParams.abapPackage = abapPackage
                 cmUtilReceivedParams.osDeployUser = osDeployUser
                 cmUtilReceivedParams.deployToolDependencies = deployToolsDependencies
+                cmUtilReceivedParams.deployConfigFile = deployConfigFile
                 cmUtilReceivedParams.credentialsId = credentialsId
             }
         }
@@ -216,6 +218,7 @@ public class TransportRequestUploadFileTest extends BasePiperTest {
                 abapPackage: 'myPackage',
                 osDeployUser: 'node2',
                 deployToolDependencies: ['@ui5/cli', '@sap/ux-ui5-tooling', '@ui5/logger', '@ui5/fs', '@dummy/foo'],
+                deployConfigFile: 'ui5-deploy.yaml',
                 credentialsId: 'CM',
             ]
     }

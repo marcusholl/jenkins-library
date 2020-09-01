@@ -219,6 +219,7 @@ void call(parameters = [:]) {
                             configuration.abapPackage,
                             configuration.changeManagement.cts.osDeployUser,
                             configuration.changeManagement.cts.deployToolDependencies,
+                            configuration.changeManagement.cts.deployConfigFile,
                             configuration.changeManagement.credentialsId)
 
                         echo "[INFO] Application '${configuration.applicationName}' has been successfully uploaded to transport request '${configuration.transportRequestId}'."

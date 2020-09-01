@@ -30,6 +30,7 @@ general:
         - '@sap/ux-ui5-tooling'
         - '@ui5/logger'
         - '@ui5/fs'
+      deployConfigFile: 'ui5-deploy.yaml'
       nodeDocker:
         image: 'node'
         options: []

@@ -179,6 +179,7 @@ public class ChangeManagement implements Serializable {
         String abapPackage, // "package" would be better, but this is a keyword
         String osDeployUser,
         def deployToolDependencies,
+        String deployConfigFile,
         String credentialsId) {
 
         def script = this.script
@@ -221,9 +222,6 @@ public class ChangeManagement implements Serializable {
                                 |      - .*\\.test.js
                                 |      - internal.md
                                 |""" as CharSequence).stripMargin()
-
-        def deployConfigFile = 'ui5-deploy.yaml' // this is the default value assumed by the toolset anyhow.
-
 
         script.writeFile file: deployConfigFile, text: deployConfig, encoding: 'UTF-8'
 

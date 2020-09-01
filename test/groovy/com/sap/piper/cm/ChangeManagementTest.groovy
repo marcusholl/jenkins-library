@@ -312,6 +312,7 @@ public void testGetCommandLineWithCMClientOpts() {
             'aPackage',
             'node2',
             ['@ui5/cli', '@sap/ux-ui5-tooling', '@ui5/logger', '@ui5/fs', '@dummy/foo'],
+            'ui5-deploy.yaml',
             'me',
         )
 
@@ -369,6 +370,7 @@ public void testGetCommandLineWithCMClientOpts() {
             'the description',
             'node2',
             [],
+            'ui5-deploy.yaml',
             'me',
         )
 
@@ -406,6 +408,7 @@ public void testGetCommandLineWithCMClientOpts() {
             'the description',
             'node',
             '@ui5/cli @sap/ux-ui5-tooling @ui5/logger @ui5/fs',
+            'ui5-deploy.yaml',
             'me',
         )
     }
