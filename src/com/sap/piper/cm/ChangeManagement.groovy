@@ -254,7 +254,7 @@ public class ChangeManagement implements Serializable {
         // in the script.
         boolean noInstall = deployToolDependencies.isEmpty()
 
-        def cmd = ['#!/bin/bash -e']
+        Iterable cmd = ['#!/bin/bash -e']
 
         if (! noInstall) {
             cmd << "npm install -g ${deployToolDependencies}"
@@ -288,7 +288,7 @@ public class ChangeManagement implements Serializable {
                 dockerEnvVars: dockerEnvVars,
                 dockerPullImage: docker.pullImage) {
 
-                script.sh script: (cmd as Iterable).join('\n')
+                script.sh script: cmd.join('\n')
             }
         }
         // === Dungheap ===
