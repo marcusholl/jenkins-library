@@ -259,6 +259,8 @@ public class ChangeManagement implements Serializable {
         if (! noInstall) {
             cmd << "npm install -g ${deployToolDependencies}"
             cmd << "su ${osDeployUser}"
+        } else {
+            script.echo "[INFO] no deploy dependencies provided. Skipping npm install call. Assuning docker image '${docker?.image}' contains already the dependencies for performing the deployment."
         }
         cmd << "fiori deploy -c \"${deployConfigFile}\" -t ${transportRequestId} -u ${endpoint} -- -y"
 
