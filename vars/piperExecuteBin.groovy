@@ -142,6 +142,7 @@ static String getCustomConfigArg(def script) {
 
 // reused in sonarExecuteScan
 void dockerWrapper(script, config, body) {
+    script.echo "[MH] Inside docker wrapper: dockerImage:${config.dockerImage}"
     if (config.dockerImage) {
         Map dockerExecuteParameters = [:].plus(config)
         dockerExecuteParameters.script = script
