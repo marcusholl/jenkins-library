@@ -668,21 +668,25 @@ func deployMta(config *cloudFoundryDeployOptions, mtarFilePath string, command c
 		cfDeployParams = append(cfDeployParams, deployParams...)
 	}
 
-	cfDeployParams = append(cfDeployParams, handleMtaExtensionDescriptors(config.MtaExtensionDescriptor)...)
+	extFileParams, extFiles := handleMtaExtensionDescriptors(config.MtaExtensionDescriptor)
+	_ = extFiles
+	cfDeployParams = append(cfDeployParams, extFileParams...)
 
 	return cfDeploy(config, cfDeployParams, nil, nil, command)
 }
 
-func handleMtaExtensionDescriptors(mtaExtensionDescriptor string) []string {
+func handleMtaExtensionDescriptors(mtaExtensionDescriptor string) ([]string, []string) {
 	var result = []string{}
+	var extFiles = []string{}
 	for _, part := range strings.Fields(strings.Trim(mtaExtensionDescriptor, " ")) {
 		if part == "-e" || part == "" {
 			continue
 		}
 		// REVISIT: maybe check if the extension descriptor exists
 		result = append(result, "-e", part)
+		extFiles = append(extFiles, part)
 	}
-	return result
+	return result, extFiles
 }
 
 func cfDeploy(

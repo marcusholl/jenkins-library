@@ -1216,7 +1216,8 @@ func TestDefaultManifestVariableFilesHandling(t *testing.T) {
 func TestExtensionDescriptorsWithMinusE(t *testing.T) {
 
 	t.Run("ExtensionDescriptorsWithMinusE", func(t *testing.T) {
-		extDesc := handleMtaExtensionDescriptors("-e 1.yaml -e 2.yaml")
+		extDesc, extFiles := handleMtaExtensionDescriptors("-e 1.yaml -e 2.yaml")
+		_ = extFiles
 		assert.Equal(t, []string{
 			"-e",
 			"1.yaml",
@@ -1226,7 +1227,8 @@ func TestExtensionDescriptorsWithMinusE(t *testing.T) {
 	})
 
 	t.Run("ExtensionDescriptorsFirstOneWithoutMinusE", func(t *testing.T) {
-		extDesc := handleMtaExtensionDescriptors("1.yaml -e 2.yaml")
+		extDesc, extFiles := handleMtaExtensionDescriptors("1.yaml -e 2.yaml")
+		_ = extFiles
 		assert.Equal(t, []string{
 			"-e",
 			"1.yaml",
@@ -1236,7 +1238,8 @@ func TestExtensionDescriptorsWithMinusE(t *testing.T) {
 	})
 
 	t.Run("NoExtensionDescriptors", func(t *testing.T) {
-		extDesc := handleMtaExtensionDescriptors("")
+		extDesc, extFiles := handleMtaExtensionDescriptors("")
+		_ = extFiles
 		assert.Equal(t, []string{}, extDesc)
 	})
 }
