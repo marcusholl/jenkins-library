@@ -672,8 +672,8 @@ func deployMta(config *cloudFoundryDeployOptions, mtarFilePath string, command c
 
 	extFileParams, extFiles := handleMtaExtensionDescriptors(config.MtaExtensionDescriptor)
 
-	for _, extFile := range(extFiles) {
-		_, err := fileUtils.Copy(extFile, extFile + ".original")
+	for _, extFile := range extFiles {
+		_, err := fileUtils.Copy(extFile, extFile+".original")
 		if err != nil {
 			return err
 		}
@@ -684,9 +684,9 @@ func deployMta(config *cloudFoundryDeployOptions, mtarFilePath string, command c
 
 	err := cfDeploy(config, cfDeployParams, nil, nil, command)
 
-	for _, extFile := range(extFiles) {
+	for _, extFile := range extFiles {
 		fileUtils.Delete(extFile)
-		fileUtils.Copy(extFile + ".original", extFile)
+		fileUtils.Copy(extFile+".original", extFile)
 		fileUtils.Delete(extFile + ".original")
 	}
 
