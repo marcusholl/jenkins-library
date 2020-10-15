@@ -27,6 +27,7 @@ type cfFileUtil interface {
 	Glob(string) ([]string, error)
 	Chmod(string, os.FileMode) error
 	Copy(string, string) (int64, error)
+	Delete(string) error
 }
 
 var _now = time.Now
@@ -684,10 +685,10 @@ func deployMta(config *cloudFoundryDeployOptions, mtarFilePath string, command c
 	err := cfDeploy(config, cfDeployParams, nil, nil, command)
 
 	for _, extFile := range(extFiles) {
-		_ = extFile
-		// delete the modified ext file and replace it by the original file
+		fileUtils.Delete(extFile)
+		fileUtils.Copy(extFile + ".original", extFile)
+		fileUtils.Delete(extFile + ".original")
 	}
-
 
 	return err
 }
