@@ -295,6 +295,7 @@ func retrieveHookConfig(source *json.RawMessage, target *HookConfiguration) {
 var errIncompatibleTypes = fmt.Errorf("incompatible types")
 
 func checkTypes(config map[string]interface{}, options interface{}) map[string]interface{} {
+	fmt.Printf("[MH] Entering 'checkTypes'\n")
 	optionsType := getStepOptionsStructType(options)
 
 	for paramName := range config {
@@ -308,11 +309,17 @@ func checkTypes(config map[string]interface{}, options interface{}) map[string]i
 			continue
 		}
 
+		fmt.Printf("[MH] Options field: '%v %T'\n", optionsField, optionsField)
+		fmt.Printf("[MH] Param: %v\n", paramName)
+
 		paramValueType := reflect.ValueOf(config[paramName])
 		if optionsField.Type.Kind() == paramValueType.Kind() {
 			// Types already match, nothing to do
+                        fmt.Printf("[MH] Type match\n")
 			continue
 		}
+
+		fmt.Printf("[MH] ParamValueType: %v, %v\n", paramValueType, paramValueType.Kind())
 
 		var typeError error = nil
 
@@ -336,6 +343,7 @@ func checkTypes(config map[string]interface{}, options interface{}) map[string]i
 			log.Entry().WithError(typeError).Fatal("type error in configuration")
 		}
 	}
+        fmt.Printf("CONFIG: %v", config)
 	return config
 }
 
