@@ -25,3 +25,8 @@ steps:
       - 'CCFenner'
       - 'OliverNocon'
       - 'nevskrem'
+  cloudFoundryDeploy:
+    org: myOrg
+    space: s123
+    mtaExtensionCredentials:
+        brokerCredentialsHash: 'EDOM_RETAILER_DEV_SBF_HASH'
