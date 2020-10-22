@@ -260,7 +260,7 @@ spec:
         aliases:
           - name: cloudFoundry/mtaExtensionDescriptor
       - name: mtaExtensionCredentials
-        type: "[]string"
+        type: "map[string]interface{}"
         description: "Defines a map of credentials that need to be replaced in the `mtaExtensionDescriptor`. This map needs to be created as `value-to-be-replaced`:`id-of-a-credential-in-jenkins`"
         scope:
           - PARAMETERS
