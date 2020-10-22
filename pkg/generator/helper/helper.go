@@ -135,7 +135,7 @@ func {{.CobraCmdFuncName}}() *cobra.Command {
 
 func {{.FlagsFunc}}(cmd *cobra.Command, stepConfig *{{.StepName}}Options) {
 	{{- range $key, $value := uniqueName .StepParameters }}
-	cmd.Flags().{{ $value.Type | flagType }}(&stepConfig.{{ $value.Name | golangName }}, "{{ $value.Name }}", {{ $value.Default }}, "{{ $value.Description }}"){{ end }}
+        {{ if ne $value.Type "map[string]interface{}" }}cmd.Flags().{{ $value.Type | flagType }}(&stepConfig.{{ $value.Name | golangName }}, "{{ $value.Name }}", {{ $value.Default }}, "{{ $value.Description }}"){{end}}{{ end }}
 	{{- printf "\n" }}
 	{{- range $key, $value := .StepParameters }}{{ if $value.Mandatory }}
 	cmd.MarkFlagRequired("{{ $value.Name }}"){{ end }}{{ end }}
@@ -306,6 +306,8 @@ func setDefaultParameters(stepData *config.StepData) (bool, error) {
 			case "[]string":
 				// ToDo: Check if default should be read from env
 				param.Default = "[]string{}"
+			case "map[string]interface{}":
+                                param.Default = "\"\"" // TODO: revisit
 			default:
 				return false, fmt.Errorf("Meta data type not set or not known: '%v'", param.Type)
 			}
@@ -323,6 +325,8 @@ func setDefaultParameters(stepData *config.StepData) (bool, error) {
 				param.Default = fmt.Sprintf("`%v`", param.Default)
 			case "[]string":
 				param.Default = fmt.Sprintf("[]string{`%v`}", strings.Join(getStringSliceFromInterface(param.Default), "`, `"))
+			case "map[string]interface{}":
+				param.Default = "\"\"" // TODO: revisit.
 			default:
 				return false, fmt.Errorf("Meta data type not set or not known: '%v'", param.Type)
 			}
