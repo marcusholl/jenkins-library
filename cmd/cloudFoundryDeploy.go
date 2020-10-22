@@ -677,7 +677,11 @@ func deployMta(config *cloudFoundryDeployOptions, mtarFilePath string, command c
 		if err != nil {
 			return err
 		}
-		// password handling
+
+		log.Entry().Info("[MH] config: %v", config)
+		log.Entry().Infof("[MH] mtaExtensionCreds: %v", config.MtaExtensionCredentials)
+
+		//handleMtaExtensionCredentials(extFile, config.handleMtaExtensionCredentials)
 	}
 
 	cfDeployParams = append(cfDeployParams, extFileParams...)
