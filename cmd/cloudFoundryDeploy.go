@@ -62,6 +62,10 @@ func cloudFoundryDeploy(config cloudFoundryDeployOptions, telemetryData *telemet
 	c.Stdout(log.Writer())
 	c.Stderr(log.Writer())
 
+        fmt.Printf("[MH] cloudFoundryDeployOptions: %v\n", config)
+        fmt.Printf("[MH] MtaExtensionCredentials: %v\n", config.MtaExtensionCredentials)
+        fmt.Printf("[MH] xx '%v'\n", config.MtaExtensionCredentials["brokerCredentialsHash"])
+
 	// for http calls import  piperhttp "github.com/SAP/jenkins-library/pkg/http"
 	// and use a  &piperhttp.Client{} in a custom system
 	// Example: step checkmarxExecuteScan.go
