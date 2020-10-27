@@ -123,6 +123,12 @@ import static com.sap.piper.Prerequisites.checkScript
 void call(parameters = [:]) {
     handlePipelineStepErrors(stepName: STEP_NAME, stepParameters: parameters) {
 
+        def p=readProperties text: '''|
+                                      |abc=123
+                                      |def=456'''.stripMargin()
+
+        System.err << "[MH] Props: ${p}\n"
+
         def script = checkScript(this, parameters) ?: this
         def utils = parameters.utils ?: new Utils()
         String stageName = parameters.stageName ?: env.STAGE_NAME
