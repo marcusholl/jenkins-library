@@ -139,6 +139,7 @@ import groovy.transform.Field
  */
 @GenerateDocumentation
 void call(Map parameters = [:], body) {
+    echo "[MH] inside call (dockerExecute) 001"
     handlePipelineStepErrors(stepName: STEP_NAME, stepParameters: parameters, failOnError: true) {
 
         final script = checkScript(this, parameters) ?: this
@@ -232,6 +233,7 @@ void call(Map parameters = [:], body) {
                 if (config.dockerPullImage) pull(image, config.dockerRegistry, config.dockerRegistryCredentials)
                 else echo "[INFO][$STEP_NAME] Skipped pull of image '${config.dockerImage}'."
                 if (!config.sidecarImage) {
+                    echo "[MH] before getDockerOptions: ${config?.dockerVolumeBind} / ${config?.dockerVolumeBind?.getClass().getName()}"
                     image.inside(getDockerOptions(config.dockerEnvVars, config.dockerVolumeBind, config.dockerOptions)) {
                         body()
                     }
