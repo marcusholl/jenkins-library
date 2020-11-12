@@ -43,6 +43,7 @@ type cloudFoundryDeployOptions struct {
 	SmokeTestStatusCode      int                    `json:"smokeTestStatusCode,omitempty"`
 	Space                    string                 `json:"space,omitempty"`
 	Username                 string                 `json:"username,omitempty"`
+	Mhdummy                  string                 `json:"mhdummy,omitempty"`
 }
 
 type cloudFoundryDeployInflux struct {
@@ -183,6 +184,7 @@ func addCloudFoundryDeployFlags(cmd *cobra.Command, stepConfig *cloudFoundryDepl
 	cmd.Flags().IntVar(&stepConfig.SmokeTestStatusCode, "smokeTestStatusCode", 200, "Expected status code returned by the check.")
 	cmd.Flags().StringVar(&stepConfig.Space, "space", os.Getenv("PIPER_space"), "Cloud Foundry target space")
 	cmd.Flags().StringVar(&stepConfig.Username, "username", os.Getenv("PIPER_username"), "User")
+	cmd.Flags().StringVar(&stepConfig.Mhdummy, "mhdummy", os.Getenv("PIPER_mhdummy"), "Just a dummy")
 
 	cmd.MarkFlagRequired("apiEndpoint")
 	cmd.MarkFlagRequired("org")
@@ -475,6 +477,14 @@ func cloudFoundryDeployMetadata() config.StepData {
 						Type:        "map[string]interface{}",
 						Mandatory:   false,
 						Aliases:     []config.Alias{},
+					},
+					{
+						Name:        "mhdummy",
+						ResourceRef: []config.ResourceReference{},
+						Scope:       []string{},
+						Type:        "string",
+						Mandatory:   false,
+						Aliases:     []config.Alias{{Name: "mtaExtensionCredentials/dummy"}},
 					},
 				},
 			},

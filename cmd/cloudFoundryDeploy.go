@@ -75,7 +75,7 @@ func cloudFoundryDeploy(config cloudFoundryDeployOptions, telemetryData *telemet
 
 func runCloudFoundryDeploy(config *cloudFoundryDeployOptions, telemetryData *telemetry.CustomData, influxData *cloudFoundryDeployInflux, command command.ExecRunner) error {
 
-        log.Entry().Infof("[MH] entering runCloudFoundryDeploy: %v", config)
+	log.Entry().Infof("[MH] entering runCloudFoundryDeploy: %v", config)
 	log.Entry().Infof("General parameters: deployTool='%s', deployType='%s', cfApiEndpoint='%s', cfOrg='%s', cfSpace='%s'",
 		config.DeployTool, config.DeployType, config.APIEndpoint, config.Org, config.Space)
 
