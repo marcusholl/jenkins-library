@@ -371,11 +371,19 @@ spec:
       - name: mtaExtensionCredentials
         type: map[string]interface{}
         description: "additional credentials"
+        scope:
+          - PARAMETERS
+          - STAGES
+          - STEPS
       - name: mhdummy
         type: string
         description: "Just a dummy"
         aliases:
           - name: mtaExtensionCredentials/dummy
+        scope:
+          - PARAMETERS
+          - STAGES
+          - STEPS
   containers:
     - name: cfDeploy
       image: ppiper/cf-cli
