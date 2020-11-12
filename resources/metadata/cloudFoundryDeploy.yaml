@@ -368,6 +368,9 @@ spec:
               - $(vaultPath)/cloudfoundry-$(cfOrg)-$(cfSpace)
               - $(vaultBasePath)/$(vaultPipelineName)/cloudfoundry-$(cfOrg)-$(cfSpace)
               - $(vaultBasePath)/GROUP-SECRETS/cloudfoundry-$(cfOrg)-$(cfSpace)
+    - name: mtaExtensionCredentials
+      type: map[string]interface{}
+      description: "additional credentials"
   containers:
     - name: cfDeploy
       image: ppiper/cf-cli
