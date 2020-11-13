@@ -1,3 +1,6 @@
+general:
+  maven:
+    projectSettingsFile: 'mysettings.xml'
 steps:
   githubPublishRelease:
     addClosedIssues: true

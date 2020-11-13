@@ -388,8 +388,16 @@ spec:
         type: string
         aliases:
           - name: maven/projectSettingsFile
+        scope:
+          - PARAMETERS
+          - STAGES
+          - STEPS
       - name: maven
         type: map[string]interface{}
+        scope:
+          - PARAMETERS
+          - STAGES
+          - STEPS
   containers:
     - name: cfDeploy
       image: ppiper/cf-cli
