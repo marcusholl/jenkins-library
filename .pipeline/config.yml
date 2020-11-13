@@ -27,6 +27,7 @@ steps:
       - 'nevskrem'
   cloudFoundryDeploy:
     org: myOrg
-    space: s123
+    space: myspace12345
     mtaExtensionCredentials:
         brokerCredentialsHash: 'EDOM_RETAILER_DEV_SBF_HASH'
+        dummy: 'xxxxx'
