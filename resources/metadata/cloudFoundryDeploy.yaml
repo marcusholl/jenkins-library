@@ -389,12 +389,14 @@ spec:
         aliases:
           - name: maven/projectSettingsFile
         scope:
+          - GENERAL
           - PARAMETERS
           - STAGES
           - STEPS
       - name: maven
         type: map[string]interface{}
         scope:
+          - GENERAL
           - PARAMETERS
           - STAGES
           - STEPS
