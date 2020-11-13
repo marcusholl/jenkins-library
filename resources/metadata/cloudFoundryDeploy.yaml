@@ -384,6 +384,12 @@ spec:
           - PARAMETERS
           - STAGES
           - STEPS
+      - name: projectSettingsFile
+        type: string
+        aliases:
+          - name: maven/projectSettingsFile
+      - name: maven
+        type: map[string]interface{}
   containers:
     - name: cfDeploy
       image: ppiper/cf-cli
