@@ -13,12 +13,19 @@ type CTS struct {
 }
 
 // Upload ...
-func (cts *CTS) Upload(command command.ExecRunner, transportRequestID string, abapPackage string, applicationName string) error {
+func (cts *CTS) Upload(command command.ExecRunner, transportRequestID string, abapPackage string, applicationName string, description string) error {
+
+	desc := description
+
+	if len(desc) == 0 {
+		desc = "Deployed with Piper based on SAP Fiori tools"
+	}
 
 	params := []string{
 		"deploy",
 		"-f", // failfast --> provide return code != 0 in case of any failure
 		"-y", // autoconfirm --> no need to press 'y' key in order to confirm the params and trigger the deployment
+		"-e", desc,
 	}
 
 	if len(cts.endpoint) > 0 {

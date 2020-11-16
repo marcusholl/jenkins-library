@@ -10,13 +10,14 @@ func TestUploadCTS(t *testing.T) {
 
 	cts := CTS{endpoint: "https://example.org:8080/cts", client: "001", user: "me", password: "******"}
 	cmd := mock.ExecMockRunner{}
-	cts.Upload(&cmd, "12345678", "abapPackage", "appName")
+	cts.Upload(&cmd, "12345678", "abapPackage", "appName", "the Desc")
 	assert.Equal(t,
 		[]mock.ExecCall{
 			{Exec: "fiori", Params: []string{
 				"deploy",
 				"-f",
 				"-y",
+				"-e", "the Desc",
 				"-u", "https://example.org:8080/cts",
 				"-l", "001",
 				"-t", "12345678",
