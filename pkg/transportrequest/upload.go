@@ -35,31 +35,9 @@ func (cts *CTS) Upload(command command.ExecRunner, transportRequestID string, co
 		desc = "Deployed with Piper based on SAP Fiori tools"
 	}
 
-	useConfigFile := true
-	noConfig := false
-
-	if len(configFile) == 0 {
-		useConfigFile = false
-		exists, err := files.FileExists("ui5-deploy.yaml")
-		if err != nil {
-			return err
-		}
-		noConfig = !exists
-	} else {
-		exists, err := files.FileExists(configFile)
-		if err != nil {
-			return err
-		}
-		if exists {
-			useConfigFile = true
-		} else {
-			if configFile == "ui5-deploy.yaml" {
-				useConfigFile = false
-				noConfig = true
-			} else {
-				fmt.Errorf("Configured deploy config file '%s' does not exists", configFile)
-			}
-		}
+	useConfigFile, noConfig, err := handleConfigFile(configFile)
+	if err != nil {
+		return err
 	}
 
 	params := []string{
@@ -92,4 +70,36 @@ func (cts *CTS) Upload(command command.ExecRunner, transportRequestID string, co
 	}
 
 	return command.RunExecutable("fiori", params...)
+}
+
+func handleConfigFile(path string) (bool, bool, error) {
+
+	useConfigFile := true
+	noConfig := false
+
+	if len(path) == 0 {
+		useConfigFile = false
+		exists, err := files.FileExists("ui5-deploy.yaml")
+		if err != nil {
+			return false, false, err
+		}
+		noConfig = !exists
+	} else {
+		exists, err := files.FileExists(path)
+		if err != nil {
+			return false, false, err
+		}
+		if exists {
+			useConfigFile = true
+		} else {
+			if path == "ui5-deploy.yaml" {
+				useConfigFile = false
+				noConfig = true
+			} else {
+				err = fmt.Errorf("Configured deploy config file '%s' does not exists", path)
+				return false, false, err
+			}
+		}
+	}
+	return useConfigFile, noConfig, nil
 }

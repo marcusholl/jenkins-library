@@ -53,5 +53,4 @@ func TestUploadCTS(t *testing.T) {
 			},
 			cmd.Calls)
 	})
-
 }
