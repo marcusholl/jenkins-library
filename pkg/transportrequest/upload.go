@@ -7,19 +7,18 @@ import (
 // CTS ...
 type CTS struct {
 	endpoint string
-	client string
-	user string
+	client   string
+	user     string
 	password string
 }
 
 // Upload ...
-func (cts *CTS)Upload(command command.ExecRunner, transportRequestID string, abapPackage string, applicationName string) error {
-
+func (cts *CTS) Upload(command command.ExecRunner, transportRequestID string, abapPackage string, applicationName string) error {
 
 	params := []string{
 		"deploy",
 		"-f", // failfast --> provide return code != 0 in case of any failure
-        "-y", // autoconfirm --> no need to press 'y' key in order to confirm the params and trigger the deployment
+		"-y", // autoconfirm --> no need to press 'y' key in order to confirm the params and trigger the deployment
 	}
 
 	if len(cts.endpoint) > 0 {
@@ -38,6 +37,6 @@ func (cts *CTS)Upload(command command.ExecRunner, transportRequestID string, aba
 		params = append(params, "-n", applicationName)
 	}
 
-	command.RunExecutable("fiori", params ...)
+	command.RunExecutable("fiori", params...)
 	return nil
 }
