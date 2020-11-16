@@ -11,7 +11,7 @@ func TestUploadCTS(t *testing.T) {
 	t.Run("all possible values provided", func(t *testing.T) {
 		cts := CTS{endpoint: "https://example.org:8080/cts", client: "001", user: "me", password: "******"}
 		cmd := mock.ExecMockRunner{}
-		cts.Upload(&cmd, "12345678", CTSApp{pack: "abapPackage", name: "appName", desc:"the Desc"})
+		cts.Upload(&cmd, "12345678", CTSApp{pack: "abapPackage", name: "appName", desc: "the Desc"})
 		assert.Equal(t,
 			[]mock.ExecCall{
 				{Exec: "fiori", Params: []string{
@@ -26,14 +26,14 @@ func TestUploadCTS(t *testing.T) {
 					"-n", "appName",
 				}},
 			},
-		cmd.Calls)
+			cmd.Calls)
 	})
 
 	t.Run("all possible values omitted", func(t *testing.T) {
 		// In this case the values are expected inside the fiori deploy config file
 		cts := CTS{endpoint: "", client: "", user: "me", password: "******"}
 		cmd := mock.ExecMockRunner{}
-		cts.Upload(&cmd, "12345678", CTSApp{pack: "", name: "", desc:""})
+		cts.Upload(&cmd, "12345678", CTSApp{pack: "", name: "", desc: ""})
 		assert.Equal(t,
 			[]mock.ExecCall{
 				{Exec: "fiori", Params: []string{
@@ -44,7 +44,7 @@ func TestUploadCTS(t *testing.T) {
 					"-t", "12345678",
 				}},
 			},
-		cmd.Calls)
+			cmd.Calls)
 	})
 
 }
