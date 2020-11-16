@@ -11,12 +11,17 @@ type CTS struct {
 	user     string
 	password string
 }
+// CTSApp ...
+type CTSApp struct {
+	name string
+	pack string
+	desc string
+}
 
 // Upload ...
-func (cts *CTS) Upload(command command.ExecRunner, transportRequestID string, abapPackage string, applicationName string, description string) error {
+func (cts *CTS) Upload(command command.ExecRunner, transportRequestID string, app CTSApp) error {
 
-	desc := description
-
+	desc := app.desc
 	if len(desc) == 0 {
 		desc = "Deployed with Piper based on SAP Fiori tools"
 	}
@@ -37,11 +42,11 @@ func (cts *CTS) Upload(command command.ExecRunner, transportRequestID string, ab
 	if len(transportRequestID) > 0 {
 		params = append(params, "-t", transportRequestID)
 	}
-	if len(abapPackage) > 0 {
-		params = append(params, "-p", abapPackage)
+	if len(app.pack) > 0 {
+		params = append(params, "-p", app.pack)
 	}
-	if len(applicationName) > 0 {
-		params = append(params, "-n", applicationName)
+	if len(app.name) > 0 {
+		params = append(params, "-n", app.name)
 	}
 
 	command.RunExecutable("fiori", params...)
