@@ -91,6 +91,7 @@ func handleConfigFile(path string) (bool, bool, error) {
 		}
 		if exists {
 			useConfigFile = true
+			noConfig = false
 		} else {
 			if path == "ui5-deploy.yaml" {
 				useConfigFile = false
