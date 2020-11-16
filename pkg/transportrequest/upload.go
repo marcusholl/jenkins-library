@@ -50,6 +50,5 @@ func (cts *CTS) Upload(command command.ExecRunner, transportRequestID string, ap
 		params = append(params, "-n", app.name)
 	}
 
-	command.RunExecutable("fiori", params...)
-	return nil
+	return command.RunExecutable("fiori", params...)
 }
