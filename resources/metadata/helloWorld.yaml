@@ -1,0 +1,20 @@
+metadata:
+  name: helloWorld
+  description: "Simple hello world example"
+  longDescription: |
+    Simple hello world example.
+spec:
+  inputs:
+    params:
+      - name: name
+        type: string
+        description: "A name printed instead of 'World'"
+        scope:
+          - PARAMETERS
+          - STAGES
+          - STEPS
+          - GENERAL
+        mandatory: false
+        default: World
+        aliases:
+          - name: helloWorld/name
