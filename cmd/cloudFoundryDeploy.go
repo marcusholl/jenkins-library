@@ -835,6 +835,10 @@ func cfDeploy(
 
 	log.Entry().Infof("Using additional environment variables: %s", additionalEnvironment)
 
+	if "1" == "1" {
+		log.Entry().Info("[MH] Deployment skipped intentionally.")
+		return nil
+	}
 	// TODO set HOME to config.DockerWorkspace
 	command.SetEnv(additionalEnvironment)
 
