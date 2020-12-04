@@ -692,12 +692,14 @@ func deployMta(config *cloudFoundryDeployOptions, mtarFilePath string, command c
 
 	err := cfDeploy(config, cfDeployParams, nil, nil, command)
 
+	/*
 	for _, extFile := range extFiles {
 		renameError := fileUtils.FileRename(extFile+".original", extFile)
 		if err == nil && renameError != nil {
 			return renameError
 		}
 	}
+	*/
 
 	return err
 }
