@@ -54,62 +54,53 @@ func TestRetrieveLabelStraightForward(t *testing.T) {
 
 	t.Run("single commit tests", func(t * testing.T) {
 
-		runTest := func(message string, asserts func([]string)) {
-			commitIter := &commitIteratorMock{
-				commits: []object.Commit{
-					object.Commit{
-						Hash:    plumbing.NewHash("3434343434343434343434343434343434343434"),
-						Message: message,
+		runTest := func(testName, message string, asserts func([]string)) {
+			t.Run(testName, func(t *testing.T) {
+				commitIter := &commitIteratorMock{
+					commits: []object.Commit{
+						object.Commit{
+							Hash:    plumbing.NewHash("3434343434343434343434343434343434343434"),
+							Message: message,
+						},
 					},
-				},
-			}
-			labels, err := FindLabelsInCommits(commitIter, "TransportRequest")
-			if assert.NoError(t, err) {
-				asserts(labels)
-			}
+				}
+				labels, err := FindLabelsInCommits(commitIter, "TransportRequest")
+				if assert.NoError(t, err) {
+					asserts(labels)
+				}
+			})
 		}
-		_ = runTest
-		t.Run("straight forward", func(t * testing.T) {
-			runTest(
-				"this is a commit with TransportRequestId\n\nThis is the first line of the message body\nTransportRequest: 12345678",
-				func(labels []string) {
-					assert.Equal(t, []string{"12345678"}, labels)
-				},
-			)
-		})
-		t.Run("trailing spaces after our value", func(t * testing.T) {
-			runTest(
-				"this is a commit with TransportRequestId\n\nThis is the first line of the message body\nTransportRequest: 12345678  ",
-				func(labels []string) {
-					assert.Equal(t, []string{"12345678"}, labels)
-				},
-			)
-		})
-		t.Run("trailing text after our value", func(t * testing.T) {
-			runTest(
-				"this is a commit with TransportRequestId\n\nThis is the first line of the message body\nTransportRequest: 12345678 aaa",
-				func(labels []string) {
-					assert.Empty(t, labels)
-				},
-			)
-		})
-		t.Run("Leading whitespace before our label", func(t * testing.T) {
-			runTest(
-				"this is a commit with TransportRequestId\n\nThis is the first line of the message body\n   TransportRequest: 12345678",
-				func(labels []string) {
-					assert.Equal(t, []string{"12345678"}, labels)
-				},
-			)
-		})
-		t.Run("leading text before our label", func(t * testing.T) {
-			runTest(
-				"this is a commit with TransportRequestId\n\nThis is the first line of the message body\naaa TransportRequest: 12345678",
-				func(labels []string) {
-					assert.Empty(t, labels)
-				},
-			)
-		})
 
+		runTest("straight forward",
+			"this is a commit with TransportRequestId\n\nThis is the first line of the message body\nTransportRequest: 12345678",
+			func(labels []string) {
+				assert.Equal(t, []string{"12345678"}, labels)
+			},
+		)
+		runTest("trailing spaces after our value",
+			"this is a commit with TransportRequestId\n\nThis is the first line of the message body\nTransportRequest: 12345678  ",
+			func(labels []string) {
+				assert.Equal(t, []string{"12345678"}, labels)
+			},
+		)
+		runTest("trailing text after our value",
+			"this is a commit with TransportRequestId\n\nThis is the first line of the message body\nTransportRequest: 12345678 aaa",
+			func(labels []string) {
+				assert.Equal(t, []string{}, labels)
+			},
+		)
 
+		runTest("Leading whitespace before our label",
+			"this is a commit with TransportRequestId\n\nThis is the first line of the message body\n   TransportRequest: 12345678",
+			func(labels []string) {
+				assert.Equal(t, []string{"12345678"}, labels)
+			},
+		)
+		runTest("leading text before our label",
+			"this is a commit with TransportRequestId\n\nThis is the first line of the message body\naaa TransportRequest: 12345678",
+			func(labels []string) {
+				assert.Equal(t, []string{}, labels)
+			},
+		)
 	})
 }
