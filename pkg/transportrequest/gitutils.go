@@ -10,7 +10,7 @@ import (
 // FindLabelsInCommits ...
 func FindLabelsInCommits(commits object.CommitIter, label string) ([]string, error) {
 	allLabels := []string{}
-	labelRegex, err := regexp.Compile(fmt.Sprintf("%s: (.*)", label))
+	labelRegex, err := regexp.Compile(fmt.Sprintf(`(?m)^\s*%s\s*:\s*(\S*)\s*$`, label))
 	if err != nil {
 		return []string{}, fmt.Errorf("Cannot extract label: %w", err)
 	}
