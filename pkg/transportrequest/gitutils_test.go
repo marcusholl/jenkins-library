@@ -75,26 +75,36 @@ func TestRetrieveLabelStraightForward(t *testing.T) {
 			})
 		}
 
-		runTest("straight forward",
-			"this is a commit with TransportRequestId\n\nThis is the first line of the message body\nTransportRequest: 12345678",
-			"12345678",
-		)
-		runTest("trailing spaces after our value",
-			"this is a commit with TransportRequestId\n\nThis is the first line of the message body\nTransportRequest: 12345678  ",
-			"12345678",
-		)
-		runTest("trailing text after our value",
-			"this is a commit with TransportRequestId\n\nThis is the first line of the message body\nTransportRequest: 12345678 aaa",
-			"",
-		)
+		tests := [][]string {
+			[]string{
+				"straight forward",
+				"this is a commit with TransportRequestId\n\nThis is the first line of the message body\nTransportRequest: 12345678",
+				"12345678",
+			},
+			[]string {
+				"trailing spaces after our value",
+				"this is a commit with TransportRequestId\n\nThis is the first line of the message body\nTransportRequest: 12345678  ",
+				"12345678",
+			},
+			[]string {
+				"trailing text after our value",
+				"this is a commit with TransportRequestId\n\nThis is the first line of the message body\nTransportRequest: 12345678 aaa",
+				"",
+			},
+			[]string {
+				"leading whitespace before our label",
+				"this is a commit with TransportRequestId\n\nThis is the first line of the message body\n   TransportRequest: 12345678",
+				"12345678",
+			},
+			[]string {
+				"leading text before our label",
+				"this is a commit with TransportRequestId\n\nThis is the first line of the message body\naaa TransportRequest: 12345678",
+				"",
+			},
+		}
 
-		runTest("Leading whitespace before our label",
-			"this is a commit with TransportRequestId\n\nThis is the first line of the message body\n   TransportRequest: 12345678",
-			"12345678",
-		)
-		runTest("leading text before our label",
-			"this is a commit with TransportRequestId\n\nThis is the first line of the message body\naaa TransportRequest: 12345678",
-			"",
-		)
+		for _, test := range tests {
+			runTest(test[0], test[1], test[2])
+		}
 	})
 }
