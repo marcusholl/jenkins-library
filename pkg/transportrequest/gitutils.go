@@ -19,9 +19,6 @@ func FindLabelsInCommits(commits object.CommitIter, label string) ([]string, err
 		if err != nil {
 			return fmt.Errorf("Cannot extract label '%s' from commit '%s':%w", label, c.ID(), err)
 		}
-		if len(labels) > 1 {
-			return fmt.Errorf("Found more than one labels (%s) in commit '%s': %s", label, c.ID(), labels)
-		}
 		allLabels = append(allLabels, labels...)
 		return nil
 	})
