@@ -41,7 +41,7 @@ func TestNpmExecuteLint(t *testing.T) {
 			FailOnError: true,
 		}
 
-		npmExecutor := npmExecutorMock{utils: npmUtils, config: npmConfig{runScripts: []string{"ci-lint"}, runOptions: []string{"--silent"}}}
+		npmExecutor := NpmExecutorMock{utils: npmUtils, config: npmConfig{runScripts: []string{"ci-lint"}, runOptions: []string{"--silent"}}}
 		err := runNpmExecuteLint(&npmExecutor, &lintUtils, &config)
 
 		assert.NoError(t, err)

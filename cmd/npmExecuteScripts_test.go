@@ -36,37 +36,37 @@ type npmConfig struct {
 	packagesList       []string
 }
 
-// npmExecutorMock mocking struct
-type npmExecutorMock struct {
+// NpmExecutorMock mocking struct
+type NpmExecutorMock struct {
 	utils  npmMockUtilsBundle
 	config npmConfig
 	executed []string
 }
 
-func(n *npmExecutorMock) Execute(args []string) error {
+func(n *NpmExecutorMock) Execute(args []string) error {
 	n.executed = append(n.executed, args...)
 	return nil
 }
 
 // FindPackageJSONFiles mock implementation
-func (n *npmExecutorMock) FindPackageJSONFiles() []string {
+func (n *NpmExecutorMock) FindPackageJSONFiles() []string {
 	packages, _ := n.utils.Glob("**/package.json")
 	return packages
 }
 
 // FindPackageJSONFiles mock implementation
-func (n *npmExecutorMock) FindPackageJSONFilesWithExcludes(excludeList []string) ([]string, error) {
+func (n *NpmExecutorMock) FindPackageJSONFilesWithExcludes(excludeList []string) ([]string, error) {
 	packages, _ := n.utils.Glob("**/package.json")
 	return packages, nil
 }
 
 // FindPackageJSONFilesWithScript mock implementation
-func (n *npmExecutorMock) FindPackageJSONFilesWithScript(packageJSONFiles []string, script string) ([]string, error) {
+func (n *NpmExecutorMock) FindPackageJSONFilesWithScript(packageJSONFiles []string, script string) ([]string, error) {
 	return packageJSONFiles, nil
 }
 
 // RunScriptsInAllPackages mock implementation
-func (n *npmExecutorMock) RunScriptsInAllPackages(runScripts []string, runOptions []string, scriptOptions []string, virtualFrameBuffer bool, excludeList []string, packagesList []string) error {
+func (n *NpmExecutorMock) RunScriptsInAllPackages(runScripts []string, runOptions []string, scriptOptions []string, virtualFrameBuffer bool, excludeList []string, packagesList []string) error {
 	if len(runScripts) != len(n.config.runScripts) {
 		return fmt.Errorf("RunScriptsInAllPackages was called with a different list of runScripts than config.runScripts")
 	}
@@ -100,7 +100,7 @@ func (n *npmExecutorMock) RunScriptsInAllPackages(runScripts []string, runOption
 }
 
 // InstallAllDependencies mock implementation
-func (n *npmExecutorMock) InstallAllDependencies(packageJSONFiles []string) error {
+func (n *NpmExecutorMock) InstallAllDependencies(packageJSONFiles []string) error {
 	allPackages := n.FindPackageJSONFiles()
 	if len(packageJSONFiles) != len(allPackages) {
 		return fmt.Errorf("packageJSONFiles != n.FindPackageJSONFiles()")
@@ -118,7 +118,7 @@ func (n *npmExecutorMock) InstallAllDependencies(packageJSONFiles []string) erro
 }
 
 // SetNpmRegistries mock implementation
-func (n *npmExecutorMock) SetNpmRegistries() error {
+func (n *NpmExecutorMock) SetNpmRegistries() error {
 	return nil
 }
 
@@ -129,7 +129,7 @@ func TestNpmExecuteScripts(t *testing.T) {
 		utils.AddFile("package.json", []byte("{\"name\": \"Test\" }"))
 		utils.AddFile("src/package.json", []byte("{\"name\": \"Test\" }"))
 
-		npmExecutor := npmExecutorMock{utils: utils, config: npmConfig{install: config.Install, runScripts: config.RunScripts, packagesList: config.BuildDescriptorList}}
+		npmExecutor := NpmExecutorMock{utils: utils, config: npmConfig{install: config.Install, runScripts: config.RunScripts, packagesList: config.BuildDescriptorList}}
 		err := runNpmExecuteScripts(&npmExecutor, &config)
 
 		assert.NoError(t, err)
@@ -141,7 +141,7 @@ func TestNpmExecuteScripts(t *testing.T) {
 		utils.AddFile("package.json", []byte("{\"name\": \"Test\" }"))
 		utils.AddFile("src/package.json", []byte("{\"name\": \"Test\" }"))
 
-		npmExecutor := npmExecutorMock{utils: utils, config: npmConfig{install: config.Install, runScripts: config.RunScripts, excludeList: config.BuildDescriptorExcludeList}}
+		npmExecutor := NpmExecutorMock{utils: utils, config: npmConfig{install: config.Install, runScripts: config.RunScripts, excludeList: config.BuildDescriptorExcludeList}}
 		err := runNpmExecuteScripts(&npmExecutor, &config)
 
 		assert.NoError(t, err)
@@ -153,7 +153,7 @@ func TestNpmExecuteScripts(t *testing.T) {
 		utils.AddFile("package.json", []byte("{\"name\": \"Test\" }"))
 		utils.AddFile("src/package.json", []byte("{\"name\": \"Test\" }"))
 
-		npmExecutor := npmExecutorMock{utils: utils, config: npmConfig{install: config.Install, runScripts: config.RunScripts, scriptOptions: config.ScriptOptions}}
+		npmExecutor := NpmExecutorMock{utils: utils, config: npmConfig{install: config.Install, runScripts: config.RunScripts, scriptOptions: config.ScriptOptions}}
 		err := runNpmExecuteScripts(&npmExecutor, &config)
 
 		assert.NoError(t, err)
@@ -165,7 +165,7 @@ func TestNpmExecuteScripts(t *testing.T) {
 		utils.AddFile("package.json", []byte("{\"name\": \"Test\" }"))
 		utils.AddFile("src/package.json", []byte("{\"name\": \"Test\" }"))
 
-		npmExecutor := npmExecutorMock{utils: utils, config: npmConfig{install: config.Install, runScripts: config.RunScripts}}
+		npmExecutor := NpmExecutorMock{utils: utils, config: npmConfig{install: config.Install, runScripts: config.RunScripts}}
 		err := runNpmExecuteScripts(&npmExecutor, &config)
 
 		assert.NoError(t, err)
@@ -177,7 +177,7 @@ func TestNpmExecuteScripts(t *testing.T) {
 		utils.AddFile("package.json", []byte("{\"name\": \"Test\" }"))
 		utils.AddFile("src/package.json", []byte("{\"name\": \"Test\" }"))
 
-		npmExecutor := npmExecutorMock{utils: utils, config: npmConfig{install: config.Install, runScripts: config.RunScripts}}
+		npmExecutor := NpmExecutorMock{utils: utils, config: npmConfig{install: config.Install, runScripts: config.RunScripts}}
 		err := runNpmExecuteScripts(&npmExecutor, &config)
 
 		assert.NoError(t, err)
@@ -189,7 +189,7 @@ func TestNpmExecuteScripts(t *testing.T) {
 		utils.AddFile("package.json", []byte("{\"name\": \"Test\" }"))
 		utils.AddFile("src/package.json", []byte("{\"name\": \"Test\" }"))
 
-		npmExecutor := npmExecutorMock{utils: utils, config: npmConfig{install: config.Install, runScripts: config.RunScripts, virtualFrameBuffer: config.VirtualFrameBuffer}}
+		npmExecutor := NpmExecutorMock{utils: utils, config: npmConfig{install: config.Install, runScripts: config.RunScripts, virtualFrameBuffer: config.VirtualFrameBuffer}}
 		err := runNpmExecuteScripts(&npmExecutor, &config)
 
 		assert.NoError(t, err)
