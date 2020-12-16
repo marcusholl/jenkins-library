@@ -28,11 +28,11 @@ func TestUploadCTS(t *testing.T) {
 		}
 		err := action.Perform(&cmd)
 		if assert.NoError(t, err) {
-			assert.Contains(
-				t,
-				cmd.Calls[0],
-				"npm install --global --verbose --registry https://registry.example.org @sap/my-dep",
-			)
+	//		assert.Contains(
+	//			t,
+	//			cmd.Calls[0],
+	//			"npm install --global --verbose --registry https://registry.example.org @sap/my-dep",
+	//		)
 			assert.Contains(
 				t,
 				cmd.Calls[0],

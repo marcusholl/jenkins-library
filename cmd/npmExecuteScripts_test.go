@@ -40,6 +40,12 @@ type npmConfig struct {
 type npmExecutorMock struct {
 	utils  npmMockUtilsBundle
 	config npmConfig
+	executed []string
+}
+
+func(n *npmExecutorMock) Execute(args []string) error {
+	n.executed = append(n.executed, args...)
+	return nil
 }
 
 // FindPackageJSONFiles mock implementation

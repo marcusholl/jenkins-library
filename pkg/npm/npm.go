@@ -26,6 +26,7 @@ type Executor interface {
 	RunScriptsInAllPackages(runScripts []string, runOptions []string, scriptOptions []string, virtualFrameBuffer bool, excludeList []string, packagesList []string) error
 	InstallAllDependencies(packageJSONFiles []string) error
 	SetNpmRegistries() error
+	Execute(args []string) error
 }
 
 // ExecutorOptions holds common parameters for functions of Executor

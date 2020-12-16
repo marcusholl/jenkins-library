@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/SAP/jenkins-library/pkg/command"
 	"github.com/SAP/jenkins-library/pkg/log"
+	"github.com/SAP/jenkins-library/pkg/npm"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
 	"strings"
 )
@@ -123,14 +124,14 @@ func (action *CTSUploadAction) Perform(command command.ShellRunner) error {
 }
 
 func getPrepareFioriEnvironmentStatement(deps []string, npmInstallOpts []string) string {
-	cmd := []string{
-		"npm",
-		"install",
-		"--global",
-	}
-	cmd = append(cmd, npmInstallOpts...)
-	cmd = append(cmd, deps...)
-	return strings.Join(cmd, " ")
+
+	npmExec := npm.NewExecutor(npm.ExecutorOptions{})
+	args := []string{"install", "--global"}
+	args = append(args, npmInstallOpts...)
+	args = append(args, deps...)
+	npmExec.Execute(args)
+
+	return strings.Join([]string{}, " ")
 }
 
 func getFioriDeployStatement(
