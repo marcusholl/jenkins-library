@@ -34,7 +34,9 @@ func TestNpmExecuteScripts(t *testing.T) {
 		npmExecutor := npm.NpmExecutorMock{Utils: utils, Config: npm.NpmConfig{Install: config.Install, RunScripts: config.RunScripts, PackagesList: config.BuildDescriptorList}}
 		err := runNpmExecuteScripts(&npmExecutor, &config)
 
-		assert.NoError(t, err)
+		if assert.NoError(t, err) {
+			assert.Equal(t, []string{"src/package.json"}, npmExecutor.Config.PackagesList)
+		}
 	})
 
 	t.Run("Call with excludeList", func(t *testing.T) {
