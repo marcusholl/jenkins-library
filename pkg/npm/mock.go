@@ -60,35 +60,11 @@ func (n *NpmExecutorMock) FindPackageJSONFilesWithScript(packageJSONFiles []stri
 
 // RunScriptsInAllPackages mock implementation
 func (n *NpmExecutorMock) RunScriptsInAllPackages(runScripts []string, runOptions []string, scriptOptions []string, virtualFrameBuffer bool, excludeList []string, packagesList []string) error {
-	if len(runScripts) != len(n.Config.RunScripts) {
-		return fmt.Errorf("RunScriptsInAllPackages was called with a different list of runScripts than config.runScripts")
-	}
-	for i, script := range runScripts {
-		if script != n.Config.RunScripts[i] {
-			return fmt.Errorf("RunScriptsInAllPackages was called with a different list of runScripts than config.runScripts")
-		}
-	}
-
-	if len(scriptOptions) != len(n.Config.ScriptOptions) {
-		return fmt.Errorf("RunScriptsInAllPackages was called with a different list of scriptOptions than config.scriptOptions")
-	}
-
-	if len(runOptions) != len(n.Config.RunOptions) {
-		return fmt.Errorf("RunScriptsInAllPackages was called with a different list of runOptions than config.runOptions")
-	}
-
-	if virtualFrameBuffer != n.Config.VirtualFrameBuffer {
-		return fmt.Errorf("RunScriptsInAllPackages was called with a different value of virtualFrameBuffer than config.virtualFrameBuffer")
-	}
-
-	if len(excludeList) != len(n.Config.ExcludeList) {
-		return fmt.Errorf("RunScriptsInAllPackages was called with a different value of excludeList than config.excludeList")
-	}
-
-	if len(packagesList) != len(n.Config.PackagesList) {
-		return fmt.Errorf("RunScriptsInAllPackages was called with a different value of packagesList than config.packagesList")
-	}
-
+	n.Config.RunScripts = runScripts
+	n.Config.ScriptOptions = scriptOptions
+	n.Config.RunOptions = runOptions
+	n.Config.VirtualFrameBuffer = virtualFrameBuffer
+	n.Config.PackagesList = packagesList
 	return nil
 }
 
