@@ -53,7 +53,14 @@ func TestNpmExecuteScripts(t *testing.T) {
 		npmExecutor := npm.NpmExecutorMock{Utils: utils, Config: npm.NpmConfig{Install: config.Install, RunScripts: config.RunScripts, ExcludeList: config.BuildDescriptorExcludeList}}
 		err := runNpmExecuteScripts(&npmExecutor, &config)
 
-		assert.NoError(t, err)
+		if assert.NoError(t, err) {
+			assert.Empty(t, npmExecutor.Config.PackagesList)
+			assert.Equal(t, []string{"ci-build", "ci-test"}, npmExecutor.Config.RunScripts)
+			assert.Equal(t, []string {"**/path/**"}, npmExecutor.Config.ExcludeList)
+			assert.Empty(t, npmExecutor.Config.VirtualFrameBuffer)
+			assert.Empty(t, npmExecutor.Config.RunOptions)
+			assert.Empty(t, npmExecutor.Config.ScriptOptions)
+		}
 	})
 
 	t.Run("Call with scriptOptions", func(t *testing.T) {
