@@ -37,6 +37,8 @@ func TestNpmExecuteScripts(t *testing.T) {
 		if assert.NoError(t, err) {
 			assert.Equal(t, []string{"src/package.json"}, npmExecutor.Config.PackagesList)
 			assert.Empty(t, npmExecutor.Config.ExcludeList)
+			assert.Empty(t, npmExecutor.Config.VirtualFrameBuffer)
+			assert.Empty(t, npmExecutor.Config.RunOptions)
 		}
 	})
 
