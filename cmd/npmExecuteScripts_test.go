@@ -36,6 +36,7 @@ func TestNpmExecuteScripts(t *testing.T) {
 
 		if assert.NoError(t, err) {
 			assert.Equal(t, []string{"src/package.json"}, npmExecutor.Config.PackagesList)
+			assert.Equal(t, []string{"ci-build", "ci-test"}, npmExecutor.Config.RunScripts)
 			assert.Empty(t, npmExecutor.Config.ExcludeList)
 			assert.Empty(t, npmExecutor.Config.VirtualFrameBuffer)
 			assert.Empty(t, npmExecutor.Config.RunOptions)
