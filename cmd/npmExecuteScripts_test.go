@@ -39,6 +39,7 @@ func TestNpmExecuteScripts(t *testing.T) {
 			assert.Empty(t, npmExecutor.Config.ExcludeList)
 			assert.Empty(t, npmExecutor.Config.VirtualFrameBuffer)
 			assert.Empty(t, npmExecutor.Config.RunOptions)
+			assert.Empty(t, npmExecutor.Config.ScriptOptions)
 		}
 	})
 
