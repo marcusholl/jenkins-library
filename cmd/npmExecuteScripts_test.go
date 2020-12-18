@@ -58,7 +58,7 @@ func TestNpmExecuteScripts(t *testing.T) {
 		if assert.NoError(t, err) {
 			assert.Empty(t, npmExecutor.Received.PackagesList)
 			assert.Equal(t, []string{"ci-build", "ci-test"}, npmExecutor.Received.RunScripts)
-			assert.Equal(t, []string {"**/path/**"}, npmExecutor.Received.ExcludeList)
+			assert.Equal(t, []string{"**/path/**"}, npmExecutor.Received.ExcludeList)
 			assert.False(t, npmExecutor.Received.VirtualFrameBuffer)
 			assert.Empty(t, npmExecutor.Received.RunOptions)
 			assert.Empty(t, npmExecutor.Received.ScriptOptions)
@@ -112,7 +112,7 @@ func TestNpmExecuteScripts(t *testing.T) {
 	t.Run("Call without install", func(t *testing.T) {
 		// TODO check with collegues: test name suggests this should run
 		// with Install = false, but was true ... I set it to false ...
-		config := npmExecuteScriptsOptions{/*Install: false,*/ RunScripts: []string{"ci-build", "ci-test"}}
+		config := npmExecuteScriptsOptions{ /*Install: false,*/ RunScripts: []string{"ci-build", "ci-test"}}
 		utils := npm.NewNpmMockUtilsBundle()
 		utils.AddFile("package.json", []byte("{\"name\": \"Test\" }"))
 		utils.AddFile("src/package.json", []byte("{\"name\": \"Test\" }"))

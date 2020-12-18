@@ -37,7 +37,7 @@ type NpmConfig struct {
 
 // NpmExecutorMock mocking struct
 type NpmExecutorMock struct {
-	Utils  NpmMockUtilsBundle
+	Utils    NpmMockUtilsBundle
 	Received NpmConfig
 }
 
