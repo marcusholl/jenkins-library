@@ -3,7 +3,6 @@
 package npm
 
 import (
-	"fmt"
 	"github.com/SAP/jenkins-library/pkg/mock"
 )
 
@@ -33,6 +32,7 @@ type NpmConfig struct {
 	VirtualFrameBuffer bool
 	ExcludeList        []string
 	PackagesList       []string
+	FoundPackageFiles  []string
 }
 
 // NpmExecutorMock mocking struct
@@ -65,24 +65,14 @@ func (n *NpmExecutorMock) RunScriptsInAllPackages(runScripts []string, runOption
 	n.Config.RunOptions = runOptions
 	n.Config.VirtualFrameBuffer = virtualFrameBuffer
 	n.Config.PackagesList = packagesList
+	n.Config.ExcludeList = excludeList
 	return nil
 }
 
 // InstallAllDependencies mock implementation
 func (n *NpmExecutorMock) InstallAllDependencies(packageJSONFiles []string) error {
-	allPackages := n.FindPackageJSONFiles()
-	if len(packageJSONFiles) != len(allPackages) {
-		return fmt.Errorf("packageJSONFiles != n.FindPackageJSONFiles()")
-	}
-	for i, packageJSON := range packageJSONFiles {
-		if packageJSON != allPackages[i] {
-			return fmt.Errorf("InstallAllDependencies was called with a different list of package.json files than result of n.FindPackageJSONFiles()")
-		}
-	}
-
-	if !n.Config.Install {
-		return fmt.Errorf("InstallAllDependencies was called but config.install was false")
-	}
+	n.Config.FoundPackageFiles = n.FindPackageJSONFiles()
+	n.Config.Install = true
 	return nil
 }
 
