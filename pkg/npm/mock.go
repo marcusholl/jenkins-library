@@ -71,7 +71,7 @@ func (n *NpmExecutorMock) RunScriptsInAllPackages(runScripts []string, runOption
 
 // InstallAllDependencies mock implementation
 func (n *NpmExecutorMock) InstallAllDependencies(packageJSONFiles []string) error {
-	n.Config.FoundPackageFiles = n.FindPackageJSONFiles()
+	n.Config.FoundPackageFiles = packageJSONFiles
 	n.Config.Install = true
 	return nil
 }

@@ -42,9 +42,6 @@ func TestNpmExecuteScripts(t *testing.T) {
 			assert.Empty(t, npmExecutor.Config.RunOptions)
 			assert.Empty(t, npmExecutor.Config.ScriptOptions)
 			assert.True(t, npmExecutor.Config.Install)
-
-			// TODO check with collegues: I believe the check below is wrong. Should we have only the one file which is
-			// contained in the build descriptor list above?
 			assert.Equal(t, []string{"package.json", "src/package.json"}, npmExecutor.Config.FoundPackageFiles)
 		}
 	})
@@ -131,9 +128,6 @@ func TestNpmExecuteScripts(t *testing.T) {
 			assert.Empty(t, npmExecutor.Config.RunOptions)
 			assert.Empty(t, npmExecutor.Config.ScriptOptions)
 			assert.False(t, npmExecutor.Config.Install)
-
-			// TODO check with collegues: In this case no files are resolved. In the test before
-			// we checked for the well known two files
 			assert.Empty(t, npmExecutor.Config.FoundPackageFiles)
 		}
 	})
