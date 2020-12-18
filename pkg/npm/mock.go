@@ -38,7 +38,7 @@ type NpmConfig struct {
 // NpmExecutorMock mocking struct
 type NpmExecutorMock struct {
 	Utils  NpmMockUtilsBundle
-	Config NpmConfig
+	Received NpmConfig
 }
 
 // FindPackageJSONFiles mock implementation
@@ -60,19 +60,19 @@ func (n *NpmExecutorMock) FindPackageJSONFilesWithScript(packageJSONFiles []stri
 
 // RunScriptsInAllPackages mock implementation
 func (n *NpmExecutorMock) RunScriptsInAllPackages(runScripts []string, runOptions []string, scriptOptions []string, virtualFrameBuffer bool, excludeList []string, packagesList []string) error {
-	n.Config.RunScripts = runScripts
-	n.Config.ScriptOptions = scriptOptions
-	n.Config.RunOptions = runOptions
-	n.Config.VirtualFrameBuffer = virtualFrameBuffer
-	n.Config.PackagesList = packagesList
-	n.Config.ExcludeList = excludeList
+	n.Received.RunScripts = runScripts
+	n.Received.ScriptOptions = scriptOptions
+	n.Received.RunOptions = runOptions
+	n.Received.VirtualFrameBuffer = virtualFrameBuffer
+	n.Received.PackagesList = packagesList
+	n.Received.ExcludeList = excludeList
 	return nil
 }
 
 // InstallAllDependencies mock implementation
 func (n *NpmExecutorMock) InstallAllDependencies(packageJSONFiles []string) error {
-	n.Config.FoundPackageFiles = packageJSONFiles
-	n.Config.Install = true
+	n.Received.FoundPackageFiles = packageJSONFiles
+	n.Received.Install = true
 	return nil
 }
 

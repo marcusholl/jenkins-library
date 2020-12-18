@@ -31,18 +31,18 @@ func TestNpmExecuteScripts(t *testing.T) {
 		utils.AddFile("package.json", []byte("{\"name\": \"Test\" }"))
 		utils.AddFile("src/package.json", []byte("{\"name\": \"Test\" }"))
 
-		npmExecutor := npm.NpmExecutorMock{Utils: utils, Config: npm.NpmConfig{}}
+		npmExecutor := npm.NpmExecutorMock{Utils: utils, Received: npm.NpmConfig{}}
 		err := runNpmExecuteScripts(&npmExecutor, &config)
 
 		if assert.NoError(t, err) {
-			assert.Equal(t, []string{"src/package.json"}, npmExecutor.Config.PackagesList)
-			assert.Equal(t, []string{"ci-build", "ci-test"}, npmExecutor.Config.RunScripts)
-			assert.Empty(t, npmExecutor.Config.ExcludeList)
-			assert.False(t, npmExecutor.Config.VirtualFrameBuffer)
-			assert.Empty(t, npmExecutor.Config.RunOptions)
-			assert.Empty(t, npmExecutor.Config.ScriptOptions)
-			assert.True(t, npmExecutor.Config.Install)
-			assert.Equal(t, []string{"package.json", "src/package.json"}, npmExecutor.Config.FoundPackageFiles)
+			assert.Equal(t, []string{"src/package.json"}, npmExecutor.Received.PackagesList)
+			assert.Equal(t, []string{"ci-build", "ci-test"}, npmExecutor.Received.RunScripts)
+			assert.Empty(t, npmExecutor.Received.ExcludeList)
+			assert.False(t, npmExecutor.Received.VirtualFrameBuffer)
+			assert.Empty(t, npmExecutor.Received.RunOptions)
+			assert.Empty(t, npmExecutor.Received.ScriptOptions)
+			assert.True(t, npmExecutor.Received.Install)
+			assert.Equal(t, []string{"package.json", "src/package.json"}, npmExecutor.Received.FoundPackageFiles)
 		}
 	})
 
@@ -52,18 +52,18 @@ func TestNpmExecuteScripts(t *testing.T) {
 		utils.AddFile("package.json", []byte("{\"name\": \"Test\" }"))
 		utils.AddFile("src/package.json", []byte("{\"name\": \"Test\" }"))
 
-		npmExecutor := npm.NpmExecutorMock{Utils: utils, Config: npm.NpmConfig{}}
+		npmExecutor := npm.NpmExecutorMock{Utils: utils, Received: npm.NpmConfig{}}
 		err := runNpmExecuteScripts(&npmExecutor, &config)
 
 		if assert.NoError(t, err) {
-			assert.Empty(t, npmExecutor.Config.PackagesList)
-			assert.Equal(t, []string{"ci-build", "ci-test"}, npmExecutor.Config.RunScripts)
-			assert.Equal(t, []string {"**/path/**"}, npmExecutor.Config.ExcludeList)
-			assert.False(t, npmExecutor.Config.VirtualFrameBuffer)
-			assert.Empty(t, npmExecutor.Config.RunOptions)
-			assert.Empty(t, npmExecutor.Config.ScriptOptions)
-			assert.True(t, npmExecutor.Config.Install)
-			assert.Equal(t, []string{"package.json", "src/package.json"}, npmExecutor.Config.FoundPackageFiles)
+			assert.Empty(t, npmExecutor.Received.PackagesList)
+			assert.Equal(t, []string{"ci-build", "ci-test"}, npmExecutor.Received.RunScripts)
+			assert.Equal(t, []string {"**/path/**"}, npmExecutor.Received.ExcludeList)
+			assert.False(t, npmExecutor.Received.VirtualFrameBuffer)
+			assert.Empty(t, npmExecutor.Received.RunOptions)
+			assert.Empty(t, npmExecutor.Received.ScriptOptions)
+			assert.True(t, npmExecutor.Received.Install)
+			assert.Equal(t, []string{"package.json", "src/package.json"}, npmExecutor.Received.FoundPackageFiles)
 		}
 	})
 
@@ -73,18 +73,18 @@ func TestNpmExecuteScripts(t *testing.T) {
 		utils.AddFile("package.json", []byte("{\"name\": \"Test\" }"))
 		utils.AddFile("src/package.json", []byte("{\"name\": \"Test\" }"))
 
-		npmExecutor := npm.NpmExecutorMock{Utils: utils, Config: npm.NpmConfig{}}
+		npmExecutor := npm.NpmExecutorMock{Utils: utils, Received: npm.NpmConfig{}}
 		err := runNpmExecuteScripts(&npmExecutor, &config)
 
 		if assert.NoError(t, err) {
-			assert.Empty(t, npmExecutor.Config.PackagesList)
-			assert.Equal(t, []string{"ci-build", "ci-test"}, npmExecutor.Config.RunScripts)
-			assert.Empty(t, npmExecutor.Config.ExcludeList)
-			assert.False(t, npmExecutor.Config.VirtualFrameBuffer)
-			assert.Empty(t, npmExecutor.Config.RunOptions)
-			assert.Equal(t, []string{"--run"}, npmExecutor.Config.ScriptOptions)
-			assert.True(t, npmExecutor.Config.Install)
-			assert.Equal(t, []string{"package.json", "src/package.json"}, npmExecutor.Config.FoundPackageFiles)
+			assert.Empty(t, npmExecutor.Received.PackagesList)
+			assert.Equal(t, []string{"ci-build", "ci-test"}, npmExecutor.Received.RunScripts)
+			assert.Empty(t, npmExecutor.Received.ExcludeList)
+			assert.False(t, npmExecutor.Received.VirtualFrameBuffer)
+			assert.Empty(t, npmExecutor.Received.RunOptions)
+			assert.Equal(t, []string{"--run"}, npmExecutor.Received.ScriptOptions)
+			assert.True(t, npmExecutor.Received.Install)
+			assert.Equal(t, []string{"package.json", "src/package.json"}, npmExecutor.Received.FoundPackageFiles)
 		}
 	})
 
@@ -94,18 +94,18 @@ func TestNpmExecuteScripts(t *testing.T) {
 		utils.AddFile("package.json", []byte("{\"name\": \"Test\" }"))
 		utils.AddFile("src/package.json", []byte("{\"name\": \"Test\" }"))
 
-		npmExecutor := npm.NpmExecutorMock{Utils: utils, Config: npm.NpmConfig{}}
+		npmExecutor := npm.NpmExecutorMock{Utils: utils, Received: npm.NpmConfig{}}
 		err := runNpmExecuteScripts(&npmExecutor, &config)
 
 		if assert.NoError(t, err) {
-			assert.Empty(t, npmExecutor.Config.PackagesList)
-			assert.Equal(t, []string{"ci-build", "ci-test"}, npmExecutor.Config.RunScripts)
-			assert.Empty(t, npmExecutor.Config.ExcludeList)
-			assert.False(t, npmExecutor.Config.VirtualFrameBuffer)
-			assert.Empty(t, npmExecutor.Config.RunOptions)
-			assert.Empty(t, npmExecutor.Config.ScriptOptions)
-			assert.True(t, npmExecutor.Config.Install)
-			assert.Equal(t, []string{"package.json", "src/package.json"}, npmExecutor.Config.FoundPackageFiles)
+			assert.Empty(t, npmExecutor.Received.PackagesList)
+			assert.Equal(t, []string{"ci-build", "ci-test"}, npmExecutor.Received.RunScripts)
+			assert.Empty(t, npmExecutor.Received.ExcludeList)
+			assert.False(t, npmExecutor.Received.VirtualFrameBuffer)
+			assert.Empty(t, npmExecutor.Received.RunOptions)
+			assert.Empty(t, npmExecutor.Received.ScriptOptions)
+			assert.True(t, npmExecutor.Received.Install)
+			assert.Equal(t, []string{"package.json", "src/package.json"}, npmExecutor.Received.FoundPackageFiles)
 		}
 	})
 
@@ -117,18 +117,18 @@ func TestNpmExecuteScripts(t *testing.T) {
 		utils.AddFile("package.json", []byte("{\"name\": \"Test\" }"))
 		utils.AddFile("src/package.json", []byte("{\"name\": \"Test\" }"))
 
-		npmExecutor := npm.NpmExecutorMock{Utils: utils, Config: npm.NpmConfig{}}
+		npmExecutor := npm.NpmExecutorMock{Utils: utils, Received: npm.NpmConfig{}}
 		err := runNpmExecuteScripts(&npmExecutor, &config)
 
 		if assert.NoError(t, err) {
-			assert.Empty(t, npmExecutor.Config.PackagesList)
-			assert.Equal(t, []string{"ci-build", "ci-test"}, npmExecutor.Config.RunScripts)
-			assert.Empty(t, npmExecutor.Config.ExcludeList)
-			assert.False(t, npmExecutor.Config.VirtualFrameBuffer)
-			assert.Empty(t, npmExecutor.Config.RunOptions)
-			assert.Empty(t, npmExecutor.Config.ScriptOptions)
-			assert.False(t, npmExecutor.Config.Install)
-			assert.Empty(t, npmExecutor.Config.FoundPackageFiles)
+			assert.Empty(t, npmExecutor.Received.PackagesList)
+			assert.Equal(t, []string{"ci-build", "ci-test"}, npmExecutor.Received.RunScripts)
+			assert.Empty(t, npmExecutor.Received.ExcludeList)
+			assert.False(t, npmExecutor.Received.VirtualFrameBuffer)
+			assert.Empty(t, npmExecutor.Received.RunOptions)
+			assert.Empty(t, npmExecutor.Received.ScriptOptions)
+			assert.False(t, npmExecutor.Received.Install)
+			assert.Empty(t, npmExecutor.Received.FoundPackageFiles)
 		}
 	})
 
@@ -138,18 +138,18 @@ func TestNpmExecuteScripts(t *testing.T) {
 		utils.AddFile("package.json", []byte("{\"name\": \"Test\" }"))
 		utils.AddFile("src/package.json", []byte("{\"name\": \"Test\" }"))
 
-		npmExecutor := npm.NpmExecutorMock{Utils: utils, Config: npm.NpmConfig{}}
+		npmExecutor := npm.NpmExecutorMock{Utils: utils, Received: npm.NpmConfig{}}
 		err := runNpmExecuteScripts(&npmExecutor, &config)
 
 		if assert.NoError(t, err) {
-			assert.Empty(t, npmExecutor.Config.PackagesList)
-			assert.Equal(t, []string{"ci-build", "ci-test"}, npmExecutor.Config.RunScripts)
-			assert.Empty(t, npmExecutor.Config.ExcludeList)
-			assert.True(t, npmExecutor.Config.VirtualFrameBuffer)
-			assert.Empty(t, npmExecutor.Config.RunOptions)
-			assert.Empty(t, npmExecutor.Config.ScriptOptions)
-			assert.True(t, npmExecutor.Config.Install)
-			assert.Equal(t, []string{"package.json", "src/package.json"}, npmExecutor.Config.FoundPackageFiles)
+			assert.Empty(t, npmExecutor.Received.PackagesList)
+			assert.Equal(t, []string{"ci-build", "ci-test"}, npmExecutor.Received.RunScripts)
+			assert.Empty(t, npmExecutor.Received.ExcludeList)
+			assert.True(t, npmExecutor.Received.VirtualFrameBuffer)
+			assert.Empty(t, npmExecutor.Received.RunOptions)
+			assert.Empty(t, npmExecutor.Received.ScriptOptions)
+			assert.True(t, npmExecutor.Received.Install)
+			assert.Equal(t, []string{"package.json", "src/package.json"}, npmExecutor.Received.FoundPackageFiles)
 		}
 	})
 
