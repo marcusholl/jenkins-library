@@ -7,6 +7,7 @@ import (
 )
 
 func TestDeployIntegrationArtifactCommand(t *testing.T) {
+	t.Parallel()
 
 	testCmd := DeployIntegrationArtifactCommand()
 
