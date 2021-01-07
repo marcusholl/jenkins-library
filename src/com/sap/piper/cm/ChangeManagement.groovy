@@ -208,6 +208,8 @@ public class ChangeManagement implements Serializable {
 
         Iterable cmd = ['#!/bin/bash -e']
 
+        cmd << "whoami"
+
         if (! noInstall) {
             cmd << "npm install --global ${npmInstallOpts} ${deployToolDependencies}"
             cmd << "su ${osDeployUser}"
