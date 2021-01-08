@@ -84,6 +84,7 @@ func addCheckChangeInDevelopmentFlags(cmd *cobra.Command, stepConfig *checkChang
 	cmd.Flags().StringVar(&stepConfig.Password, "password", os.Getenv("PIPER_password"), "The password")
 	cmd.Flags().StringVar(&stepConfig.ChangeDocumentID, "changeDocumentId", os.Getenv("PIPER_changeDocumentId"), "The change document which should be checked for the status")
 
+	cmd.MarkFlagRequired("endpoint")
 	cmd.MarkFlagRequired("username")
 	cmd.MarkFlagRequired("password")
 	cmd.MarkFlagRequired("changeDocumentId")
@@ -105,7 +106,7 @@ func checkChangeInDevelopmentMetadata() config.StepData {
 						ResourceRef: []config.ResourceReference{},
 						Scope:       []string{"PARAMETERS", "STAGES", "STEPS", "GENERAL"},
 						Type:        "string",
-						Mandatory:   false,
+						Mandatory:   true,
 						Aliases:     []config.Alias{{Name: "changeManagement/endpoint"}},
 					},
 					{
