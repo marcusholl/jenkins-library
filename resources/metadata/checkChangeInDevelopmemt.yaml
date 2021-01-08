@@ -9,6 +9,7 @@ spec:
     params:
       - name: endpoint
         type: string
+        mandatory: true
         description: "The service endpoint"
         aliases:
           - name: changeManagement/endpoint
