@@ -1,0 +1,45 @@
+metadata:
+  name: checkChangeInDevelopment
+  description: "Checks if a certain change is in status 'in development'"
+  longDescription: |
+    "Checks if a certain change is in status 'in development'"
+
+spec:
+  inputs:
+    params:
+      - name: endpoint
+        type: string
+        description: "The service endpoint"
+        aliases:
+          - name: changeManagement/endpoint
+        scope:
+          - PARAMETERS
+          - STAGES
+          - STEPS
+          - GENERAL
+      - name: username
+        type: string
+        mandatory: true
+        description: "The user"
+        secret: true
+        scope:
+          - PARAMETERS
+          - STAGES
+          - STEPS
+          - GENERAL
+      - name: password
+        type: string
+        mandatory: true
+        description: "The password"
+        secret: true
+        scope:
+          - PARAMETERS
+          - GENERAL
+      - name: changeDocumentId
+        type: string
+        mandatory: true
+        description: "The change document which should be checked for the status"
+        scope:
+          - PARAMETERS
+          - STAGES
+          - STEPS
