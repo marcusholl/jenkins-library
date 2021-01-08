@@ -52,3 +52,10 @@ spec:
           - PARAMETERS
           - STAGES
           - STEPS
+      - name: clientOpts
+        type: "[]string"
+        description: "additional options passed to cm client, e.g. for troubleshooting"
+        scope:
+          - PARAMETERS
+          - STAGES
+          - STEPS
