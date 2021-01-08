@@ -14,11 +14,12 @@ import (
 )
 
 type checkChangeInDevelopmentOptions struct {
-	Endpoint                       string `json:"endpoint,omitempty"`
-	Username                       string `json:"username,omitempty"`
-	Password                       string `json:"password,omitempty"`
-	ChangeDocumentID               string `json:"changeDocumentId,omitempty"`
-	FailIfStatusIsNotInDevelopment bool   `json:"failIfStatusIsNotInDevelopment,omitempty"`
+	Endpoint                       string   `json:"endpoint,omitempty"`
+	Username                       string   `json:"username,omitempty"`
+	Password                       string   `json:"password,omitempty"`
+	ChangeDocumentID               string   `json:"changeDocumentId,omitempty"`
+	FailIfStatusIsNotInDevelopment bool     `json:"failIfStatusIsNotInDevelopment,omitempty"`
+	ClientOpts                     []string `json:"clientOpts,omitempty"`
 }
 
 // CheckChangeInDevelopmentCommand Checks if a certain change is in status 'in development'
@@ -85,6 +86,7 @@ func addCheckChangeInDevelopmentFlags(cmd *cobra.Command, stepConfig *checkChang
 	cmd.Flags().StringVar(&stepConfig.Password, "password", os.Getenv("PIPER_password"), "The password")
 	cmd.Flags().StringVar(&stepConfig.ChangeDocumentID, "changeDocumentId", os.Getenv("PIPER_changeDocumentId"), "The change document which should be checked for the status")
 	cmd.Flags().BoolVar(&stepConfig.FailIfStatusIsNotInDevelopment, "failIfStatusIsNotInDevelopment", true, "lets the build fail in case the change is not in status 'in developent'. Otherwise a warning is emitted to the log")
+	cmd.Flags().StringSliceVar(&stepConfig.ClientOpts, "clientOpts", []string{}, "additional options passed to cm client, e.g. for troubleshooting")
 
 	cmd.MarkFlagRequired("endpoint")
 	cmd.MarkFlagRequired("username")
@@ -140,6 +142,14 @@ func checkChangeInDevelopmentMetadata() config.StepData {
 						ResourceRef: []config.ResourceReference{},
 						Scope:       []string{"PARAMETERS", "STAGES", "STEPS"},
 						Type:        "bool",
+						Mandatory:   false,
+						Aliases:     []config.Alias{},
+					},
+					{
+						Name:        "clientOpts",
+						ResourceRef: []config.ResourceReference{},
+						Scope:       []string{"PARAMETERS", "STAGES", "STEPS"},
+						Type:        "[]string",
 						Mandatory:   false,
 						Aliases:     []config.Alias{},
 					},
