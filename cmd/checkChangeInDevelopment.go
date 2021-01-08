@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/SAP/jenkins-library/pkg/command"
 	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/SAP/jenkins-library/pkg/telemetry"
@@ -8,6 +9,7 @@ import (
 
 type checkChangeInDevelopmentUtils interface {
 	command.ExecRunner
+	GetExitCode() int
 
 	// Add more methods here, or embed additional interfaces, or remove/replace as required.
 	// The checkChangeInDevelopmentUtils interface should be descriptive of your runtime dependencies,
@@ -53,6 +55,16 @@ func checkChangeInDevelopment(config checkChangeInDevelopmentOptions, telemetryD
 
 func runCheckChangeInDevelopment(config *checkChangeInDevelopmentOptions, telemetryData *telemetry.CustomData, utils checkChangeInDevelopmentUtils) error {
 	log.Entry().WithField("LogField", "Log field content").Info("This is just a demo for a simple step.")
+	isInDevelopment, err := isChangeInDevelopment(config, utils)
+	if err != nil {
+		return err
+	}
+
+	_ = isInDevelopment
+	return nil
+}
+
+func isChangeInDevelopment(config *checkChangeInDevelopmentOptions, utils checkChangeInDevelopmentUtils) (bool, error) {
 	utils.RunExecutable("cmclient",
 		"--endpoint", config.Endpoint,
 		"--user", config.Username,
@@ -61,5 +73,17 @@ func runCheckChangeInDevelopment(config *checkChangeInDevelopmentOptions, teleme
 		"is-change-in-development",
 		"--change-id", config.ChangeDocumentID,
 		"--return-code")
-	return nil
+
+	exitCode := utils.GetExitCode()
+
+	hint := "Check log for details"
+	if exitCode == 0 {
+		return true, nil
+	} else if exitCode == 3 {
+		return false, nil
+	} else if exitCode == 2 {
+		hint = "Invalid credentials"
+	}
+
+	return false, fmt.Errorf("Cannot retrieve change status: %s", hint)
 }
