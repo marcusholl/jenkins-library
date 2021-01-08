@@ -56,7 +56,6 @@ func checkChangeInDevelopment(config checkChangeInDevelopmentOptions, telemetryD
 func runCheckChangeInDevelopment(config *checkChangeInDevelopmentOptions, telemetryData *telemetry.CustomData, utils checkChangeInDevelopmentUtils) error {
 	log.Entry().WithField("LogField", "Log field content").Infof("This is just a demo for a simple step:%v", config)
 
-
 	log.Entry().Infof("FailIfStatusIsNotInDevelopment: %v", config.FailIfStatusIsNotInDevelopment)
 
 	isInDevelopment, err := isChangeInDevelopment(config, utils)
