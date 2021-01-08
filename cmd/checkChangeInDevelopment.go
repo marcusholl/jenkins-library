@@ -54,13 +54,21 @@ func checkChangeInDevelopment(config checkChangeInDevelopmentOptions, telemetryD
 }
 
 func runCheckChangeInDevelopment(config *checkChangeInDevelopmentOptions, telemetryData *telemetry.CustomData, utils checkChangeInDevelopmentUtils) error {
-	log.Entry().WithField("LogField", "Log field content").Info("This is just a demo for a simple step.")
+	log.Entry().WithField("LogField", "Log field content").Infof("This is just a demo for a simple step:%v", config)
 	isInDevelopment, err := isChangeInDevelopment(config, utils)
 	if err != nil {
 		return err
 	}
 
-	_ = isInDevelopment
+	if isInDevelopment {
+		log.Entry().Infof("Change '%s' is in status 'in development'.", config.ChangeDocumentID)
+	} else {
+		if config.FailIfStatusIsNotInDevelopment {
+			return fmt.Errorf("Change '%s' is not in status 'in development'", config.ChangeDocumentID)
+		} else {
+			log.Entry().Warningf("Change '%s' is not in status 'in development'. Failing the step has been explicitly disabled.", config.ChangeDocumentID)
+		}
+	}
 	return nil
 }
 
