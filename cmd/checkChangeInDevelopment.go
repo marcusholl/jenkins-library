@@ -53,5 +53,13 @@ func checkChangeInDevelopment(config checkChangeInDevelopmentOptions, telemetryD
 
 func runCheckChangeInDevelopment(config *checkChangeInDevelopmentOptions, telemetryData *telemetry.CustomData, utils checkChangeInDevelopmentUtils) error {
 	log.Entry().WithField("LogField", "Log field content").Info("This is just a demo for a simple step.")
+	utils.RunExecutable("cmclient",
+		"--endpoint", config.Endpoint,
+		"--user", config.Username,
+		"--password", config.Password,
+		"--backend-type", "SOLMAN",
+		"is-change-in-development",
+		"--change-id", config.ChangeDocumentID,
+		"--return-code")
 	return nil
 }
