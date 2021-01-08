@@ -44,3 +44,11 @@ spec:
           - PARAMETERS
           - STAGES
           - STEPS
+      - name: failIfStatusIsNotInDevelopment
+        type: bool
+        default: true
+        description: "lets the build fail in case the change is not in status 'in developent'. Otherwise a warning is emitted to the log"
+        scope:
+          - PARAMETERS
+          - STAGES
+          - STEPS
