@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 	"github.com/SAP/jenkins-library/pkg/command"
 	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/SAP/jenkins-library/pkg/telemetry"
@@ -76,6 +77,11 @@ func runCheckChangeInDevelopment(config *checkChangeInDevelopmentOptions, teleme
 }
 
 func isChangeInDevelopment(config *checkChangeInDevelopmentOptions, utils checkChangeInDevelopmentUtils) (bool, error) {
+
+	if len(config.ClientOpts) > 0 {
+		utils.AppendEnv([]string{fmt.Sprintf("CMCLIENT_OPTS=%s", strings.Join(config.ClientOpts, " "))})
+	}
+
 	utils.RunExecutable("cmclient",
 		"--endpoint", config.Endpoint,
 		"--user", config.Username,
