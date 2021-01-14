@@ -17,3 +17,9 @@ curl -X POST \
         --data "{\"state\": \"success\", \"target_url\": \"https://travis-ci.org/SAP/jenkins-library\", \"description\": \"${message}\", \"context\": \"integration-tests\"}" \
         --netrc \
     "https://api.github.com/repos/SAP/jenkins-library/statuses/${hash}"
+
+curl -X POST \
+        --fail \
+        --data "{\"state\": \"success\", \"target_url\": \"https://travis-ci.org/SAP/jenkins-library\", \"description\": \"${message}\", \"context\": \"Go / integration-tests\"}" \
+        --netrc \
+    "https://api.github.com/repos/SAP/jenkins-library/statuses/${hash}"
