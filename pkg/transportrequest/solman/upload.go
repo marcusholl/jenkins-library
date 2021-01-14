@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/SAP/jenkins-library/pkg/command"
 	"reflect"
+	"strings"
 )
 
 type fileSystem interface {
@@ -28,12 +29,13 @@ type SOLMANUploadAction struct {
 
 func (a *SOLMANUploadAction) Perform(fs fileSystem, command command.ExecRunner) error {
 
-	notInitialized, err := ContainsEmptyStringValue(a)
+	missingParameters, err := FindEmptyStrings(a)
 	if err != nil {
-		return fmt.Errorf("Cannot check everything was initialized for SOLMAN upload: %w", err)
+		return fmt.Errorf("Cannot check that all required parameters are available for SOLMAN upload: %w", err)
 	}
+	notInitialized := len(missingParameters) != 0
 	if notInitialized {
-		return fmt.Errorf("")
+		return fmt.Errorf("Cannot perform artifact upload. The following parameters are not available %s", missingParameters)
 	}
 
 	exists, err := fs.FileExists(a.File)
@@ -58,26 +60,29 @@ func (a *SOLMANUploadAction) Perform(fs fileSystem, command command.ExecRunner) 
 
 // ContainsEmptyStrings if the struct hold any empty strings
 // in case the stuct contains another struct, also this struct is checked.
-func ContainsEmptyStringValue(v interface{}) (bool, error) {
-
+func FindEmptyStrings(v interface{}) ([]string, error) {
+	emptyStrings := []string{}
 	if reflect.ValueOf(v).Kind() != reflect.Struct {
-		return false, fmt.Errorf("%v (%T) was not a stuct", v, v)
+		return emptyStrings, fmt.Errorf("%v (%T) was not a stuct", v, v)
 	}
+	findEmptyStringsInternal(v, &emptyStrings, []string{})
+	return emptyStrings, nil
+}
+
+func findEmptyStringsInternal(v interface{}, emptyStrings *[]string, prefix []string) (bool, error) {
 	fields := reflect.TypeOf(v)
 	values := reflect.ValueOf(v)
 	for i := 0; i < fields.NumField(); i++ {
 		switch values.Field(i).Kind() {
 		case reflect.String:
 			if len(values.Field(i).String()) == 0 {
+				*emptyStrings = append(*emptyStrings, strings.Join(append(prefix, fields.Field(i).Name), "."))
 				return true, nil
 			}
 		case reflect.Struct:
-			containsEmptyStrings, err := ContainsEmptyStringValue(values.Field(i).Interface())
+			_, err := findEmptyStringsInternal(values.Field(i).Interface(), emptyStrings, append(prefix, fields.Field(i).Name))
 			if err != nil {
 				return false, err
-			}
-			if containsEmptyStrings {
-				return true, nil
 			}
 		case reflect.Int:
 		case reflect.Int32:
