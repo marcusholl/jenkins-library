@@ -77,7 +77,6 @@ func findEmptyStringsInternal(v interface{}, emptyStrings *[]string, prefix []st
 		case reflect.String:
 			if len(values.Field(i).String()) == 0 {
 				*emptyStrings = append(*emptyStrings, strings.Join(append(prefix, fields.Field(i).Name), "."))
-				return true, nil
 			}
 		case reflect.Struct:
 			_, err := findEmptyStringsInternal(values.Field(i).Interface(), emptyStrings, append(prefix, fields.Field(i).Name))
