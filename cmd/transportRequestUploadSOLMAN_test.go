@@ -28,26 +28,11 @@ func TestRunTransportRequestUploadSOLMAN(t *testing.T) {
 		config := transportRequestUploadSOLMANOptions{}
 
 		utils := newTransportRequestUploadSOLMANTestsUtils()
-		utils.AddFile("file.txt", []byte("dummy content"))
 
 		// test
 		err := runTransportRequestUploadSOLMAN(&config, nil, utils)
 
 		// assert
 		assert.NoError(t, err)
-	})
-
-	t.Run("error path", func(t *testing.T) {
-		t.Parallel()
-		// init
-		config := transportRequestUploadSOLMANOptions{}
-
-		utils := newTransportRequestUploadSOLMANTestsUtils()
-
-		// test
-		err := runTransportRequestUploadSOLMAN(&config, nil, utils)
-
-		// assert
-		assert.EqualError(t, err, "cannot run without important file")
 	})
 }

@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/SAP/jenkins-library/pkg/command"
 	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
@@ -58,21 +57,5 @@ func transportRequestUploadSOLMAN(config transportRequestUploadSOLMANOptions, te
 }
 
 func runTransportRequestUploadSOLMAN(config *transportRequestUploadSOLMANOptions, telemetryData *telemetry.CustomData, utils transportRequestUploadSOLMANUtils) error {
-	log.Entry().WithField("LogField", "Log field content").Info("This is just a demo for a simple step.")
-
-	// Example of calling methods from external dependencies directly on utils:
-	exists, err := utils.FileExists("file.txt")
-	if err != nil {
-		// It is good practice to set an error category.
-		// Most likely you want to do this at the place where enough context is known.
-		log.SetErrorCategory(log.ErrorConfiguration)
-		// Always wrap non-descriptive errors to enrich them with context for when they appear in the log:
-		return fmt.Errorf("failed to check for important file: %w", err)
-	}
-	if !exists {
-		log.SetErrorCategory(log.ErrorConfiguration)
-		return fmt.Errorf("cannot run without important file")
-	}
-
 	return nil
 }
