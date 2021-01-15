@@ -11,6 +11,11 @@ type fileSystem interface {
 	FileExists(path string) (bool, error)
 }
 
+type exec interface {
+	command.ExecRunner
+	GetExitCode() int
+}
+
 // SOLMANConnection Everything wee need for connecting to CTS
 type SOLMANConnection struct {
 	Endpoint string
@@ -28,9 +33,9 @@ type SOLMANUploadAction struct {
 	CMOpts             []string
 }
 
-func (a *SOLMANUploadAction) Perform(fs fileSystem, command command.ExecRunner) error {
+func (a *SOLMANUploadAction) Perform(fs fileSystem, command exec) error {
 
-	missingParameters, err := FindEmptyStrings(a)
+	missingParameters, err := FindEmptyStrings(*a)
 	if err != nil {
 		return fmt.Errorf("Cannot check that all required parameters are available for SOLMAN upload: %w", err)
 	}
@@ -46,6 +51,9 @@ func (a *SOLMANUploadAction) Perform(fs fileSystem, command command.ExecRunner) 
 	if !exists {
 		return fmt.Errorf("File '%s' does not exist.", a.File)
 	}
+
+	command.SetEnv(a.CMOpts)
+
 	err = command.RunExecutable("cmclient",
 		"--endpoint", a.Connection.Endpoint,
 		"--user", a.Connection.User,
@@ -56,6 +64,15 @@ func (a *SOLMANUploadAction) Perform(fs fileSystem, command command.ExecRunner) 
 		"-tID", a.TransportRequestId,
 		a.ApplicationID, a.File)
 
+	if err != nil {
+		err = fmt.Errorf("Cannot upload '%s': %w", a.File, err)
+	}
+
+	exitCode := command.GetExitCode()
+
+	if exitCode != 0 {
+		err = fmt.Errorf("Cannot upload '%s': Upload command returned with exit code '%d'", a.File, exitCode)
+	}
 	return err
 }
 
