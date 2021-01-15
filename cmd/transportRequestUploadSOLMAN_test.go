@@ -4,6 +4,7 @@ import (
 	"github.com/SAP/jenkins-library/pkg/mock"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	transportrequest "github.com/SAP/jenkins-library/pkg/transportrequest/solman"
 )
 
 type transportRequestUploadSOLMANMockUtils struct {
@@ -29,8 +30,10 @@ func TestRunTransportRequestUploadSOLMAN(t *testing.T) {
 
 		utils := newTransportRequestUploadSOLMANTestsUtils()
 
+		// TODO needs to be replaced by mock ...
+		action := transportrequest.SOLMANUploadAction{}
 		// test
-		err := runTransportRequestUploadSOLMAN(&config, nil, utils)
+		err := runTransportRequestUploadSOLMAN(&config, &action, nil, utils)
 
 		// assert
 		assert.NoError(t, err)
