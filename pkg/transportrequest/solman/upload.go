@@ -59,7 +59,7 @@ func (a *SOLMANUploadAction) Perform(fs fileSystem, command command.ExecRunner) 
 	return err
 }
 
-// ContainsEmptyStrings if the struct hold any empty strings
+// FindEmptyStrings finds empty strings in a struct.
 // in case the stuct contains another struct, also this struct is checked.
 func FindEmptyStrings(v interface{}) ([]string, error) {
 	emptyStrings := []string{}
