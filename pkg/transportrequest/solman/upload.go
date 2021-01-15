@@ -87,10 +87,10 @@ func findEmptyStringsInternal(v interface{}, emptyStrings *[]string, prefix []st
 		case reflect.Int32:
 		case reflect.Int64:
 		case reflect.Bool:
+		case reflect.Slice:
 		default:
 			return false, fmt.Errorf("Unexpected field: %v, value: %v", fields.Field(i), values.Field(i))
 		}
 	}
-
 	return false, nil
 }
