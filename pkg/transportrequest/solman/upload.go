@@ -25,6 +25,7 @@ type SOLMANUploadAction struct {
 	TransportRequestId string
 	ApplicationID      string
 	File               string
+	CMOpts             []string
 }
 
 func (a *SOLMANUploadAction) Perform(fs fileSystem, command command.ExecRunner) error {
