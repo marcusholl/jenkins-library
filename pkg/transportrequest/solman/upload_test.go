@@ -99,20 +99,20 @@ func TestSolmanUpload(t *testing.T) {
 
 }
 
-func TestXXX(t *testing.T) {
-	x := SOLMANUploadAction{
+func TestFindEmptyStringsInConfig(t *testing.T) {
+	uploadAction := SOLMANUploadAction{
 		Connection: SOLMANConnection{
-			Endpoint: "x",
+			Endpoint: "<set>",
 			User:     "",
-			Password: "x",
+			Password: "<set>",
 		},
 		ChangeDocumentId:   "",
-		TransportRequestId: "x",
-		ApplicationID:      "x",
-		File:               "x",
+		TransportRequestId: "<set>",
+		ApplicationID:      "<set>",
+		File:               "<set>",
 		CMOpts:             []string{},
 	}
-	emptyStrings, err := FindEmptyStrings(x)
+	emptyStrings, err := FindEmptyStrings(uploadAction)
 	if assert.NoError(t, err) {
 		assert.Len(t, emptyStrings, 2)
 		assert.Subset(t, emptyStrings, []string{"Connection.User", "ChangeDocumentId"})
