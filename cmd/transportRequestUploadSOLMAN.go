@@ -13,6 +13,8 @@ type transportRequestUploadSOLMANUtils interface {
 
 	FileExists(filename string) (bool, error)
 
+	GetExitCode() int
+
 	// Add more methods here, or embed additional interfaces, or remove/replace as required.
 	// The transportRequestUploadSOLMANUtils interface should be descriptive of your runtime dependencies,
 	// i.e. include everything you need to be able to mock in tests.
@@ -58,5 +60,15 @@ func transportRequestUploadSOLMAN(config transportRequestUploadSOLMANOptions, te
 }
 
 func runTransportRequestUploadSOLMAN(config *transportRequestUploadSOLMANOptions, action transportrequest.Action, telemetryData *telemetry.CustomData, utils transportRequestUploadSOLMANUtils) error {
-	return nil
+	action.WithConnection(transportrequest.SOLMANConnection {
+		Endpoint: config.Endpoint,
+		User:	config.Username,
+		Password: config.Password,
+	})
+	action.WithChangeDocumentId(config.ChangeDocumentID)
+	action.WithTransportRequestId(config.TransportRequestID)
+	action.WithApplicationID(config.ApplicationID)
+	action.WithFile(config.FilePath)
+	action.WithCMOpts(config.Cmclientops)
+	return action.Perform(utils, utils)
 }

@@ -57,9 +57,11 @@ func (a *SOLMANUploadAction) WithApplicationID(id string) {
 }
 func (a *SOLMANUploadAction) WithFile(f string) {
 	a.File = f
+	fmt.Printf("[MH] File: %s", a.File)
 }
 func (a *SOLMANUploadAction) WithCMOpts(opts []string) {
 	a.CMOpts = opts
+
 }
 
 func (a *SOLMANUploadAction) Perform(fs FileSystem, command Exec) error {
