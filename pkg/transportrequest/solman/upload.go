@@ -36,7 +36,7 @@ type Action interface {
 }
 
 // WithConnection specifies all the connection details which
-// are required in order to connect so SOLMAN
+// are required in order to connect to SOLMAN
 func (a *UploadAction) WithConnection(c Connection) {
 	a.Connection = c
 }
@@ -81,7 +81,7 @@ func (a *UploadAction) Perform(fs FileSystem, command Exec) error {
 	if err == nil {
 		notInitialized := len(missingParameters) != 0
 		if notInitialized {
-			err = fmt.Errorf("the following parameters are not available %s", missingParameters)
+			err = fmt.Errorf("the following parameters are not available '%s'", missingParameters)
 		}
 	}
 
@@ -112,7 +112,15 @@ func (a *UploadAction) Perform(fs FileSystem, command Exec) error {
 		exitCode := command.GetExitCode()
 
 		if exitCode != 0 {
-			err = fmt.Errorf("Upload command returned with exit code '%d'", exitCode)
+			if err != nil {
+				// Using the wrapping here is to some extend an abuse, since it is not really
+				// error chaining (the other error is not necessaryly a "predecessor" of this one).
+				// But it is a pragmatic approach for not loosing information for trouble shooting. There
+				// is no possibility to have something like suppressed errors.
+				err = errors.Wrapf(err, "upload command returned with exit code '%d'", exitCode)
+			} else {
+				err = fmt.Errorf("upload command returned with exit code '%d'", exitCode)
+			}
 		}
 	}
 
