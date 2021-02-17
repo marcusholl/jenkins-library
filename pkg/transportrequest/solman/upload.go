@@ -10,9 +10,9 @@ import (
 
 // FileSystem interface collecting everything which is file system
 // related and needed in the context of a SOLMAN upload.
-type FileSystem interface {
-	FileExists(path string) (bool, error)
-}
+// type FileSystem interface {
+// 	FileExists(path string) (bool, error)
+// }
 
 // UploadAction Collects all the properties we need for the deployment
 type UploadAction struct {

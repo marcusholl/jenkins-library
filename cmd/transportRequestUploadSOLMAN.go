@@ -9,11 +9,8 @@ import (
 )
 
 type transportRequestUploadSOLMANUtils interface {
-	command.ExecRunner
-
-	FileExists(filename string) (bool, error)
-
-	GetExitCode() int
+	solman.Exec
+	solman.FileSystem
 
 	// Add more methods here, or embed additional interfaces, or remove/replace as required.
 	// The transportRequestUploadSOLMANUtils interface should be descriptive of your runtime dependencies,
@@ -37,8 +34,8 @@ func newTransportRequestUploadSOLMANUtils() transportRequestUploadSOLMANUtils {
 		Files:   &piperutils.Files{},
 	}
 	// Reroute command output to logging framework
-	utils.Stdout(log.Writer())
-	utils.Stderr(log.Writer())
+	utils.Command.Stdout(log.Writer())
+	utils.Command.Stderr(log.Writer())
 	return &utils
 }
 
@@ -70,6 +67,7 @@ func runTransportRequestUploadSOLMAN(config *transportRequestUploadSOLMANOptions
 	action.WithApplicationID(config.ApplicationID)
 	action.WithFile(config.FilePath)
 	action.WithCMOpts(config.Cmclientops)
+
 	err := action.Perform(utils, utils)
 
 	if err == nil {

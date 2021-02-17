@@ -11,6 +11,12 @@ type Exec interface {
 	GetExitCode() int
 }
 
+// FileSystem interface collecting everything which is file system
+// related and needed in the context of a SOLMAN upload.
+type FileSystem interface {
+	FileExists(path string) (bool, error)
+}
+
 // Connection Everything we need for connecting to CTS
 type Connection struct {
 	Endpoint string
