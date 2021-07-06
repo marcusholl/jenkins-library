@@ -100,7 +100,7 @@ void call(Map parameters = [:]) {
         ], configuration)
 
         // JAVA
-        if(configurtion.pmd.active) {
+        if(configuration.pmd.active) {
           report(pmdParser(createToolOptions(configuration.pmd)), configuration.pmd, configuration.archive)
         }
         if(configuration.cpd.active) {
