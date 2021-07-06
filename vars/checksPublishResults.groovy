@@ -137,14 +137,12 @@ void call(Map parameters = [:]) {
 }
 
 def report(tool, settings, doArchive){
-    if (settings.active) {
-        def options = createOptions(settings).plus([tools: [tool]])
-        echo "recordIssues OPTIONS: ${options}"
-        // publish
-        recordIssues(options)
-        // archive check results
-        archiveResults(doArchive && settings.get('archive'), settings.get('pattern'), true)
-    }
+    def options = createOptions(settings).plus([tools: [tool]])
+    echo "recordIssues OPTIONS: ${options}"
+    // publish
+    recordIssues(options)
+    // archive check results
+    archiveResults(doArchive && settings.get('archive'), settings.get('pattern'), true)
 }
 
 def archiveResults(archive, pattern, allowEmpty){
