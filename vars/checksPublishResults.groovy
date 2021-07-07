@@ -103,7 +103,7 @@ void call(Map parameters = [:]) {
         report(pmdParser(createToolOptions(configuration.pmd)), configuration.pmd, configuration.archive)
         report(cpd(createToolOptions(configuration.cpd)), configuration.cpd, configuration.archive)
         def mhfb = findBugs(createToolOptions(configuration.findbugs, [useRankAsPriority: true]))
-        echo "MH: ${mhfb}"
+        echo "MH: ${mhfb.getClass().getName()}"
         report(mhfb, configuration.findbugs, configuration.archive)
         report(checkStyle(createToolOptions(configuration.checkstyle)), configuration.checkstyle, configuration.archive)
         // JAVA SCRIPT
