@@ -102,7 +102,9 @@ void call(Map parameters = [:]) {
         // JAVA
         report(pmdParser(createToolOptions(configuration.pmd)), configuration.pmd, configuration.archive)
         report(cpd(createToolOptions(configuration.cpd)), configuration.cpd, configuration.archive)
-        report(findBugs(createToolOptions(configuration.findbugs, [useRankAsPriority: true])), configuration.findbugs, configuration.archive)
+        def mhfb = findBugs(createToolOptions(configuration.findbugs, [useRankAsPriority: true]))
+        echo "MH: ${mhfb}"
+        report(mhfb, configuration.findbugs, configuration.archive)
         report(checkStyle(createToolOptions(configuration.checkstyle)), configuration.checkstyle, configuration.archive)
         // JAVA SCRIPT
         report(esLint(createToolOptions(configuration.eslint)), configuration.eslint, configuration.archive)
